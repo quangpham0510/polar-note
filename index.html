@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>PolarNote</title>
+
+<!-- Apple PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="PolarNote">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Bipolar mood tracker — sleep, mood poles, and early warning patterns.">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTE2MjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMEQwRDFBIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnbG93IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTg0RkYiIHN0b3Atb3BhY2l0eT0iLjMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNTg1NkQ2IiBzdG9wLW9wYWNpdHk9Ii4xNSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPCEtLSBCYXNlIC0tPgogIDxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9InVybCgjYmcpIi8+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0idXJsKCNnbG93KSIvPgogIDwhLS0gU3VidGxlIGdyaWQgbGluZXMgLS0+CiAgPGxpbmUgeDE9IjIwIiB5MT0iODIiIHgyPSIxNjAiIHkyPSI4MiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LC4wOCkiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iMyA0Ii8+CiAgPCEtLSBMaWZlIGNoYXJ0IGJhcnMgLS0+CiAgPCEtLSBZZWxsb3cgYmFycyAoaHlwb21hbmlhKSAtLT4KICA8cmVjdCB4PSIyMiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiNGRkQ2MEEiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjQyIiB5PSI0MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0iI0ZGRDYwQSIgb3BhY2l0eT0iLjkyIi8+CiAgPCEtLSBSZWQgYmFyIChtYW5pYSBwZWFrKSAtLT4KICA8cmVjdCB4PSI2MiIgeT0iMjYiIHdpZHRoPSIxNCIgaGVpZ2h0PSI1NiIgcng9IjQiIGZpbGw9IiNGRjQ1M0EiIG9wYWNpdHk9Ii45NSIvPgogIDwhLS0gUmVjb3ZlcnkgZ3JlZW4gYmFycyAtLT4KICA8cmVjdCB4PSI4MiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEwMiIgeT0iNjgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEyMiIgeT0iNzAiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxMiIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iMTQyIiB5PSI3MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEwIiByeD0iNCIgZmlsbD0iIzMwRDE1OCIgb3BhY2l0eT0iLjg1Ii8+CiAgPCEtLSBCYXNlbGluZSAtLT4KICA8bGluZSB4MT0iMTgiIHkxPSI4MiIgeDI9IjE2MiIgeTI9IjgyIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsLjIpIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iNCA1Ii8+CiAgPCEtLSBXb3JkbWFyayAtLT4KICA8dGV4dCB4PSI5MCIgeT0iMTM2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSIxOSIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9Ii45IiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+cG9sYXI8L3RleHQ+CiAgPHRleHQgeD0iOTAiIHk9IjE1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTkiIGZvbnQtc3R5bGU9Iml0YWxpYyIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwuNTUpIiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+bm90ZTwvdGV4dD4KPC9zdmc+">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTE2MjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMEQwRDFBIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnbG93IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTg0RkYiIHN0b3Atb3BhY2l0eT0iLjMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNTg1NkQ2IiBzdG9wLW9wYWNpdHk9Ii4xNSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPCEtLSBCYXNlIC0tPgogIDxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9InVybCgjYmcpIi8+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0idXJsKCNnbG93KSIvPgogIDwhLS0gU3VidGxlIGdyaWQgbGluZXMgLS0+CiAgPGxpbmUgeDE9IjIwIiB5MT0iODIiIHgyPSIxNjAiIHkyPSI4MiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LC4wOCkiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iMyA0Ii8+CiAgPCEtLSBMaWZlIGNoYXJ0IGJhcnMgLS0+CiAgPCEtLSBZZWxsb3cgYmFycyAoaHlwb21hbmlhKSAtLT4KICA8cmVjdCB4PSIyMiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiNGRkQ2MEEiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjQyIiB5PSI0MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0iI0ZGRDYwQSIgb3BhY2l0eT0iLjkyIi8+CiAgPCEtLSBSZWQgYmFyIChtYW5pYSBwZWFrKSAtLT4KICA8cmVjdCB4PSI2MiIgeT0iMjYiIHdpZHRoPSIxNCIgaGVpZ2h0PSI1NiIgcng9IjQiIGZpbGw9IiNGRjQ1M0EiIG9wYWNpdHk9Ii45NSIvPgogIDwhLS0gUmVjb3ZlcnkgZ3JlZW4gYmFycyAtLT4KICA8cmVjdCB4PSI4MiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEwMiIgeT0iNjgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEyMiIgeT0iNzAiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxMiIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iMTQyIiB5PSI3MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEwIiByeD0iNCIgZmlsbD0iIzMwRDE1OCIgb3BhY2l0eT0iLjg1Ii8+CiAgPCEtLSBCYXNlbGluZSAtLT4KICA8bGluZSB4MT0iMTgiIHkxPSI4MiIgeDI9IjE2MiIgeTI9IjgyIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsLjIpIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iNCA1Ii8+CiAgPCEtLSBXb3JkbWFyayAtLT4KICA8dGV4dCB4PSI5MCIgeT0iMTM2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSIxOSIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9Ii45IiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+cG9sYXI8L3RleHQ+CiAgPHRleHQgeD0iOTAiIHk9IjE1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTkiIGZvbnQtc3R5bGU9Iml0YWxpYyIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwuNTUpIiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+bm90ZTwvdGV4dD4KPC9zdmc+">
+<link rel="apple-touch-icon" sizes="152x152" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTE2MjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMEQwRDFBIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnbG93IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTg0RkYiIHN0b3Atb3BhY2l0eT0iLjMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNTg1NkQ2IiBzdG9wLW9wYWNpdHk9Ii4xNSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPCEtLSBCYXNlIC0tPgogIDxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9InVybCgjYmcpIi8+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0idXJsKCNnbG93KSIvPgogIDwhLS0gU3VidGxlIGdyaWQgbGluZXMgLS0+CiAgPGxpbmUgeDE9IjIwIiB5MT0iODIiIHgyPSIxNjAiIHkyPSI4MiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LC4wOCkiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iMyA0Ii8+CiAgPCEtLSBMaWZlIGNoYXJ0IGJhcnMgLS0+CiAgPCEtLSBZZWxsb3cgYmFycyAoaHlwb21hbmlhKSAtLT4KICA8cmVjdCB4PSIyMiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiNGRkQ2MEEiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjQyIiB5PSI0MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0iI0ZGRDYwQSIgb3BhY2l0eT0iLjkyIi8+CiAgPCEtLSBSZWQgYmFyIChtYW5pYSBwZWFrKSAtLT4KICA8cmVjdCB4PSI2MiIgeT0iMjYiIHdpZHRoPSIxNCIgaGVpZ2h0PSI1NiIgcng9IjQiIGZpbGw9IiNGRjQ1M0EiIG9wYWNpdHk9Ii45NSIvPgogIDwhLS0gUmVjb3ZlcnkgZ3JlZW4gYmFycyAtLT4KICA8cmVjdCB4PSI4MiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEwMiIgeT0iNjgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEyMiIgeT0iNzAiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxMiIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iMTQyIiB5PSI3MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEwIiByeD0iNCIgZmlsbD0iIzMwRDE1OCIgb3BhY2l0eT0iLjg1Ii8+CiAgPCEtLSBCYXNlbGluZSAtLT4KICA8bGluZSB4MT0iMTgiIHkxPSI4MiIgeDI9IjE2MiIgeTI9IjgyIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsLjIpIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iNCA1Ii8+CiAgPCEtLSBXb3JkbWFyayAtLT4KICA8dGV4dCB4PSI5MCIgeT0iMTM2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSIxOSIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9Ii45IiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+cG9sYXI8L3RleHQ+CiAgPHRleHQgeD0iOTAiIHk9IjE1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTkiIGZvbnQtc3R5bGU9Iml0YWxpYyIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwuNTUpIiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+bm90ZTwvdGV4dD4KPC9zdmc+">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTE2MjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMEQwRDFBIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnbG93IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTg0RkYiIHN0b3Atb3BhY2l0eT0iLjMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNTg1NkQ2IiBzdG9wLW9wYWNpdHk9Ii4xNSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPCEtLSBCYXNlIC0tPgogIDxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9InVybCgjYmcpIi8+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0idXJsKCNnbG93KSIvPgogIDwhLS0gU3VidGxlIGdyaWQgbGluZXMgLS0+CiAgPGxpbmUgeDE9IjIwIiB5MT0iODIiIHgyPSIxNjAiIHkyPSI4MiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LC4wOCkiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iMyA0Ii8+CiAgPCEtLSBMaWZlIGNoYXJ0IGJhcnMgLS0+CiAgPCEtLSBZZWxsb3cgYmFycyAoaHlwb21hbmlhKSAtLT4KICA8cmVjdCB4PSIyMiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiNGRkQ2MEEiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjQyIiB5PSI0MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0iI0ZGRDYwQSIgb3BhY2l0eT0iLjkyIi8+CiAgPCEtLSBSZWQgYmFyIChtYW5pYSBwZWFrKSAtLT4KICA8cmVjdCB4PSI2MiIgeT0iMjYiIHdpZHRoPSIxNCIgaGVpZ2h0PSI1NiIgcng9IjQiIGZpbGw9IiNGRjQ1M0EiIG9wYWNpdHk9Ii45NSIvPgogIDwhLS0gUmVjb3ZlcnkgZ3JlZW4gYmFycyAtLT4KICA8cmVjdCB4PSI4MiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEwMiIgeT0iNjgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEyMiIgeT0iNzAiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxMiIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iMTQyIiB5PSI3MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEwIiByeD0iNCIgZmlsbD0iIzMwRDE1OCIgb3BhY2l0eT0iLjg1Ii8+CiAgPCEtLSBCYXNlbGluZSAtLT4KICA8bGluZSB4MT0iMTgiIHkxPSI4MiIgeDI9IjE2MiIgeTI9IjgyIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsLjIpIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iNCA1Ii8+CiAgPCEtLSBXb3JkbWFyayAtLT4KICA8dGV4dCB4PSI5MCIgeT0iMTM2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSIxOSIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9Ii45IiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+cG9sYXI8L3RleHQ+CiAgPHRleHQgeD0iOTAiIHk9IjE1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTkiIGZvbnQtc3R5bGU9Iml0YWxpYyIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwuNTUpIiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+bm90ZTwvdGV4dD4KPC9zdmc+">
+
+<!-- ── PWA / Apple Home Screen ── -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="PolarNote">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="PolarNote">
+<meta name="description" content="Bipolar mood tracker — sleep, mood poles, and early warning patterns.">
+
+<!-- ── Apple Touch Icons (inline SVG → data URI) ── -->
+<!-- 180×180 for iPhone, 167×167 for iPad Pro, 152×152 for iPad -->
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0iIzAwMCIvPgogIDwhLS0gV2F2ZSBncmFkaWVudCBiYWNrZ3JvdW5kIC0tPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnMSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMEE4NEZGIiBzdG9wLW9wYWNpdHk9Ii4yNSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM1ODU2RDYiIHN0b3Atb3BhY2l0eT0iLjE1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSJ1cmwoI2cxKSIvPgogIDwhLS0gQmFzZWxpbmUgLS0+CiAgPGxpbmUgeDE9IjI0IiB5MT0iOTAiIHgyPSIxNTYiIHkyPSI5MCIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LC4xNSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWRhc2hhcnJheT0iNCA0Ii8+CiAgPCEtLSBFbGV2YXRlZCBiYXJzICh5ZWxsb3cgKyByZWQpIC0tPgogIDxyZWN0IHg9IjMyIiB5PSI2NiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iI0ZGRDYwQSIgb3BhY2l0eT0iLjkiLz4KICA8cmVjdCB4PSI1NCIgeT0iNDgiIHdpZHRoPSIxNCIgaGVpZ2h0PSI0MiIgcng9IjQiIGZpbGw9IiNGRkQ2MEEiIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iNzYiIHk9IjMwIiB3aWR0aD0iMTQiIGhlaWdodD0iNjAiIHJ4PSI0IiBmaWxsPSIjRkY0NTNBIG9wYWNpdHk9Ii45Ii8+CiAgPCEtLSBSZWNvdmVyeSBiYXJzIChncmVlbikgLS0+CiAgPHJlY3QgeD0iOTgiIHk9IjY2IiB3aWR0aD0iMTQiIGhlaWdodD0iMjQiIHJ4PSI0IiBmaWxsPSIjMzBEMTU4IiBvcGFjaXR5PSIuOSIvPgogIDxyZWN0IHg9IjEyMCIgeT0iNzgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxMiIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iMTQyIiB5PSI3OCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEyIiByeD0iNCIgZmlsbD0iIzMwRDE1OCIgb3BhY2l0eT0iLjkiLz4KICA8IS0tIFdvcmRtYXJrIC0tPgogIDx0ZXh0IHg9IjkwIiB5PSIxNDgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCBzZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9Ii45Ij5wb2xhcm5vdGU8L3RleHQ+Cjwvc3ZnPg==">
+<link rel="apple-touch-icon" sizes="152x152" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUyIiBoZWlnaHQ9IjE1MiIgdmlld0JveD0iMCAwIDE1MiAxNTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjE1MiIgaGVpZ2h0PSIxNTIiIHJ4PSIzNCIgZmlsbD0iIzAwMCIvPgogIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZzEiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMEE4NEZGIiBzdG9wLW9wYWNpdHk9Ii4yNSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzU4NTZENiIgc3RvcC1vcGFjaXR5PSIuMTUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTUyIiBoZWlnaHQ9IjE1MiIgcng9IjM0IiBmaWxsPSJ1cmwoI2cxKSIvPgogIDxsaW5lIHgxPSIyMCIgeTE9Ijc2IiB4Mj0iMTMyIiB5Mj0iNzYiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwuMTUpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQgNCIvPgogIDxyZWN0IHg9IjI2IiB5PSI1NiIgd2lkdGg9IjEyIiBoZWlnaHQ9IjIwIiByeD0iMyIgZmlsbD0iI0ZGRDYwQSIgb3BhY2l0eT0iLjkiLz4KICA8cmVjdCB4PSI0NiIgeT0iNDAiIHdpZHRoPSIxMiIgaGVpZ2h0PSIzNiIgcng9IjMiIGZpbGw9IiNGRkQ2MEEiIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iNjYiIHk9IjI2IiB3aWR0aD0iMTIiIGhlaWdodD0iNTAiIHJ4PSIzIiBmaWxsPSIjRkY0NTNBIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iODYiIHk9IjU2IiB3aWR0aD0iMTIiIGhlaWdodD0iMjAiIHJ4PSIzIiBmaWxsPSIjMzBEMTU4IiBvcGFjaXR5PSIuOSIvPgogIDxyZWN0IHg9IjEwNiIgeT0iNjQiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiIgcng9IjMiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iMTI0IiB5PSI2NCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEyIiByeD0iMyIgZmlsbD0iIzMwRDE1OCIgb3BhY2l0eT0iLjkiLz4KICA8dGV4dCB4PSI3NiIgeT0iMTI2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9Ii45Ij5wb2xhcm5vdGU8L3RleHQ+Cjwvc3ZnPg==">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI4IiBmaWxsPSIjMDAwIi8+CiAgPHJlY3QgeD0iNiIgeT0iMTIiIHdpZHRoPSIzIiBoZWlnaHQ9IjYiIHJ4PSIxIiBmaWxsPSIjRkZENjBBIi8+CiAgPHJlY3QgeD0iMTEiIHk9IjciIHdpZHRoPSIzIiBoZWlnaHQ9IjExIiByeD0iMSIgZmlsbD0iI0ZGNDUzQSIvPgogIDxyZWN0IHg9IjE2IiB5PSIxMiIgd2lkdGg9IjMiIGhlaWdodD0iNiIgcng9IjEiIGZpbGw9IiMzMEQxNTgiLz4KICA8cmVjdCB4PSIyMSIgeT0iMTQiIHdpZHRoPSIzIiBoZWlnaHQ9IjQiIHJ4PSIxIiBmaWxsPSIjMzBEMTU4Ii8+CiAgPGxpbmUgeDE9IjQiIHkxPSIxOCIgeDI9IjI4IiB5Mj0iMTgiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwuMikiIHN0cm9rZS13aWR0aD0iLjUiLz4KPC9zdmc+">
+
+<!-- ── Splash screen color ── -->
+<meta name="msapplication-TileColor" content="#000000">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#000;--s1:#1C1C1E;--s2:#2C2C2E;--s3:#3A3A3C;
+  --txt:#FFF;--txt2:rgba(255,255,255,.6);--txt3:rgba(255,255,255,.3);
+  --border:rgba(255,255,255,.08);
+  --blue:#0A84FF;--blue-dim:rgba(10,132,255,.15);
+  --green:#30D158;--green-dim:rgba(48,209,88,.15);
+  --yellow:#FFD60A;--yellow-dim:rgba(255,214,10,.15);
+  --red:#FF453A;--red-dim:rgba(255,69,58,.15);
+  --r-lg:20px;--r-md:14px;--r-sm:10px;
+  --serif:'Fraunces',Georgia,serif;--sans:'DM Sans',sans-serif;
+}
+html,body{height:100%;overflow:hidden;background:#000;}
+body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased;}
+.app{position:fixed;inset:0;max-width:430px;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;font-size:15px;font-weight:600;flex-shrink:0;}
+.sb-icons{display:flex;gap:6px;align-items:center;}
+.sb-icons i{font-size:13px;}
+.page{flex:1;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.page::-webkit-scrollbar{display:none;}
+.page.active{display:flex;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.anim{animation:fadeUp .3s cubic-bezier(.4,0,.2,1) both;}
+.tabbar{display:flex;background:rgba(0,0,0,.88);backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--border);padding:8px 0 28px;flex-shrink:0;}
+.tbtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:5px 0;font-family:var(--sans);font-size:10px;font-weight:500;color:var(--txt3);transition:color .2s;letter-spacing:.02em;}
+.tbtn i{font-size:22px;line-height:1;}
+.tbtn.on{color:var(--blue);}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
+.serif{font-family:var(--serif);}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:4px 10px;border-radius:100px;}
+.badge.green{background:var(--green-dim);color:var(--green);}
+.badge.yellow{background:var(--yellow-dim);color:var(--yellow);}
+.badge.red{background:var(--red-dim);color:var(--red);}
+.badge.blue{background:var(--blue-dim);color:var(--blue);}
+.badge.muted{background:var(--s2);color:var(--txt3);}
+.toggle{width:51px;height:31px;border-radius:100px;background:var(--s3);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;width:27px;height:27px;border-radius:50%;background:#fff;top:2px;left:2px;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:transform .2s cubic-bezier(.4,0,.2,1);}
+.toggle.on::after{transform:translateX(20px);}
+
+/* ONBOARDING */
+#page-onboard{background:var(--bg);}
+.ob-steps{flex:1;position:relative;overflow:hidden;}
+.ob-step{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:40px 32px 0;opacity:0;pointer-events:none;transform:translateX(32px);transition:opacity .3s ease,transform .3s cubic-bezier(.4,0,.2,1);}
+.ob-step.active{opacity:1;pointer-events:all;transform:translateX(0);}
+.ob-step.exit{opacity:0;transform:translateX(-32px);}
+.ob-icon{font-size:52px;margin-bottom:28px;line-height:1;}
+.ob-h{font-family:var(--serif);font-size:34px;font-weight:400;line-height:1.2;letter-spacing:-.5px;margin-bottom:12px;}
+.ob-h em{font-style:italic;color:var(--txt2);}
+.ob-body{font-size:16px;color:var(--txt2);line-height:1.6;font-weight:300;margin-bottom:32px;}
+.ob-dots{display:flex;gap:6px;margin-bottom:32px;}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--s3);transition:all .2s;}
+.ob-dot.on{width:18px;border-radius:3px;background:var(--blue);}
+.ob-cta-wrap{padding:0 32px 44px;flex-shrink:0;}
+.ob-cta{width:100%;padding:17px;border:none;border-radius:var(--r-md);font-family:var(--sans);font-size:17px;font-weight:600;cursor:pointer;background:var(--blue);color:#fff;transition:opacity .15s;margin-bottom:12px;}
+.ob-cta:hover{opacity:.88;}
+.ob-skip{background:none;border:none;font-family:var(--sans);font-size:15px;color:var(--txt3);cursor:pointer;text-align:center;width:100%;padding:4px 0;}
+.ob-input{width:100%;padding:16px;background:var(--s1);border:1.5px solid var(--s3);border-radius:var(--r-md);font-family:var(--sans);font-size:17px;color:var(--txt);outline:none;transition:border-color .2s;margin-bottom:10px;}
+.ob-input:focus{border-color:var(--blue);}
+.ob-sel-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.ob-sel-btn{padding:14px 18px;background:var(--s1);border:1.5px solid var(--s3);border-radius:var(--r-md);font-family:var(--sans);font-size:15px;color:var(--txt2);cursor:pointer;text-align:left;transition:all .15s;}
+.ob-sel-btn.on{background:var(--blue-dim);border-color:var(--blue);color:var(--txt);}
+
+/* TODAY FLOW */
+#page-today{padding-bottom:0;}
+.flow-nav{display:flex;justify-content:space-between;align-items:center;padding:10px 24px 6px;flex-shrink:0;}
+.flow-back{display:flex;align-items:center;gap:2px;background:none;border:none;cursor:pointer;color:var(--blue);font-family:var(--sans);font-size:17px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.flow-back.vis{opacity:1;pointer-events:all;}
+.flow-back i{font-size:20px;}
+.flow-skip{background:none;border:none;cursor:pointer;color:var(--blue);font-family:var(--sans);font-size:17px;}
+.flow-prog{padding:0 24px 16px;flex-shrink:0;}
+.prog-track{height:3px;background:var(--s3);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.prog-meta{font-size:12px;color:var(--txt3);margin-top:6px;}
+.steps-outer{flex:1;position:relative;overflow:hidden;}
+.step{position:absolute;inset:0;padding:4px 24px 24px;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateX(36px);transition:opacity .28s ease,transform .28s cubic-bezier(.4,0,.2,1);scrollbar-width:none;}
+.step::-webkit-scrollbar{display:none;}
+.step.active{opacity:1;pointer-events:all;transform:translateX(0);}
+.step.exit{opacity:0;transform:translateX(-36px);}
+.step-eye{color:var(--blue);margin-bottom:8px;}
+.step-h{font-family:var(--serif);font-size:30px;font-weight:400;line-height:1.15;letter-spacing:-.3px;margin-bottom:6px;}
+.step-h em{font-style:italic;color:var(--txt2);}
+.step-sub{font-size:15px;color:var(--txt2);line-height:1.5;margin-bottom:24px;font-weight:300;}
+.time-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.time-tile{background:var(--s1);border-radius:var(--r-md);padding:16px;cursor:pointer;border:1.5px solid transparent;transition:border-color .2s,background .15s;}
+.time-tile:hover{background:var(--s2);}
+.time-tile.set{border-color:var(--blue);}
+.tt-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;}
+.tt-val{font-family:var(--serif);font-size:30px;font-weight:300;color:var(--txt3);line-height:1;letter-spacing:-1px;transition:color .2s;}
+.time-tile.set .tt-val{color:var(--txt);}
+.tt-ap{font-size:14px;font-weight:400;margin-left:3px;color:var(--txt2);}
+.sleep-result{background:var(--s1);border-radius:var(--r-md);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;opacity:0;transition:opacity .3s;margin-bottom:10px;}
+.sleep-result.show{opacity:1;}
+.sr-label{font-size:13px;color:var(--txt2);}
+.sr-val{font-size:22px;font-weight:600;letter-spacing:-.5px;}
+.sr-val.good{color:var(--green);}
+.sr-val.warn{color:var(--yellow);}
+.sr-val.bad{color:var(--red);}
+.wake-alert{border-radius:var(--r-sm);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;opacity:0;transition:opacity .3s;pointer-events:none;}
+.wake-alert.show{opacity:1;pointer-events:all;}
+.wake-alert.yellow{background:var(--yellow-dim);color:var(--yellow);}
+.wake-alert.red{background:var(--red-dim);color:var(--red);}
+.wake-alert i{font-size:16px;flex-shrink:0;margin-top:1px;}
+.mood-col{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.mood-chip{width:100%;border-radius:100px;border:1.5px solid transparent;background:var(--s1);cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0 20px;transition:all .2s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;flex-shrink:0;}
+.mood-chip:active{transform:scale(.98);}
+.chip-left{display:flex;align-items:baseline;gap:8px;}
+.chip-num{font-family:var(--serif);font-size:22px;font-weight:300;line-height:1;letter-spacing:-.5px;}
+.chip-name{font-size:13px;font-weight:400;}
+.chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mood-chip[data-z="green"]{border-color:rgba(48,209,88,.2);}
+.mood-chip[data-z="yellow"]{border-color:rgba(255,214,10,.2);}
+.mood-chip[data-z="red"]{border-color:rgba(255,69,58,.2);}
+.mood-chip[data-z="green"] .chip-num,.mood-chip[data-z="green"] .chip-name{color:rgba(48,209,88,.55);}
+.mood-chip[data-z="yellow"] .chip-num,.mood-chip[data-z="yellow"] .chip-name{color:rgba(255,214,10,.55);}
+.mood-chip[data-z="red"] .chip-num,.mood-chip[data-z="red"] .chip-name{color:rgba(255,69,58,.55);}
+.mood-chip[data-z="green"] .chip-dot{background:rgba(48,209,88,.4);}
+.mood-chip[data-z="yellow"] .chip-dot{background:rgba(255,214,10,.4);}
+.mood-chip[data-z="red"] .chip-dot{background:rgba(255,69,58,.4);}
+.mood-chip.sel[data-z="green"]{background:var(--green);border-color:var(--green);box-shadow:0 0 24px rgba(48,209,88,.3);}
+.mood-chip.sel[data-z="yellow"]{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 24px rgba(255,214,10,.3);}
+.mood-chip.sel[data-z="red"]{background:var(--red);border-color:var(--red);box-shadow:0 0 24px rgba(255,69,58,.3);}
+.mood-chip.sel .chip-num,.mood-chip.sel .chip-name{color:rgba(0,0,0,.85);}
+.mood-chip.sel .chip-dot{background:rgba(0,0,0,.35);}
+.mood-fb{background:var(--s1);border-radius:var(--r-md);padding:16px 18px;border-left:3px solid transparent;opacity:0;transition:opacity .25s;}
+.mood-fb.show{opacity:1;}
+.mood-fb.green{border-left-color:var(--green);}
+.mood-fb.yellow{border-left-color:var(--yellow);}
+.mood-fb.red{border-left-color:var(--red);}
+.mft{font-size:13px;font-weight:600;margin-bottom:4px;}
+.mood-fb.green .mft{color:var(--green);}
+.mood-fb.yellow .mft{color:var(--yellow);}
+.mood-fb.red .mft{color:var(--red);}
+.mfb{font-size:13px;color:var(--txt2);line-height:1.5;font-weight:300;}
+.flag-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;}
+.flag-chip{padding:10px 16px;border-radius:100px;border:1.5px solid var(--s3);background:var(--s1);font-family:var(--sans);font-size:14px;font-weight:400;color:var(--txt2);cursor:pointer;transition:all .15s;}
+.flag-chip.on{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+.done-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 8px;}
+@keyframes ringBurst{0%{transform:scale(0);opacity:0;}70%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.done-ring{width:84px;height:84px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;margin-bottom:22px;animation:ringBurst .5s cubic-bezier(.175,.885,.32,1.275);}
+.done-ring i{font-size:38px;color:var(--green);}
+.done-h{font-family:var(--serif);font-size:34px;font-weight:400;letter-spacing:-.5px;margin-bottom:8px;}
+.done-sub{font-size:15px;color:var(--txt2);line-height:1.5;margin-bottom:28px;font-weight:300;}
+.streak-tile{background:var(--s1);border-radius:var(--r-md);padding:18px 22px;width:100%;display:flex;align-items:center;gap:18px;}
+.streak-num{font-family:var(--serif);font-size:48px;font-weight:300;color:var(--green);letter-spacing:-2px;line-height:1;}
+.streak-txt strong{display:block;font-size:15px;font-weight:600;margin-bottom:3px;}
+.streak-txt span{font-size:13px;color:var(--txt2);font-weight:300;}
+.cta-wrap{padding:12px 24px 16px;flex-shrink:0;}
+.cta{width:100%;padding:16px;border:none;border-radius:var(--r-md);font-family:var(--sans);font-size:17px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;letter-spacing:-.1px;}
+.cta:active{transform:scale(.99);}
+.cta.blue{background:var(--blue);color:#fff;}
+.cta.grn{background:var(--green);color:#000;}
+
+/* HISTORY */
+#page-history{padding-bottom:100px;}
+.page-hdr{padding:20px 24px 4px;}
+.page-title{font-family:var(--serif);font-size:30px;font-weight:400;letter-spacing:-.3px;margin-bottom:2px;}
+.page-title em{font-style:italic;color:var(--txt2);}
+.page-sub{font-size:13px;color:var(--txt3);font-weight:300;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 24px;}
+.stat-tile{background:var(--s1);border-radius:var(--r-md);padding:16px;}
+.stl{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;}
+.stv{font-family:var(--serif);font-size:28px;font-weight:300;letter-spacing:-.8px;margin-bottom:2px;line-height:1;}
+.stv.green{color:var(--green);}
+.stv.yellow{color:var(--yellow);}
+.stv.red{color:var(--red);}
+.sts{font-size:12px;color:var(--txt3);font-weight:300;}
+.unlock-card{margin:0 24px 16px;background:var(--s1);border-radius:var(--r-lg);padding:20px;position:relative;overflow:hidden;}
+.unlock-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,132,255,.1) 0%,transparent 55%);pointer-events:none;}
+.uc-eye{color:var(--blue);margin-bottom:6px;}
+.uc-h{font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:-.3px;margin-bottom:4px;}
+.uc-sub{font-size:13px;color:var(--txt2);margin-bottom:14px;font-weight:300;}
+.uc-bar{height:4px;background:var(--s3);border-radius:2px;margin-bottom:6px;overflow:hidden;}
+.uc-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .6s ease;}
+.uc-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--txt3);}
+.chart-card{margin:0 24px 16px;background:var(--s1);border-radius:var(--r-lg);padding:18px;}
+.cc-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;}
+.cc-title{font-size:15px;font-weight:600;}
+.cc-sub{font-size:12px;color:var(--txt3);}
+.log-wrap{padding:0 24px;}
+.log-sec-label{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;}
+.log-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:.5px solid var(--border);}
+.log-item:last-child{border-bottom:none;}
+.log-date{font-size:13px;color:var(--txt3);font-weight:300;min-width:52px;}
+.log-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.log-dot.green{background:var(--green);}
+.log-dot.yellow{background:var(--yellow);}
+.log-dot.red{background:var(--red);}
+.log-num{font-family:var(--serif);font-size:17px;font-weight:400;min-width:32px;}
+.log-sleep{font-size:12px;color:var(--txt2);flex:1;}
+.log-flags{font-size:11px;color:var(--txt3);text-align:right;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* INSIGHTS */
+#page-insights{padding-bottom:100px;}
+.insight-card{margin:0 24px 12px;background:var(--s1);border-radius:var(--r-lg);padding:20px;}
+.insight-card.locked{background:var(--bg);border:1.5px solid var(--s2);}
+.ic-body{font-size:15px;font-weight:300;line-height:1.6;color:var(--txt);margin-bottom:10px;}
+.ic-body strong{font-weight:600;}
+.ic-meta{font-size:12px;color:var(--txt3);}
+.ic-table{margin-top:14px;background:var(--s2);border-radius:var(--r-sm);overflow:hidden;}
+.ic-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:.5px solid var(--border);}
+.ic-row:last-child{border-bottom:none;}
+.ic-rl{font-size:12px;color:var(--txt2);}
+.ic-rv{font-size:12px;font-weight:500;}
+.cycle-svg-wrap{display:flex;justify-content:center;margin:16px 0 8px;}
+
+/* PROFILE */
+#page-profile{padding-bottom:100px;}
+.prof-hdr{padding:24px 24px 20px;display:flex;align-items:center;gap:16px;}
+.prof-av{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#5856D6);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:22px;font-weight:300;flex-shrink:0;}
+.prof-name{font-family:var(--serif);font-size:24px;font-weight:400;letter-spacing:-.3px;}
+.prof-dx{font-size:13px;color:var(--txt3);margin-top:2px;font-weight:300;}
+.pref-sec{padding:0 24px;margin-bottom:20px;}
+.pref-label{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;}
+.pref-card{background:var(--s1);border-radius:var(--r-md);overflow:hidden;}
+.pref-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--border);}
+.pref-row:last-child{border-bottom:none;}
+.pr-title{font-size:15px;font-weight:400;}
+.pr-sub{font-size:12px;color:var(--txt3);margin-top:2px;font-weight:300;}
+.export-btn{margin:0 24px 8px;width:calc(100% - 48px);padding:14px;border:1.5px solid var(--blue);border-radius:var(--r-md);background:none;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;}
+.export-btn:hover{background:var(--blue-dim);}
+.danger-btn{margin:8px 24px;width:calc(100% - 48px);padding:14px;border:1.5px solid rgba(255,69,58,.3);border-radius:var(--r-md);background:none;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.version{text-align:center;font-size:12px;color:var(--txt3);padding:20px;font-weight:300;}
+
+/* TIME PICKER MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal-sheet{background:#1C1C1E;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:0 0 44px;transform:translateY(40px);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.modal-bg.open .modal-sheet{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--s3);border-radius:2px;margin:12px auto 0;}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:.5px solid var(--border);}
+.modal-cancel{background:none;border:none;cursor:pointer;color:var(--txt2);font-family:var(--sans);font-size:17px;}
+.modal-htitle{font-size:15px;font-weight:600;}
+.modal-done{background:none;border:none;cursor:pointer;color:var(--blue);font-family:var(--sans);font-size:17px;font-weight:600;}
+.wheel-outer{display:flex;justify-content:center;align-items:flex-start;padding:12px 24px;}
+.wheel-col{flex:1;max-width:110px;}
+.wcol-label{text-align:center;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;}
+.wheel-scroll{height:176px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;position:relative;}
+.wheel-scroll::-webkit-scrollbar{display:none;}
+.wheel-item{height:44px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:24px;font-weight:300;color:var(--txt3);cursor:pointer;scroll-snap-align:center;transition:all .15s;letter-spacing:-.5px;}
+.wheel-item.sel{color:var(--txt);font-size:28px;font-weight:400;}
+.wheel-pad{height:66px;display:block;}
+.wheel-hl{position:absolute;left:4px;right:4px;height:44px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.06);border-radius:8px;pointer-events:none;}
+.wheel-colon{font-family:var(--serif);font-size:30px;color:var(--txt3);padding:20px 4px 0;}
+.ampm-col{display:flex;flex-direction:column;gap:8px;padding:18px 0 0 20px;}
+.ampm-pill{padding:10px 18px;border-radius:10px;border:1.5px solid var(--s3);background:none;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--txt2);cursor:pointer;transition:all .15s;}
+.ampm-pill.on{background:var(--blue);border-color:var(--blue);color:#fff;}
+
+/* REPORT MODAL */
+.report-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;}
+.report-bg.open{opacity:1;pointer-events:all;}
+.report-sheet{background:#1C1C1E;border-radius:20px 20px 0 0;width:100%;max-width:430px;max-height:82vh;overflow-y:auto;padding:24px 24px 44px;transform:translateY(40px);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.report-bg.open .report-sheet{transform:translateY(0);}
+.rp-handle{width:36px;height:4px;background:var(--s3);border-radius:2px;margin:0 auto 20px;}
+.rp-title{font-family:var(--serif);font-size:22px;margin-bottom:4px;}
+.rp-sub{font-size:13px;color:var(--txt3);margin-bottom:20px;font-weight:300;}
+.rp-section{margin-bottom:16px;}
+.rp-sec-title{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;}
+.rp-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border);}
+.rp-row:last-child{border-bottom:none;}
+.rp-key{font-size:13px;color:var(--txt2);}
+.rp-val{font-size:13px;font-weight:500;color:var(--txt);}
+.rp-copy-btn{width:100%;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:var(--r-md);font-family:var(--sans);font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);color:var(--txt);padding:12px 20px;border-radius:100px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sb">
+    <span id="clk">9:41</span>
+    <div class="sb-icons"><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div>
+  </div>
+
+  <!-- ONBOARDING -->
+  <div class="page active" id="page-onboard" style="padding-bottom:0;">
+    <div class="ob-steps">
+      <div class="ob-step active" id="obs-0">
+        <div class="ob-icon">🌊</div>
+        <div class="ob-h">Track your <em>poles.</em><br>Understand your cycle.</div>
+        <div class="ob-body">PolarNote is built for people with bipolar — not for general mood tracking. Every feature is designed for how your mind actually works.</div>
+        <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+      </div>
+      <div class="ob-step" id="obs-1">
+        <div class="ob-icon">🌙</div>
+        <div class="ob-h">Sleep is your <em>first signal.</em></div>
+        <div class="ob-body">Waking at 5 AM three days in a row? That's your early warning system. We track bedtime and wake time so you can see the pattern before the episode arrives.</div>
+        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+      </div>
+      <div class="ob-step" id="obs-2">
+        <div class="ob-icon">📊</div>
+        <div class="ob-h">Not good or bad —<br><em>which pole.</em></div>
+        <div class="ob-body">We use a −3 to +3 scale. Green means functioning. Yellow means watch closely. Red means reach out now. Simple, clinically grounded, never ambiguous.</div>
+        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div></div>
+      </div>
+      <div class="ob-step" id="obs-3">
+        <div class="ob-icon">👋</div>
+        <div class="ob-h">Let's set up <em>your profile.</em></div>
+        <div class="ob-body" style="margin-bottom:14px;">Two things to get started.</div>
+        <input class="ob-input" id="ob-name" type="text" placeholder="Your first name" maxlength="30">
+        <div class="ob-sel-group">
+          <button class="ob-sel-btn" data-dx="Bipolar I" onclick="selDx(this)">Bipolar I</button>
+          <button class="ob-sel-btn" data-dx="Bipolar II" onclick="selDx(this)">Bipolar II</button>
+          <button class="ob-sel-btn" data-dx="Cyclothymia" onclick="selDx(this)">Cyclothymia</button>
+          <button class="ob-sel-btn" data-dx="Unspecified / exploring" onclick="selDx(this)">Unspecified / exploring</button>
+        </div>
+        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div></div>
+      </div>
+    </div>
+    <div class="ob-cta-wrap">
+      <button class="ob-cta" id="ob-cta" onclick="obNext()">Get started</button>
+      <button class="ob-skip" id="ob-skip" onclick="obNext()">Skip</button>
+    </div>
+  </div>
+
+  <!-- TODAY -->
+  <div class="page" id="page-today" style="padding-bottom:0;">
+    <div class="flow-nav">
+      <button class="flow-back" id="flow-back" onclick="flowBack()"><i class="ti ti-chevron-left"></i>Back</button>
+      <button class="flow-skip" id="flow-skip" onclick="flowNext()">Skip</button>
+    </div>
+    <div class="flow-prog">
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:33%"></div></div>
+      <div class="prog-meta" id="prog-meta">Step 1 of 3</div>
+    </div>
+    <div class="steps-outer">
+      <div class="step active" id="step-sleep">
+        <div class="eyebrow step-eye">Sleep</div>
+        <div class="step-h">When did you <em>sleep?</em></div>
+        <div class="step-sub">Bedtime and wake time reveal more than duration alone.</div>
+        <div class="time-grid">
+          <div class="time-tile" id="tile-bed" onclick="openModal('bed')" role="button" tabindex="0"><div class="tt-label">Went to bed</div><div class="tt-val" id="bed-disp">—</div></div>
+          <div class="time-tile" id="tile-wake" onclick="openModal('wake')" role="button" tabindex="0"><div class="tt-label">Woke up</div><div class="tt-val" id="wake-disp">—</div></div>
+        </div>
+        <div class="sleep-result" id="sleep-result"><span class="sr-label">Total sleep</span><span class="sr-val" id="sr-val">—</span></div>
+        <div class="wake-alert" id="wake-alert"><i class="ti ti-alert-triangle"></i><span id="wake-alert-txt"></span></div>
+      </div>
+      <div class="step" id="step-mood">
+        <div class="eyebrow step-eye">Mood</div>
+        <div class="step-h">Where are you <em>today?</em></div>
+        <div class="step-sub">Tap the number that feels closest. Size reflects intensity.</div>
+        <div class="mood-col">
+          <div class="mood-chip" data-v="3"  data-z="red"    style="height:86px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">+3</span><span class="chip-name">Mania / crisis</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="2"  data-z="yellow" style="height:72px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">+2</span><span class="chip-name">Mild hypomania</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="1"  data-z="green"  style="height:62px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">+1</span><span class="chip-name">Slightly elevated</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="0"  data-z="green"  style="height:54px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">0</span><span class="chip-name">Baseline</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="-1" data-z="green"  style="height:62px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">−1</span><span class="chip-name">Slightly low</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="-2" data-z="yellow" style="height:72px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">−2</span><span class="chip-name">Mild depression</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="-3" data-z="red"    style="height:86px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">−3</span><span class="chip-name">Severe depression</span></div><div class="chip-dot"></div></div>
+        </div>
+        <div class="mood-fb" id="mood-fb"><div class="mft" id="mft"></div><div class="mfb" id="mfb"></div></div>
+      </div>
+      <div class="step" id="step-flags">
+        <div class="eyebrow step-eye">Notes</div>
+        <div class="step-h">Anything <em>else?</em></div>
+        <div class="step-sub">Select all that apply — helps reveal patterns over time.</div>
+        <div class="flag-wrap">
+          <button class="flag-chip" onclick="this.classList.toggle('on')">Racing thoughts</button>
+          <button class="flag-chip" onclick="this.classList.toggle('on')">Irritable</button>
+          <button class="flag-chip" onclick="this.classList.toggle('on')">Low motivation</button>
+          <button class="flag-chip" onclick="this.classList.toggle('on')">Spending ↑</button>
+          <button class="flag-chip" onclick="this.classList.toggle('on')">Withdrew socially</button>
+          <button class="flag-chip" onclick="this.classList.toggle('on')">Medication ✓</button>
+          <button class="flag-chip" onclick="this.classList.toggle('on')">Appetite change</button>
+          <button class="flag-chip" onclick="this.classList.toggle('on')">Hard to focus</button>
+          <button class="flag-chip" onclick="this.classList.toggle('on')">Risky behavior</button>
+        </div>
+      </div>
+      <div class="step" id="step-done">
+        <div class="done-wrap">
+          <div class="done-ring"><i class="ti ti-check"></i></div>
+          <div class="done-h">Logged.</div>
+          <p class="done-sub" id="done-sub">Your data is building something real.</p>
+          <div class="streak-tile"><div class="streak-num" id="streak-num">0</div><div class="streak-txt"><strong>Days tracked</strong><span id="streak-sub">Clinic report unlocks at 30 days</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="cta-wrap" id="cta-wrap"><button class="cta blue" id="cta-btn" onclick="flowNext()">Continue</button></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="page-history" style="padding-bottom:100px;">
+    <div class="page-hdr anim"><div class="page-title">Your <em>journey</em></div><div class="page-sub" id="hist-sub">—</div></div>
+    <div class="stat-grid anim">
+      <div class="stat-tile"><div class="stl">Days tracked</div><div class="stv" id="h-days">0</div><div class="sts">of last 30</div></div>
+      <div class="stat-tile"><div class="stl">Avg wake time</div><div class="stv" id="h-wake">—</div><div class="sts">this week</div></div>
+      <div class="stat-tile"><div class="stl">Avg sleep</div><div class="stv" id="h-sleep">—</div><div class="sts">this week</div></div>
+      <div class="stat-tile"><div class="stl">Stable since</div><div class="stv green" id="h-stable">—</div><div class="sts">no red/yellow</div></div>
+    </div>
+    <div class="unlock-card anim">
+      <div class="eyebrow uc-eye">Clinic Report</div>
+      <div class="uc-h">Doctor-ready summary</div>
+      <div class="uc-sub" id="uc-sub">Track 30 days to unlock your personalized report.</div>
+      <div class="uc-bar"><div class="uc-fill" id="uc-fill" style="width:0%"></div></div>
+      <div class="uc-meta"><span id="uc-left">0 / 30 days</span><span id="uc-right">Unlocks in 30 days</span></div>
+    </div>
+    <div class="chart-card anim">
+      <div class="cc-hdr"><span class="cc-title">Life chart</span><span class="cc-sub">Mood · Wake time</span></div>
+      <svg id="life-chart" width="100%" viewBox="0 0 340 120" role="img" aria-label="Life chart"></svg>
+    </div>
+    <div class="log-wrap anim">
+      <div class="log-sec-label">Recent entries</div>
+      <div id="log-list"></div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="page" id="page-insights" style="padding-bottom:100px;">
+    <div class="page-hdr anim"><div class="page-title">What your <em>data says</em></div><div class="page-sub" id="ins-sub">—</div></div>
+    <div id="insights-body"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="page" id="page-profile" style="padding-bottom:100px;">
+    <div class="prof-hdr anim"><div class="prof-av" id="prof-av">?</div><div><div class="prof-name" id="prof-name">Your Name</div><div class="prof-dx" id="prof-dx">Bipolar · Tracking since today</div></div></div>
+    <div class="pref-sec anim">
+      <div class="pref-label">Notifications</div>
+      <div class="pref-card">
+        <div class="pref-row"><div><div class="pr-title">Evening reminder</div><div class="pr-sub">9:00 PM daily</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Early wake alert</div><div class="pr-sub">Wake before 6 AM for 3+ days</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Red zone alert</div><div class="pr-sub">Immediate when you log ±3</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Weekly summary</div><div class="pr-sub">Every Sunday morning</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+    </div>
+    <div class="pref-sec anim">
+      <div class="pref-label">Clinic report</div>
+      <div class="pref-card">
+        <div class="pref-row"><div><div class="pr-title">Include wake times</div><div class="pr-sub">Bedtime + wake in report</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Include medications</div><div class="pr-sub">From daily flag entries</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+    </div>
+    <div class="pref-sec anim">
+      <div class="pref-label">Data &amp; privacy</div>
+      <div class="pref-card">
+        <div class="pref-row"><div><div class="pr-title">Anonymized research opt-in</div><div class="pr-sub">Help improve bipolar care. No personal info shared.</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+    </div>
+    <button class="export-btn anim" onclick="showReport()"><i class="ti ti-file-text"></i>Preview clinic report</button>
+    <button class="danger-btn anim" onclick="resetApp()"><i class="ti ti-trash"></i>Reset all data</button>
+    <div class="version">PolarNote · v0.1 Beta · For validation only</div>
+  </div>
+
+  <!-- TAB BAR -->
+  <nav class="tabbar" id="tabbar" style="display:none;">
+    <button class="tbtn on" onclick="switchTab('today',this)"><i class="ti ti-home"></i>Today</button>
+    <button class="tbtn" onclick="switchTab('history',this)"><i class="ti ti-chart-bar"></i>History</button>
+    <button class="tbtn" onclick="switchTab('insights',this)"><i class="ti ti-bulb"></i>Insights</button>
+    <button class="tbtn" onclick="switchTab('profile',this)"><i class="ti ti-user"></i>Profile</button>
+  </nav>
+</div>
+
+<!-- TIME PICKER -->
+<div class="modal-bg" id="modal-bg" onclick="closeModalOutside(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <div class="modal-htitle" id="modal-title">Bedtime</div>
+      <button class="modal-done" onclick="confirmTime()">Done</button>
+    </div>
+    <div class="wheel-outer">
+      <div class="wheel-col"><div class="wcol-label">Hour</div><div class="wheel-scroll" id="wh-h"><div class="wheel-hl"></div></div></div>
+      <div class="wheel-colon">:</div>
+      <div class="wheel-col"><div class="wcol-label">Min</div><div class="wheel-scroll" id="wh-m"><div class="wheel-hl"></div></div></div>
+      <div class="ampm-col">
+        <button class="ampm-pill" id="ap-am" onclick="setAP('AM')">AM</button>
+        <button class="ampm-pill on" id="ap-pm" onclick="setAP('PM')">PM</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="report-bg" id="report-bg" onclick="closeReportOutside(event)">
+  <div class="report-sheet">
+    <div class="rp-handle"></div>
+    <div class="rp-title">Clinic Report</div>
+    <div class="rp-sub" id="rp-sub">—</div>
+    <div id="rp-body"></div>
+    <button class="rp-copy-btn" onclick="copyReport()">Copy report text</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='polarnote_v1';
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||def();}catch{return def();}}
+function save(s){localStorage.setItem(KEY,JSON.stringify(s));}
+function def(){return{onboarded:false,name:'',dx:'',startDate:new Date().toISOString().slice(0,10),entries:[]};}
+let S=load();
+
+function seedDemo(){
+  if(S.entries.length>0)return;
+  const today=new Date();
+  const seed=[
+    {d:18,bed:22*60,wake:7*60,mood:0,flags:['Medication ✓']},
+    {d:17,bed:22*60+30,wake:7*60+15,mood:1,flags:['Medication ✓']},
+    {d:16,bed:23*60,wake:7*60+30,mood:0,flags:[]},
+    {d:15,bed:22*60,wake:7*60,mood:-1,flags:['Low motivation']},
+    {d:14,bed:22*60+30,wake:7*60,mood:0,flags:['Medication ✓']},
+    {d:13,bed:21*60,wake:6*60+30,mood:1,flags:['Medication ✓']},
+    {d:12,bed:21*60,wake:6*60,mood:2,flags:['Racing thoughts','Spending ↑']},
+    {d:11,bed:20*60+30,wake:5*60+30,mood:2,flags:['Racing thoughts','Irritable']},
+    {d:10,bed:21*60,wake:5*60,mood:3,flags:['Racing thoughts','Risky behavior']},
+    {d:9,bed:21*60,wake:5*60+30,mood:2,flags:['Irritable']},
+    {d:8,bed:22*60,wake:6*60,mood:1,flags:['Medication ✓']},
+    {d:7,bed:22*60,wake:7*60,mood:0,flags:['Medication ✓']},
+    {d:6,bed:22*60+30,wake:7*60,mood:0,flags:['Medication ✓']},
+    {d:5,bed:22*60,wake:6*60+30,mood:1,flags:['Medication ✓']},
+    {d:4,bed:21*60+30,wake:6*60,mood:2,flags:['Racing thoughts']},
+    {d:3,bed:21*60,wake:5*60+45,mood:2,flags:['Racing thoughts','Spending ↑']},
+    {d:2,bed:21*60,wake:5*60+15,mood:2,flags:['Irritable','Racing thoughts']},
+    {d:1,bed:20*60+30,wake:5*60,mood:2,flags:['Spending ↑','Racing thoughts']},
+  ];
+  seed.forEach(({d,bed,wake,mood,flags})=>{
+    const dt=new Date(today);dt.setDate(dt.getDate()-d);
+    const date=dt.toISOString().slice(0,10);
+    const diff=((wake-bed)+24*60)%(24*60);
+    const sleepH=Math.round(diff/6)/10;
+    const zone=Math.abs(mood)>=3?'red':Math.abs(mood)>=2?'yellow':'green';
+    S.entries.push({date,bedMin:bed,wakeMin:wake,sleepH,mood,zone,flags,ts:Date.now()});
+  });
+  save(S);
+}
+
+(function tick(){
+  const n=new Date(),h=n.getHours()%12||12;
+  document.getElementById('clk').textContent=h+':'+String(n.getMinutes()).padStart(2,'0');
+  setTimeout(tick,10000);
+})();
+
+let obCur=0,selDxVal='';
+function selDx(btn){document.querySelectorAll('.ob-sel-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');selDxVal=btn.dataset.dx;}
+function obNext(){
+  if(obCur===3){
+    S.name=document.getElementById('ob-name').value.trim()||'Friend';
+    S.dx=selDxVal||'Bipolar';S.onboarded=true;save(S);seedDemo();launchApp();return;
+  }
+  const cur=document.getElementById('obs-'+obCur);
+  cur.classList.remove('active');cur.classList.add('exit');
+  obCur++;
+  setTimeout(()=>cur.classList.remove('exit'),300);
+  setTimeout(()=>document.getElementById('obs-'+obCur).classList.add('active'),20);
+  if(obCur===3){document.getElementById('ob-cta').textContent='Start tracking';document.getElementById('ob-skip').textContent='Skip setup';}
+  else{document.getElementById('ob-cta').textContent='Continue';}
+}
+
+function launchApp(){
+  document.getElementById('page-onboard').classList.remove('active');
+  document.getElementById('tabbar').style.display='flex';
+  switchTab('today',document.querySelector('.tbtn'));
+  updateProfileUI();renderHistory();renderInsights();
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('on');
+  if(name==='history')renderHistory();
+  if(name==='insights')renderInsights();
+  if(name==='today'){
+    const today=new Date().toISOString().slice(0,10);
+    if(S.entries.some(e=>e.date===today))showDoneState();else resetFlow();
+  }
+}
+
+function showDoneState(){
+  const n=S.entries.length;
+  document.getElementById('streak-num').textContent=n;
+  document.getElementById('streak-sub').textContent=n>=30?'Clinic report ready!':'Clinic report unlocks in '+(30-n)+' days';
+  document.getElementById('done-sub').textContent=n+' day'+(n!==1?'s':'')+' tracked and counting.';
+  const STEPS=['sleep','mood','flags','done'];
+  STEPS.forEach(s=>{const el=document.getElementById('step-'+s);el.classList.remove('active','exit');});
+  document.getElementById('step-done').classList.add('active');
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-meta').textContent='Complete';
+  document.getElementById('cta-wrap').style.display='none';
+  document.getElementById('flow-back').classList.remove('vis');
+  document.getElementById('flow-skip').style.opacity='0';
+}
+
+const STEPS=['sleep','mood','flags','done'];
+let flowCur=0,todayBedMin=null,todayWakeMin=null,todaySleepH=null,todayMood=null,todayZone=null;
+
+function resetFlow(){
+  flowCur=0;todayBedMin=todayWakeMin=todaySleepH=todayMood=todayZone=null;
+  document.getElementById('tile-bed').classList.remove('set');
+  document.getElementById('tile-wake').classList.remove('set');
+  document.getElementById('bed-disp').innerHTML='—';
+  document.getElementById('wake-disp').innerHTML='—';
+  document.getElementById('sleep-result').classList.remove('show');
+  document.getElementById('wake-alert').className='wake-alert';
+  document.querySelectorAll('.mood-chip').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('mood-fb').className='mood-fb';
+  document.querySelectorAll('.flag-chip').forEach(c=>c.classList.remove('on'));
+  showFlowStep(0);
+}
+
+function showFlowStep(i){
+  STEPS.forEach((s,idx)=>{const el=document.getElementById('step-'+s);el.classList.remove('active','exit');if(idx<i)el.classList.add('exit');});
+  setTimeout(()=>document.getElementById('step-'+STEPS[i]).classList.add('active'),20);
+  const pct=Math.round(((i+1)/STEPS.length)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-meta').textContent=i<STEPS.length-1?'Step '+(i+1)+' of '+(STEPS.length-1):'Complete';
+  document.getElementById('flow-back').classList.toggle('vis',i>0&&i<STEPS.length-1);
+  const skip=document.getElementById('flow-skip');
+  skip.style.opacity=i>=STEPS.length-1?'0':'1';skip.style.pointerEvents=i>=STEPS.length-1?'none':'all';
+  const btn=document.getElementById('cta-btn'),wrap=document.getElementById('cta-wrap');
+  if(STEPS[i]==='done'){
+    wrap.style.display='none';
+    const n=S.entries.length;
+    document.getElementById('streak-num').textContent=n;
+    document.getElementById('streak-sub').textContent=n>=30?'Clinic report ready!':'Clinic report unlocks in '+(30-n)+' days';
+    document.getElementById('done-sub').textContent=n+' day'+(n!==1?'s':'')+' tracked and counting.';
+  } else {
+    wrap.style.display='block';
+    if(STEPS[i]==='flags'){btn.textContent='Save check-in';btn.className='cta grn';}
+    else{btn.textContent='Continue';btn.className='cta blue';}
+  }
+}
+
+function flowNext(){
+  if(flowCur===STEPS.indexOf('flags'))saveEntry();
+  if(flowCur<STEPS.length-1){flowCur++;showFlowStep(flowCur);}
+}
+function flowBack(){if(flowCur>0){flowCur--;showFlowStep(flowCur);}}
+
+function saveEntry(){
+  const today=new Date().toISOString().slice(0,10);
+  if(S.entries.some(e=>e.date===today))return;
+  const flags=Array.from(document.querySelectorAll('.flag-chip.on')).map(b=>b.textContent);
+  S.entries.push({date:today,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,ts:Date.now()});
+  save(S);
+}
+
+let pickerTarget='bed',selH=10,selM=0,selAP='PM';
+
+function buildWheel(elId,items,selected){
+  const el=document.getElementById(elId);
+  const hl=el.querySelector('.wheel-hl')||Object.assign(document.createElement('div'),{className:'wheel-hl'});
+  el.innerHTML='';el.appendChild(hl);
+  const pt=document.createElement('div');pt.className='wheel-pad';el.appendChild(pt);
+  items.forEach(v=>{
+    const d=document.createElement('div');d.className='wheel-item'+(v===selected?' sel':'');
+    d.textContent=String(v).padStart(2,'0');
+    d.onclick=()=>{if(elId==='wh-h')selH=v;else selM=v;buildWheel(elId,items,v);};
+    el.appendChild(d);
+  });
+  const pb=document.createElement('div');pb.className='wheel-pad';el.appendChild(pb);
+  setTimeout(()=>{const s=el.querySelector('.sel');if(s)s.scrollIntoView({block:'center',behavior:'smooth'});},50);
+}
+
+function setAP(v){selAP=v;document.getElementById('ap-am').classList.toggle('on',v==='AM');document.getElementById('ap-pm').classList.toggle('on',v==='PM');}
+
+function openModal(t){
+  pickerTarget=t;document.getElementById('modal-title').textContent=t==='bed'?'Bedtime':'Wake time';
+  if(t==='bed'){selH=10;selM=30;selAP='PM';}else{selH=7;selM=0;selAP='AM';}
+  setAP(selAP);
+  buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);
+  buildWheel('wh-m',[0,15,30,45],selM);
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+
+function confirmTime(){
+  const h24=selH%12+(selAP==='PM'?12:0),mins=h24*60+selM;
+  const label=String(selH).padStart(2,'0')+':'+String(selM).padStart(2,'0')+'<span class="tt-ap"> '+selAP+'</span>';
+  if(pickerTarget==='bed'){
+    todayBedMin=mins;document.getElementById('bed-disp').innerHTML=label;document.getElementById('tile-bed').classList.add('set');
+  } else {
+    todayWakeMin=mins;document.getElementById('wake-disp').innerHTML=label;document.getElementById('tile-wake').classList.add('set');
+    evalWake(h24,selM);
+  }
+  if(todayBedMin!==null&&todayWakeMin!==null)calcSleep();
+  closeModal();
+}
+
+function calcSleep(){
+  let diff=todayWakeMin-todayBedMin;if(diff<0)diff+=24*60;
+  const h=Math.floor(diff/60),m=diff%60;
+  todaySleepH=Math.round(diff/6)/10;
+  const v=document.getElementById('sr-val');
+  v.textContent=m?h+'h '+m+'m':h+'h';
+  v.className='sr-val '+(h>=7?'good':h>=6?'warn':'bad');
+  document.getElementById('sleep-result').classList.add('show');
+}
+
+function evalWake(h24,m){
+  const wm=h24*60+m;
+  const week=S.entries.slice(-7);
+  const earlyCount=week.filter(e=>e.wakeMin!==null&&e.wakeMin<6*60).length+(wm<6*60?1:0);
+  const al=document.getElementById('wake-alert'),tx=document.getElementById('wake-alert-txt');
+  if(earlyCount>=4){al.className='wake-alert red show';tx.textContent='Early waking '+earlyCount+' days in a row — matches your pre-hypomanic pattern. Consider reaching out to your care team.';}
+  else if(earlyCount>=2){al.className='wake-alert yellow show';tx.textContent='Early waking '+earlyCount+' days this week. Sleep disruption often precedes mood shifts — keep an eye on this.';}
+  else{al.className='wake-alert';}
+}
+
+const MOOD_INFO={'3':{z:'red',t:'Mania / crisis — Red zone',b:'You are outside your window of tolerance. Please contact your psychiatrist or crisis line today.'},'2':{z:'yellow',t:'Mild hypomania — Yellow zone',b:'You can still recognize this. Be cautious with decisions. Protect sleep tonight above all.'},'1':{z:'green',t:'Slightly elevated — Green zone',b:'Functioning well. Enjoy the energy but keep your sleep schedule.'},'0':{z:'green',t:'Baseline — Green zone',b:'This is your stable state. A good day to reinforce healthy habits.'},'-1':{z:'green',t:'Slightly low — Green zone',b:'Functioning well. Keep your routine and watch for further dips.'},'-2':{z:'yellow',t:'Mild depression — Yellow zone',b:'You can still recognize this. Prioritize sleep, routine, and reaching out to someone you trust.'},'-3':{z:'red',t:'Severe depression — Red zone',b:'Please reach out to your care team or a crisis line today. You do not have to handle this alone.'}};
+
+function pickMood(el){
+  document.querySelectorAll('.mood-chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
+  todayMood=parseInt(el.dataset.v);const info=MOOD_INFO[el.dataset.v];todayZone=info.z;
+  const fb=document.getElementById('mood-fb');
+  document.getElementById('mft').textContent=info.t;document.getElementById('mfb').textContent=info.b;
+  fb.className='mood-fb show '+info.z;
+}
+
+function fmtTime(min){
+  if(min===null||min===undefined)return'—';
+  const h=Math.floor(min/60)%24,m=min%60,ap=h>=12?'PM':'AM',hh=h%12||12;
+  return hh+':'+String(m).padStart(2,'0')+' '+ap;
+}
+function fmtDate(iso){
+  if(!iso)return'—';
+  return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+function renderHistory(){
+  const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('hist-sub').textContent=entries.length+' day'+(entries.length!==1?'s':'')+' tracked · Started '+fmtDate(S.startDate);
+  const recent30=entries.slice(0,30),week=entries.slice(0,7);
+  document.getElementById('h-days').textContent=recent30.length;
+  const wakeArr=week.filter(e=>e.wakeMin!==null).map(e=>e.wakeMin);
+  if(wakeArr.length){const avg=Math.round(wakeArr.reduce((a,b)=>a+b,0)/wakeArr.length);const el=document.getElementById('h-wake');el.textContent=fmtTime(avg);el.className='stv '+(avg<6*60?'red':avg<6.5*60?'yellow':'green');}
+  const sleepArr=week.filter(e=>e.sleepH).map(e=>e.sleepH);
+  if(sleepArr.length){const avg=Math.round(sleepArr.reduce((a,b)=>a+b,0)/sleepArr.length*10)/10;const el=document.getElementById('h-sleep');el.textContent=avg+'h';el.className='stv '+(avg>=7?'green':avg>=6?'yellow':'red');}
+  const si=entries.findIndex(e=>e.zone==='red'||e.zone==='yellow');
+  document.getElementById('h-stable').textContent=si<=0?'Today':si+'d ago';
+  const pct=Math.min(100,Math.round(recent30.length/30*100));
+  document.getElementById('uc-fill').style.width=pct+'%';
+  document.getElementById('uc-left').textContent=recent30.length+' / 30 days';
+  const left=Math.max(0,30-recent30.length);
+  document.getElementById('uc-right').textContent=left>0?'Unlocks in '+left+' days':'Ready to export!';
+  document.getElementById('uc-sub').textContent=left>0?recent30.length+' of 30 days tracked — keep going.':'Your clinic report is ready. Share it with your psychiatrist.';
+  renderChart(entries.slice(0,20).reverse());
+  const list=document.getElementById('log-list');list.innerHTML='';
+  entries.slice(0,10).forEach((e,i)=>{
+    const d=new Date(e.date+'T12:00:00');
+    const label=i===0?'Today':i===1?'Yesterday':d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const flagStr=e.flags&&e.flags.length?e.flags.slice(0,2).join(', '):'—';
+    const el=document.createElement('div');el.className='log-item';
+    el.innerHTML='<span class="log-date">'+label+'</span><div class="log-dot '+(e.zone||'green')+'"></div><span class="log-num">'+(e.mood>0?'+'+e.mood:e.mood)+'</span><span class="log-sleep">'+fmtTime(e.wakeMin)+' wake · '+(e.sleepH||'—')+'h</span><span class="log-flags">'+flagStr+'</span>';
+    list.appendChild(el);
+  });
+}
+
+function renderChart(entries){
+  const svg=document.getElementById('life-chart');
+  if(!entries.length){svg.innerHTML='<text x="50%" y="60" text-anchor="middle" fill="rgba(255,255,255,.2)" font-family="DM Sans,sans-serif" font-size="13">No data yet</text>';return;}
+  const W=340,padL=8,padR=8,baseline=56,unitH=7;
+  const cols=entries.length,colW=(W-padL-padR)/Math.max(cols,1);
+  let html='<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF453A" stop-opacity=".06"/><stop offset="100%" stop-color="#0A84FF" stop-opacity=".06"/></linearGradient></defs>';
+  html+='<rect x="'+padL+'" y="4" width="'+(W-padL-padR)+'" height="116" rx="8" fill="url(#cg)"/>';
+  html+='<line x1="'+padL+'" y1="'+baseline+'" x2="'+(W-padR)+'" y2="'+baseline+'" stroke="rgba(255,255,255,.1)" stroke-width=".5" stroke-dasharray="2 3"/>';
+  html+='<text x="'+(padL+4)+'" y="16" font-size="8" fill="rgba(255,69,58,.45)" font-family="DM Sans,sans-serif">elevated</text>';
+  html+='<text x="'+(padL+4)+'" y="90" font-size="8" fill="rgba(10,132,255,.45)" font-family="DM Sans,sans-serif">depressed</text>';
+  entries.forEach((e,i)=>{
+    const cx=padL+i*colW+colW/2,mood=e.mood||0,zone=e.zone||'green';
+    const col=zone==='red'?'#FF453A':zone==='yellow'?'#FFD60A':'#30D158';
+    const barH=Math.abs(mood)*unitH||3,barY=mood>=0?baseline-barH:baseline;
+    html+='<rect x="'+(cx-5)+'" y="'+barY+'" width="10" height="'+barH+'" rx="2" fill="'+col+'" opacity=".85"/>';
+    if(e.wakeMin!==null&&e.wakeMin!==undefined){
+      const dc=e.wakeMin<5.5*60?'#FF453A':e.wakeMin<6*60?'#FFD60A':'#30D158';
+      html+='<circle cx="'+cx+'" cy="112" r="'+(i===entries.length-1?4:3)+'" fill="'+dc+'"/>';
+    }
+  });
+  html+='<circle cx="228" cy="8" r="3" fill="#30D158"/><text x="234" y="11" font-size="7" fill="rgba(255,255,255,.3)" font-family="DM Sans,sans-serif">7h+</text>';
+  html+='<circle cx="260" cy="8" r="3" fill="#FFD60A"/><text x="266" y="11" font-size="7" fill="rgba(255,255,255,.3)" font-family="DM Sans,sans-serif">&lt;6.5h</text>';
+  html+='<circle cx="298" cy="8" r="3" fill="#FF453A"/><text x="304" y="11" font-size="7" fill="rgba(255,255,255,.3)" font-family="DM Sans,sans-serif">&lt;6h</text>';
+  svg.innerHTML=html;
+}
+
+function renderInsights(){
+  const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('ins-sub').textContent=entries.length?'Based on '+entries.length+' day'+(entries.length!==1?'s':'')+' of tracking':'Start tracking to unlock insights';
+  const body=document.getElementById('insights-body');body.innerHTML='';
+  if(entries.length<3){body.innerHTML='<div class="insight-card locked anim" style="margin:0 24px 12px;"><div class="badge muted" style="margin-bottom:12px;"><i class="ti ti-lock" style="font-size:11px"></i> Not enough data</div><p class="ic-body" style="color:var(--txt3)">Track at least 3 days to start seeing patterns.</p></div>';return;}
+  const week=entries.slice(0,7);
+  const earlyWakes=week.filter(e=>e.wakeMin!==null&&e.wakeMin<6*60);
+  const avgWakeArr=week.filter(e=>e.wakeMin!==null);
+  const avgWake=avgWakeArr.length?avgWakeArr.reduce((a,e)=>a+e.wakeMin,0)/avgWakeArr.length:null;
+  let wakeBody='',wakeSev='blue';
+  if(earlyWakes.length>=4){wakeSev='red';wakeBody='You\'ve woken before 6 AM <strong>'+earlyWakes.length+' times this week.</strong> Early morning waking is a key warning sign of approaching hypomania. Consider contacting your care team.';}
+  else if(earlyWakes.length>=2){wakeSev='yellow';wakeBody='Early waking <strong>'+earlyWakes.length+' times this week</strong> (before 6 AM). Sleep disruption often precedes mood shifts — monitor closely.';}
+  else{wakeBody='Sleep timing looks stable this week. Avg wake: <strong>'+fmtTime(avgWake?Math.round(avgWake):null)+'</strong>. Keep protecting your sleep schedule.';}
+  body.innerHTML+='<div class="insight-card anim"><div class="badge '+wakeSev+'" style="margin-bottom:12px;"><i class="ti ti-moon" style="font-size:11px"></i> Wake time</div><p class="ic-body">'+wakeBody+'</p><div class="ic-table"><div class="ic-row"><span class="ic-rl">Early wakes this week (&lt;6 AM)</span><span class="ic-rv" style="color:'+(earlyWakes.length>=4?'var(--red)':earlyWakes.length>=2?'var(--yellow)':'var(--green)')+'">'+earlyWakes.length+' day'+(earlyWakes.length!==1?'s':'')+'</span></div><div class="ic-row"><span class="ic-rl">Avg wake this week</span><span class="ic-rv">'+fmtTime(avgWake?Math.round(avgWake):null)+'</span></div><div class="ic-row"><span class="ic-rl">Most recent wake</span><span class="ic-rv">'+fmtTime(entries[0]&&entries[0].wakeMin)+'</span></div></div><div class="ic-meta" style="margin-top:10px">Based on last 7 entries</div></div>';
+  const mr=entries.slice(0,5).map(e=>e.mood).filter(m=>m!==null&&m!==undefined);
+  if(mr.length>=2){
+    const avg=Math.round(mr.reduce((a,b)=>a+b,0)/mr.length*10)/10;
+    const trend=mr[0]-mr[mr.length-1];
+    const ts=trend>0.5?'↑ rising':trend<-0.5?'↓ falling':'→ stable';
+    const tz=Math.abs(avg)>=2?'yellow':'green';
+    body.innerHTML+='<div class="insight-card anim"><div class="badge '+tz+'" style="margin-bottom:12px;"><i class="ti ti-activity" style="font-size:11px"></i> Mood trend</div><p class="ic-body">5-day avg: <strong>'+(avg>0?'+'+avg:avg)+'</strong> — '+ts+'. '+(Math.abs(avg)>=2?'You\'re in a yellow zone. Monitor decisions, sleep, and spending carefully.':'You\'re in a green zone. Keep your routine.')+'</p><div class="ic-table">'+mr.map((m,i)=>'<div class="ic-row"><span class="ic-rl">'+(i===0?'Today':i===1?'Yesterday':i+' days ago')+'</span><span class="ic-rv" style="color:'+(Math.abs(m)>=3?'var(--red)':Math.abs(m)>=2?'var(--yellow)':'var(--green)')+'">'+((m>0?'+'+m:m))+'</span></div>').join('')+'</div></div>';
+  }
+  if(entries.length>=14){
+    const ry=entries.filter(e=>e.zone==='red'||e.zone==='yellow');
+    const dsl=ry.length?Math.floor((Date.now()-new Date(ry[0].date+'T12:00:00'))/864e5):null;
+    const svg='<svg viewBox="0 0 120 120" width="120" height="120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--s3)" stroke-width="8"/><circle cx="60" cy="60" r="50" fill="none" stroke="var(--blue)" stroke-width="8" stroke-dasharray="314" stroke-dashoffset="'+Math.round(314*(1-Math.min(entries.length,60)/60))+'" stroke-linecap="round" transform="rotate(-90 60 60)"/><text x="60" y="55" text-anchor="middle" font-family="Fraunces,serif" font-size="26" fill="white" font-weight="300">'+entries.length+'</text><text x="60" y="72" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="rgba(255,255,255,.4)">days</text></svg>';
+    body.innerHTML+='<div class="insight-card anim"><div class="badge blue" style="margin-bottom:12px;"><i class="ti ti-repeat" style="font-size:11px"></i> Cycle</div><p class="ic-body">'+(dsl!==null?'Last elevated episode was <strong>'+dsl+' day'+(dsl!==1?'s':'')+' ago</strong>.':'No elevated episodes recorded yet.')+' With more data, your cycle length will become clearer.</p><div class="cycle-svg-wrap">'+svg+'</div><div class="ic-meta">Signature unlocks after 60 days · '+Math.max(0,60-entries.length)+' more to go</div></div>';
+  }
+  const sp=Math.min(entries.length,60);
+  body.innerHTML+='<div class="insight-card locked anim"><div class="badge muted" style="margin-bottom:12px;"><i class="ti ti-lock" style="font-size:11px"></i> Locked</div><p class="ic-body" style="color:var(--txt3)">Your <strong style="color:var(--txt2)">personal pre-episode signature</strong> — the exact combination of signals that precede your specific episodes — unlocks after 60 days.</p><div class="uc-bar" style="margin-top:14px"><div class="uc-fill" style="width:'+Math.round(sp/60*100)+'%"></div></div><div class="uc-meta" style="margin-top:6px"><span>'+sp+' / 60 days</span><span>'+Math.max(0,60-entries.length)+' more days</span></div></div>';
+}
+
+function updateProfileUI(){
+  const n=S.name||'You';
+  document.getElementById('prof-name').textContent=n;
+  document.getElementById('prof-av').textContent=(n[0]||'?').toUpperCase();
+  document.getElementById('prof-dx').textContent=(S.dx||'Bipolar')+' · Tracking since '+fmtDate(S.startDate);
+}
+
+function resetApp(){if(confirm('Reset all data? This cannot be undone.')){localStorage.removeItem(KEY);location.reload();}}
+
+function showReport(){
+  const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
+  const name=S.name||'Patient',today=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('rp-sub').textContent='Generated '+today+' · '+entries.length+' days of data';
+  const week=entries.slice(0,7);
+  const avgSleep=week.filter(e=>e.sleepH).reduce((a,e)=>a+e.sleepH,0)/Math.max(week.filter(e=>e.sleepH).length,1);
+  const avgWakeArr=week.filter(e=>e.wakeMin!==null);
+  const avgWake=avgWakeArr.length?avgWakeArr.reduce((a,e)=>a+e.wakeMin,0)/avgWakeArr.length:null;
+  const ew=week.filter(e=>e.wakeMin!==null&&e.wakeMin<6*60).length;
+  const moodArr=week.filter(e=>e.mood!==null&&e.mood!==undefined);
+  const moodAvg=moodArr.length?moodArr.reduce((a,e)=>a+e.mood,0)/moodArr.length:null;
+  const redD=entries.filter(e=>e.zone==='red').length,yelD=entries.filter(e=>e.zone==='yellow').length,grnD=entries.filter(e=>e.zone==='green').length;
+  const medD=entries.filter(e=>e.flags&&e.flags.includes('Medication ✓')).length;
+  document.getElementById('rp-body').innerHTML=
+    '<div class="rp-section"><div class="rp-sec-title">Patient</div>'+
+    '<div class="rp-row"><span class="rp-key">Name</span><span class="rp-val">'+name+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">Diagnosis</span><span class="rp-val">'+(S.dx||'Bipolar')+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">Tracking period</span><span class="rp-val">'+fmtDate(S.startDate)+' – '+today+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">Total days tracked</span><span class="rp-val">'+entries.length+'</span></div></div>'+
+    '<div class="rp-section"><div class="rp-sec-title">Sleep — last 7 days</div>'+
+    '<div class="rp-row"><span class="rp-key">Avg sleep duration</span><span class="rp-val">'+Math.round(avgSleep*10)/10+'h</span></div>'+
+    '<div class="rp-row"><span class="rp-key">Avg wake time</span><span class="rp-val">'+fmtTime(avgWake?Math.round(avgWake):null)+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">Early wakes (&lt;6 AM)</span><span class="rp-val" style="color:'+(ew>=3?'var(--red)':ew>=1?'var(--yellow)':'var(--green)')+'">'+ew+' of 7 days</span></div></div>'+
+    '<div class="rp-section"><div class="rp-sec-title">Mood distribution — all time</div>'+
+    '<div class="rp-row"><span class="rp-key">Green zone (−1 to +1)</span><span class="rp-val" style="color:var(--green)">'+grnD+' days</span></div>'+
+    '<div class="rp-row"><span class="rp-key">Yellow zone (±2)</span><span class="rp-val" style="color:var(--yellow)">'+yelD+' days</span></div>'+
+    '<div class="rp-row"><span class="rp-key">Red zone (±3)</span><span class="rp-val" style="color:var(--red)">'+redD+' days</span></div>'+
+    '<div class="rp-row"><span class="rp-key">7-day mood avg</span><span class="rp-val">'+(moodAvg!==null?(Math.round(moodAvg*10)/10>0?'+':'')+Math.round(moodAvg*10)/10:'—')+'</span></div></div>'+
+    '<div class="rp-section"><div class="rp-sec-title">Medication adherence</div>'+
+    '<div class="rp-row"><span class="rp-key">Days with medication logged</span><span class="rp-val">'+medD+' / '+entries.length+' days ('+(entries.length?Math.round(medD/entries.length*100):0)+'%)</span></div></div>'+
+    '<div class="rp-section"><div class="rp-sec-title">Recent entries (last 5)</div>'+
+    entries.slice(0,5).map(e=>'<div class="rp-row"><span class="rp-key">'+fmtDate(e.date)+'</span><span class="rp-val" style="color:'+(e.zone==='red'?'var(--red)':e.zone==='yellow'?'var(--yellow)':'var(--green)')+'">'+((e.mood>0?'+'+e.mood:e.mood))+' · wake '+fmtTime(e.wakeMin)+'</span></div>').join('')+'</div>';
+  document.getElementById('report-bg').classList.add('open');
+}
+
+function copyReport(){
+  const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
+  const name=S.name||'Patient',today=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const week=entries.slice(0,7);
+  const avgSleep=week.filter(e=>e.sleepH).reduce((a,e)=>a+e.sleepH,0)/Math.max(week.filter(e=>e.sleepH).length,1);
+  const text='POLARNOTE CLINIC REPORT\nGenerated: '+today+'\nPatient: '+name+' | Diagnosis: '+(S.dx||'Bipolar')+'\nTracking: '+fmtDate(S.startDate)+' – '+today+' ('+entries.length+' days)\n\nSLEEP (last 7 days)\nAvg duration: '+Math.round(avgSleep*10)/10+'h\nEarly wakes (<6 AM): '+week.filter(e=>e.wakeMin!==null&&e.wakeMin<6*60).length+' of 7 days\n\nMOOD (all time)\nGreen (−1 to +1): '+entries.filter(e=>e.zone==='green').length+' days\nYellow (±2): '+entries.filter(e=>e.zone==='yellow').length+' days\nRed (±3): '+entries.filter(e=>e.zone==='red').length+' days\n\nRECENT ENTRIES\n'+entries.slice(0,7).map(e=>e.date+': mood '+(e.mood>0?'+'+e.mood:e.mood)+', wake '+fmtTime(e.wakeMin)+', sleep '+(e.sleepH||'—')+'h'+(e.flags&&e.flags.length?' | '+e.flags.join(', '):'')).join('\n')+'\n\nGenerated by PolarNote (validation prototype)';
+  navigator.clipboard&&navigator.clipboard.writeText(text).then(()=>showToast('Report copied!')).catch(()=>showToast('Select and copy manually'));
+}
+
+function closeReportOutside(e){if(e.target===document.getElementById('report-bg'))document.getElementById('report-bg').classList.remove('open');}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  if(S.onboarded){
+    seedDemo();
+    document.getElementById('page-onboard').classList.remove('active');
+    document.getElementById('tabbar').style.display='flex';
+    switchTab('today',document.querySelector('.tbtn'));
+    updateProfileUI();
+  }
+});
+</script>
+<!-- PWA Manifest -->
+<script>
+(function(){
+  const m={name:'PolarNote',short_name:'PolarNote',description:'Bipolar mood tracker',start_url:'./',display:'standalone',background_color:'#000000',theme_color:'#000000',orientation:'portrait',icons:[{src:"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTE2MjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMEQwRDFBIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnbG93IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTg0RkYiIHN0b3Atb3BhY2l0eT0iLjMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNTg1NkQ2IiBzdG9wLW9wYWNpdHk9Ii4xNSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPCEtLSBCYXNlIC0tPgogIDxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9InVybCgjYmcpIi8+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0idXJsKCNnbG93KSIvPgogIDwhLS0gU3VidGxlIGdyaWQgbGluZXMgLS0+CiAgPGxpbmUgeDE9IjIwIiB5MT0iODIiIHgyPSIxNjAiIHkyPSI4MiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LC4wOCkiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iMyA0Ii8+CiAgPCEtLSBMaWZlIGNoYXJ0IGJhcnMgLS0+CiAgPCEtLSBZZWxsb3cgYmFycyAoaHlwb21hbmlhKSAtLT4KICA8cmVjdCB4PSIyMiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiNGRkQ2MEEiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjQyIiB5PSI0MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0iI0ZGRDYwQSIgb3BhY2l0eT0iLjkyIi8+CiAgPCEtLSBSZWQgYmFyIChtYW5pYSBwZWFrKSAtLT4KICA8cmVjdCB4PSI2MiIgeT0iMjYiIHdpZHRoPSIxNCIgaGVpZ2h0PSI1NiIgcng9IjQiIGZpbGw9IiNGRjQ1M0EiIG9wYWNpdHk9Ii45NSIvPgogIDwhLS0gUmVjb3ZlcnkgZ3JlZW4gYmFycyAtLT4KICA8cmVjdCB4PSI4MiIgeT0iNTgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEwMiIgeT0iNjgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjEyMiIgeT0iNzAiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxMiIgcng9IjQiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45Ii8+CiAgPHJlY3QgeD0iMTQyIiB5PSI3MiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEwIiByeD0iNCIgZmlsbD0iIzMwRDE1OCIgb3BhY2l0eT0iLjg1Ii8+CiAgPCEtLSBCYXNlbGluZSAtLT4KICA8bGluZSB4MT0iMTgiIHkxPSI4MiIgeDI9IjE2MiIgeTI9IjgyIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsLjIpIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iNCA1Ii8+CiAgPCEtLSBXb3JkbWFyayAtLT4KICA8dGV4dCB4PSI5MCIgeT0iMTM2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSIxOSIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9Ii45IiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+cG9sYXI8L3RleHQ+CiAgPHRleHQgeD0iOTAiIHk9IjE1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTkiIGZvbnQtc3R5bGU9Iml0YWxpYyIgZm9udC13ZWlnaHQ9IjQwMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwuNTUpIiBsZXR0ZXItc3BhY2luZz0iLTAuMyI+bm90ZTwvdGV4dD4KPC9zdmc+",sizes:"192x192",type:"image/svg+xml",purpose:"any maskable"},{src:"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTE2MjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMEQwRDFBIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnbG93IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwQTg0RkYiIHN0b3Atb3BhY2l0eT0iLjMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNTg1NkQ2IiBzdG9wLW9wYWNpdHk9Ii4xNSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTQiIGZpbGw9InVybCgjYmcpIi8+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTQiIGZpbGw9InVybCgjZ2xvdykiLz4KICA8bGluZSB4MT0iNTYiIHkxPSIyMzQiIHgyPSI0NTYiIHkyPSIyMzQiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwuMDgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjggMTAiLz4KICA8cmVjdCB4PSI1OCIgeT0iMTY0IiB3aWR0aD0iNDQiIGhlaWdodD0iNzAiIHJ4PSIxMSIgZmlsbD0iI0ZGRDYwQSIgb3BhY2l0eT0iLjkyIi8+CiAgPHJlY3QgeD0iMTE2IiB5PSIxMTYiIHdpZHRoPSI0NCIgaGVpZ2h0PSIxMTgiIHJ4PSIxMSIgZmlsbD0iI0ZGRDYwQSIgb3BhY2l0eT0iLjkyIi8+CiAgPHJlY3QgeD0iMTc0IiB5PSI3MiIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjE2MiIgcng9IjExIiBmaWxsPSIjRkY0NTNBIiBvcGFjaXR5PSIuOTUiLz4KICA8cmVjdCB4PSIyMzIiIHk9IjE2NCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjcwIiByeD0iMTEiIGZpbGw9IiMzMEQxNTgiIG9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjI5MCIgeT0iMTk0IiB3aWR0aD0iNDQiIGhlaWdodD0iNDAiIHJ4PSIxMSIgZmlsbD0iIzMwRDE1OCIgb3BhY2l0eT0iLjkyIi8+CiAgPHJlY3QgeD0iMzQ4IiB5PSIyMDAiIHdpZHRoPSI0NCIgaGVpZ2h0PSIzNCIgcng9IjExIiBmaWxsPSIjMzBEMTU4IiBvcGFjaXR5PSIuOSIvPgogIDxyZWN0IHg9IjQwNiIgeT0iMjA2IiB3aWR0aD0iNDQiIGhlaWdodD0iMjgiIHJ4PSIxMSIgZmlsbD0iIzMwRDE1OCIgb3BhY2l0eT0iLjg1Ii8+CiAgPGxpbmUgeDE9IjQ4IiB5MT0iMjM0IiB4Mj0iNDY0IiB5Mj0iMjM0IiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsLjIpIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1kYXNoYXJyYXk9IjEwIDEyIi8+CiAgPHRleHQgeD0iMjU2IiB5PSIzOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLHNlcmlmIiBmb250LXNpemU9IjU2IiBmb250LXdlaWdodD0iNDAwIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iLjkiPnBvbGFyPC90ZXh0PgogIDx0ZXh0IHg9IjI1NiIgeT0iNDQ4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSI1NiIgZm9udC1zdHlsZT0iaXRhbGljIiBmb250LXdlaWdodD0iNDAwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LC41NSkiPm5vdGU8L3RleHQ+Cjwvc3ZnPg==",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]};
+  const b=new Blob([JSON.stringify(m)],{type:'application/json'});
+  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(b);
+  document.head.appendChild(l);
+})();
+</script>
+
+
+<!-- Apple Splash Screens — black background with wordmark -->
+<link rel="apple-touch-startup-image" media="screen and (device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1290' height='2796'%3E%3Crect width='1290' height='2796' fill='%23000'/%3E%3Ctext x='645' y='1370' text-anchor='middle' font-family='Georgia,serif' font-size='96' fill='white' opacity='.85'%3Epolarnote%3C/text%3E%3Ctext x='645' y='1490' text-anchor='middle' font-family='Georgia,serif' font-size='40' fill='rgba(255,255,255,.35)'%3EBipolar mood tracker%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-startup-image" media="screen and (device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1179' height='2556'%3E%3Crect width='1179' height='2556' fill='%23000'/%3E%3Ctext x='590' y='1250' text-anchor='middle' font-family='Georgia,serif' font-size='88' fill='white' opacity='.85'%3Epolarnote%3C/text%3E%3Ctext x='590' y='1360' text-anchor='middle' font-family='Georgia,serif' font-size='36' fill='rgba(255,255,255,.35)'%3EBipolar mood tracker%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-startup-image" media="screen and (device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1170' height='2532'%3E%3Crect width='1170' height='2532' fill='%23000'/%3E%3Ctext x='585' y='1240' text-anchor='middle' font-family='Georgia,serif' font-size='88' fill='white' opacity='.85'%3Epolarnote%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-startup-image" media="screen and (device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1125' height='2436'%3E%3Crect width='1125' height='2436' fill='%23000'/%3E%3Ctext x='562' y='1200' text-anchor='middle' font-family='Georgia,serif' font-size='80' fill='white' opacity='.85'%3Epolarnote%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-startup-image" media="screen and (device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='750' height='1334'%3E%3Crect width='750' height='1334' fill='%23000'/%3E%3Ctext x='375' y='660' text-anchor='middle' font-family='Georgia,serif' font-size='70' fill='white' opacity='.85'%3Epolarnote%3C/text%3E%3C/svg%3E">
+</body>
+</html>
