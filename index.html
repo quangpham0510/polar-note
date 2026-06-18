@@ -313,12 +313,26 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .rp-val{font-size:13px;font-weight:500;color:var(--txt);}
 .rp-copy-btn{width:100%;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:var(--r-md);font-family:var(--sans);font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;}
 
+/* BOOT LOADER */
+#boot{position:fixed;inset:0;background:#000;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .3s;}
+#boot.hide{opacity:0;pointer-events:none;}
+.boot-mark{font-family:var(--serif);font-size:30px;color:#fff;opacity:.9;letter-spacing:-.5px;}
+.boot-mark em{font-style:italic;color:rgba(255,255,255,.5);}
+.boot-spin{width:22px;height:22px;border:2px solid rgba(255,255,255,.15);border-top-color:rgba(255,255,255,.6);border-radius:50%;animation:bootspin .8s linear infinite;}
+@keyframes bootspin{to{transform:rotate(360deg)}}
+
+/* FLOW DATE BANNER + MISSED-DAY BUTTON */
+.flow-date-banner{margin:0 24px 4px;padding:8px 14px;background:var(--blue-dim);color:var(--blue);border-radius:10px;font-size:13px;font-weight:500;text-align:center;}
+.missed-btn{margin-top:14px;width:100%;padding:12px;border:1.5px dashed var(--s3);border-radius:var(--r-md);background:none;font-family:var(--sans);font-size:14px;font-weight:500;color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:border-color .15s,color .15s;}
+.missed-btn:hover{border-color:var(--blue);color:var(--blue);}
+
 /* TOAST */
 .toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);color:var(--txt);padding:12px 20px;border-radius:100px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
+<div id="boot"><div class="boot-mark">polar<em>note</em></div><div class="boot-spin"></div></div>
 <div class="app">
   <div class="sb">
     <span id="clk">9:41</span>
@@ -390,6 +404,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
       <button class="flow-back" id="flow-back" onclick="flowBack()"><i class="ti ti-chevron-left"></i>Back</button>
       <button class="flow-skip" id="flow-skip" onclick="flowNext()">Skip</button>
     </div>
+    <div class="flow-date-banner" id="flow-date-banner" style="display:none;"></div>
     <div class="flow-prog">
       <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:33%"></div></div>
       <div class="prog-meta" id="prog-meta">Step 1 of 3</div>
@@ -443,6 +458,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
           <div class="done-h">Logged.</div>
           <p class="done-sub" id="done-sub">Your data is building something real.</p>
           <div class="streak-tile"><div class="streak-num" id="streak-num">0</div><div class="streak-txt"><strong>Days tracked</strong><span id="streak-sub">Clinic report unlocks at 30 days</span></div></div>
+          <button class="ob-skip" id="done-edit" onclick="editEntry(flowDate)" style="margin-top:14px;">Edit this entry</button>
         </div>
       </div>
     </div>
@@ -472,6 +488,8 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
     <div class="log-wrap anim">
       <div class="log-sec-label">Recent entries</div>
       <div id="log-list"></div>
+      <button class="missed-btn" onclick="promptMissedDay()"><i class="ti ti-calendar-plus"></i>Log a missed day</button>
+      <input type="date" id="missed-date" onchange="onMissedDate(this.value)" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
     </div>
   </div>
 
@@ -489,8 +507,8 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
       <div class="pref-card">
         <div class="pref-row"><div><div class="pr-title">Evening reminder</div><div class="pr-sub tap" id="set-reminder-sub" onclick="openReminderTime()">9:00 PM daily</div></div><button class="toggle" id="tg-reminderOn" onclick="toggleSetting('reminderOn',this)"></button></div>
         <div class="pref-row"><div><div class="pr-title">Early wake alert</div><div class="pr-sub tap" id="set-earlywake-sub" onclick="openEarlyWake()">Wake before 6 AM for 3+ days</div></div><button class="toggle" id="tg-earlyWakeOn" onclick="toggleSetting('earlyWakeOn',this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Red zone alert</div><div class="pr-sub">Immediate when you log ±3</div></div><button class="toggle" id="tg-redZoneOn" onclick="toggleSetting('redZoneOn',this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Weekly summary</div><div class="pr-sub tap" id="set-weekly-sub" onclick="cycleWeeklyDay()">Every Sunday morning</div></div><button class="toggle" id="tg-weeklyOn" onclick="toggleSetting('weeklyOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Red zone alert</div><div class="pr-sub tap" id="set-redzone-sub" onclick="cycleRedZone()">Immediate when you log ±3</div></div><button class="toggle" id="tg-redZoneOn" onclick="toggleSetting('redZoneOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Weekly summary</div><div class="pr-sub tap" id="set-weekly-sub" onclick="openWeeklyDay()">Every Sunday morning</div></div><button class="toggle" id="tg-weeklyOn" onclick="toggleSetting('weeklyOn',this)"></button></div>
       </div>
     </div>
     <div class="pref-sec anim">
@@ -531,9 +549,9 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
       <button class="modal-done" onclick="confirmTime()">Done</button>
     </div>
     <div class="wheel-outer">
-      <div class="wheel-col"><div class="wcol-label">Hour</div><div class="wheel-scroll" id="wh-h"><div class="wheel-hl"></div></div></div>
+      <div class="wheel-col" id="wh-h-col"><div class="wcol-label" id="wh-h-label">Hour</div><div class="wheel-scroll" id="wh-h"><div class="wheel-hl"></div></div></div>
       <div class="wheel-colon" id="wheel-colon">:</div>
-      <div class="wheel-col"><div class="wcol-label" id="wh-m-label">Min</div><div class="wheel-scroll" id="wh-m"><div class="wheel-hl"></div></div></div>
+      <div class="wheel-col" id="wh-m-col"><div class="wcol-label" id="wh-m-label">Min</div><div class="wheel-scroll" id="wh-m"><div class="wheel-hl"></div></div></div>
       <div class="ampm-col" id="ampm-col">
         <button class="ampm-pill" id="ap-am" onclick="setAP('AM')">AM</button>
         <button class="ampm-pill on" id="ap-pm" onclick="setAP('PM')">PM</button>
@@ -568,7 +586,7 @@ function save(s){localStorage.setItem(KEY,JSON.stringify(s));}
 // check-ins under the wrong day for anyone east/west of GMT.
 function localDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function todayKey(){return localDateKey(new Date());}
-const DEFAULT_SETTINGS={reminderOn:true,reminderTime:21*60,earlyWakeOn:true,earlyWakeHour:6,earlyWakeDays:3,redZoneOn:true,weeklyOn:false,weeklyDay:0};
+const DEFAULT_SETTINGS={reminderOn:true,reminderTime:21*60,earlyWakeOn:true,earlyWakeHour:6,earlyWakeDays:3,redZoneOn:true,redZoneThreshold:3,weeklyOn:false,weeklyDay:0};
 function def(){return{onboarded:false,name:'',dx:'',startDate:todayKey(),entries:[],userId:null,email:'',settings:{...DEFAULT_SETTINGS}};}
 
 // ── Supabase client ──────────────────────────────────────────
@@ -596,19 +614,51 @@ async function loadFromDB(user){
   save(S); // local cache
 }
 
+// ── Offline retry queue ──────────────────────────────────────
+// When a write fails (offline / network error) we stash it locally and replay
+// it on reconnect, so a missed sync never silently loses a check-in.
+const PKEY='polarnote_pending';
+function pending(){try{return JSON.parse(localStorage.getItem(PKEY))||[];}catch{return[];}}
+function setPending(a){localStorage.setItem(PKEY,JSON.stringify(a));}
+function queueOp(op){
+  const q=pending();
+  // Collapse duplicates: one pending op per entry-date, one for the profile.
+  const i=op.type==='entry'
+    ? q.findIndex(x=>x.type==='entry'&&x.entry.date===op.entry.date)
+    : q.findIndex(x=>x.type==='profile');
+  if(i>=0)q[i]=op;else q.push(op);
+  setPending(q);
+}
+function entryPayload(e){return{user_id:S.userId,date:e.date,bed_min:e.bedMin,wake_min:e.wakeMin,sleep_h:e.sleepH,mood:e.mood,zone:e.zone,flags:e.flags,ts:e.ts};}
+async function flushQueue(){
+  if(!sb||!S.userId||!navigator.onLine)return;
+  const q=pending();if(!q.length)return;
+  const remain=[];
+  for(const op of q){
+    try{
+      const r=op.type==='entry'
+        ? await sb.from('entries').upsert(entryPayload(op.entry),{onConflict:'user_id,date'})
+        : await sb.from('profiles').upsert({id:S.userId,name:op.profile.name,dx:op.profile.dx,start_date:op.profile.startDate,settings:op.profile.settings});
+      if(r.error)throw r.error;
+    }catch{remain.push(op);}
+  }
+  setPending(remain);
+  if(q.length&&!remain.length)showToast('Offline changes synced');
+}
+
 async function dbUpsertProfile(){
   if(!sb||!S.userId)return;
-  const {error}=await sb.from('profiles').upsert({id:S.userId,name:S.name,dx:S.dx,start_date:S.startDate,settings:S.settings||{...DEFAULT_SETTINGS}});
-  if(error)showToast('Profile sync failed');
+  const snap={name:S.name,dx:S.dx,startDate:S.startDate,settings:S.settings||{...DEFAULT_SETTINGS}};
+  if(!navigator.onLine){queueOp({type:'profile',profile:snap});return;}
+  const {error}=await sb.from('profiles').upsert({id:S.userId,...snap,start_date:snap.startDate});
+  if(error)queueOp({type:'profile',profile:snap});
 }
 
 async function dbUpsertEntry(e){
   if(!sb||!S.userId)return;
-  const {error}=await sb.from('entries').upsert({
-    user_id:S.userId,date:e.date,bed_min:e.bedMin,wake_min:e.wakeMin,
-    sleep_h:e.sleepH,mood:e.mood,zone:e.zone,flags:e.flags,ts:e.ts,
-  },{onConflict:'user_id,date'});
-  if(error)showToast('Sync failed — saved offline');
+  if(!navigator.onLine){queueOp({type:'entry',entry:e});showToast('Saved offline — will sync');return;}
+  const {error}=await sb.from('entries').upsert(entryPayload(e),{onConflict:'user_id,date'});
+  if(error){queueOp({type:'entry',entry:e});showToast('Saved offline — will sync');}
 }
 
 // ── Auth ─────────────────────────────────────────────────────
@@ -707,6 +757,8 @@ async function authSubmit(){
 
 async function onAuthed(user){
   await loadFromDB(user);
+  flushQueue();              // replay any writes made while offline
+  startReminderLoop();       // begin checking scheduled notifications
   document.getElementById('page-auth').classList.remove('active');
   if(S.onboarded){
     document.getElementById('page-onboard').classList.remove('active');
@@ -725,40 +777,6 @@ async function signOut(){
   location.reload();
 }
 let S=load();
-
-function seedDemo(){
-  if(S.entries.length>0)return;
-  const today=new Date();
-  const seed=[
-    {d:18,bed:22*60,wake:7*60,mood:0,flags:['Medication ✓']},
-    {d:17,bed:22*60+30,wake:7*60+15,mood:1,flags:['Medication ✓']},
-    {d:16,bed:23*60,wake:7*60+30,mood:0,flags:[]},
-    {d:15,bed:22*60,wake:7*60,mood:-1,flags:['Low motivation']},
-    {d:14,bed:22*60+30,wake:7*60,mood:0,flags:['Medication ✓']},
-    {d:13,bed:21*60,wake:6*60+30,mood:1,flags:['Medication ✓']},
-    {d:12,bed:21*60,wake:6*60,mood:2,flags:['Racing thoughts','Spending ↑']},
-    {d:11,bed:20*60+30,wake:5*60+30,mood:2,flags:['Racing thoughts','Irritable']},
-    {d:10,bed:21*60,wake:5*60,mood:3,flags:['Racing thoughts','Risky behavior']},
-    {d:9,bed:21*60,wake:5*60+30,mood:2,flags:['Irritable']},
-    {d:8,bed:22*60,wake:6*60,mood:1,flags:['Medication ✓']},
-    {d:7,bed:22*60,wake:7*60,mood:0,flags:['Medication ✓']},
-    {d:6,bed:22*60+30,wake:7*60,mood:0,flags:['Medication ✓']},
-    {d:5,bed:22*60,wake:6*60+30,mood:1,flags:['Medication ✓']},
-    {d:4,bed:21*60+30,wake:6*60,mood:2,flags:['Racing thoughts']},
-    {d:3,bed:21*60,wake:5*60+45,mood:2,flags:['Racing thoughts','Spending ↑']},
-    {d:2,bed:21*60,wake:5*60+15,mood:2,flags:['Irritable','Racing thoughts']},
-    {d:1,bed:20*60+30,wake:5*60,mood:2,flags:['Spending ↑','Racing thoughts']},
-  ];
-  seed.forEach(({d,bed,wake,mood,flags})=>{
-    const dt=new Date(today);dt.setDate(dt.getDate()-d);
-    const date=localDateKey(dt);
-    const diff=((wake-bed)+24*60)%(24*60);
-    const sleepH=Math.round(diff/6)/10;
-    const zone=Math.abs(mood)>=3?'red':Math.abs(mood)>=2?'yellow':'green';
-    S.entries.push({date,bedMin:bed,wakeMin:wake,sleepH,mood,zone,flags,ts:Date.now()});
-  });
-  save(S);
-}
 
 (function tick(){
   const n=new Date(),h=n.getHours()%12||12;
@@ -797,8 +815,8 @@ function switchTab(name,btn){
   if(name==='history')renderHistory();
   if(name==='insights')renderInsights();
   if(name==='today'){
-    const today=todayKey();
-    if(S.entries.some(e=>e.date===today))showDoneState();else resetFlow();
+    flowDate=todayKey();
+    if(S.entries.some(e=>e.date===flowDate))showDoneState();else resetFlow();
   }
 }
 
@@ -807,7 +825,7 @@ function showDoneState(){
   document.getElementById('streak-num').textContent=n;
   document.getElementById('streak-sub').textContent=n>=30?'Clinic report ready!':'Clinic report unlocks in '+(30-n)+' days';
   document.getElementById('done-sub').textContent=n+' day'+(n!==1?'s':'')+' tracked and counting.';
-  const STEPS=['sleep','mood','flags','done'];
+  updateFlowDateBanner();
   STEPS.forEach(s=>{const el=document.getElementById('step-'+s);el.classList.remove('active','exit');});
   document.getElementById('step-done').classList.add('active');
   document.getElementById('prog-fill').style.width='100%';
@@ -818,7 +836,30 @@ function showDoneState(){
 }
 
 const STEPS=['sleep','mood','flags','done'];
-let flowCur=0,todayBedMin=null,todayWakeMin=null,todaySleepH=null,todayMood=null,todayZone=null;
+// flowDate = which calendar day this check-in writes to. Defaults to today, but
+// editing a past entry or backfilling a missed day points it elsewhere.
+let flowCur=0,flowDate=todayKey(),todayBedMin=null,todayWakeMin=null,todaySleepH=null,todayMood=null,todayZone=null;
+
+// Time label for the bed/wake tiles: "10:30<span> PM</span>".
+function tileLabel(min){const h=Math.floor(min/60)%24,m=min%60,ap=h>=12?'PM':'AM',hh=String(h%12||12).padStart(2,'0');return hh+':'+String(m).padStart(2,'0')+'<span class="tt-ap"> '+ap+'</span>';}
+
+// Show a banner when logging/editing a day other than today.
+function updateFlowDateBanner(){
+  const b=document.getElementById('flow-date-banner');if(!b)return;
+  if(flowDate===todayKey()){b.style.display='none';return;}
+  const existing=S.entries.some(e=>e.date===flowDate);
+  b.textContent=(existing?'Editing ':'Logging ')+fmtDate(flowDate);
+  b.style.display='block';
+}
+
+// Prefill the flow controls from an existing entry (edit / backfill mode).
+function prefillFlow(e){
+  if(e.bedMin!=null){todayBedMin=e.bedMin;document.getElementById('bed-disp').innerHTML=tileLabel(e.bedMin);document.getElementById('tile-bed').classList.add('set');}
+  if(e.wakeMin!=null){todayWakeMin=e.wakeMin;document.getElementById('wake-disp').innerHTML=tileLabel(e.wakeMin);document.getElementById('tile-wake').classList.add('set');evalWake(Math.floor(e.wakeMin/60),e.wakeMin%60);}
+  if(todayBedMin!=null&&todayWakeMin!=null)calcSleep();
+  if(e.mood!=null&&e.mood!==undefined){const chip=document.querySelector('.mood-chip[data-v="'+e.mood+'"]');if(chip)pickMood(chip);}
+  (e.flags||[]).forEach(f=>document.querySelectorAll('.flag-chip').forEach(c=>{if(c.textContent===f)c.classList.add('on');}));
+}
 
 function resetFlow(){
   flowCur=0;todayBedMin=todayWakeMin=todaySleepH=todayMood=todayZone=null;
@@ -831,8 +872,30 @@ function resetFlow(){
   document.querySelectorAll('.mood-chip').forEach(c=>c.classList.remove('sel'));
   document.getElementById('mood-fb').className='mood-fb';
   document.querySelectorAll('.flag-chip').forEach(c=>c.classList.remove('on'));
+  updateFlowDateBanner();
+  const existing=S.entries.find(e=>e.date===flowDate);
+  if(existing)prefillFlow(existing);
   showFlowStep(0);
 }
+
+// Open the check-in flow for a specific date (from history tap / backfill).
+function editEntry(dateKey){
+  flowDate=dateKey;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('page-today').classList.add('active');
+  document.querySelector('.tbtn').classList.add('on');   // Today is the first tab
+  resetFlow();
+}
+
+// Backfill: pick a missed day via the native date input.
+function promptMissedDay(){
+  const inp=document.getElementById('missed-date');
+  inp.max=todayKey();if(S.startDate)inp.min=S.startDate;inp.value=todayKey();
+  if(inp.showPicker){try{inp.showPicker();return;}catch(e){}}
+  inp.click();
+}
+function onMissedDate(v){if(v)editEntry(v);}
 
 function showFlowStep(i){
   STEPS.forEach((s,idx)=>{const el=document.getElementById('step-'+s);el.classList.remove('active','exit');if(idx<i)el.classList.add('exit');});
@@ -864,29 +927,34 @@ function flowNext(){
 function flowBack(){if(flowCur>0){flowCur--;showFlowStep(flowCur);}}
 
 function saveEntry(){
-  const today=todayKey();
-  if(S.entries.some(e=>e.date===today))return;
   const flags=Array.from(document.querySelectorAll('.flag-chip.on')).map(b=>b.textContent);
-  const entry={date:today,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,ts:Date.now()};
-  S.entries.push(entry);
+  const entry={date:flowDate,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,ts:Date.now()};
+  // Upsert in place: editing a day or backfilling replaces, never duplicates.
+  const idx=S.entries.findIndex(e=>e.date===flowDate);
+  if(idx>=0)S.entries[idx]=entry;else S.entries.push(entry);
+  S.entries.sort((a,b)=>a.date.localeCompare(b.date));  // keep ascending (week slices rely on it)
   save(S);
   dbUpsertEntry(entry);
-  if(entry.zone==='red'&&getSettings().redZoneOn){
-    notify('PolarNote — red zone',(entry.mood>0?'You logged +3 (mania/crisis).':'You logged −3 (severe depression).')+' Please reach out to your care team or a crisis line.');
+  if(flowDate===todayKey()){const ns=notifState();ns.reminder=flowDate;setNotifState(ns);}  // don't nag after logging
+  if(entry.mood!==null&&Math.abs(entry.mood)>=rztVal()&&getSettings().redZoneOn){
+    const info=MOOD_INFO[String(entry.mood)],lbl=info?' ('+info.t.split(' — ')[0]+')':'';
+    notify('PolarNote — red zone','You logged '+(entry.mood>0?'+'+entry.mood:entry.mood)+lbl+'. Please reach out to your care team or a crisis line.');
   }
 }
 
 let pickerTarget='bed',selH=10,selM=0,selAP='PM';
 
-function buildWheel(elId,items,selected){
+// labels (optional): parallel display text per item, e.g. weekday names. When
+// omitted, items are shown zero-padded (time/number wheels).
+function buildWheel(elId,items,selected,labels){
   const el=document.getElementById(elId);
   const hl=el.querySelector('.wheel-hl')||Object.assign(document.createElement('div'),{className:'wheel-hl'});
   el.innerHTML='';el.appendChild(hl);
   const pt=document.createElement('div');pt.className='wheel-pad';el.appendChild(pt);
-  items.forEach(v=>{
+  items.forEach((v,idx)=>{
     const d=document.createElement('div');d.className='wheel-item'+(v===selected?' sel':'');
-    d.textContent=String(v).padStart(2,'0');
-    d.onclick=()=>{if(elId==='wh-h')selH=v;else selM=v;buildWheel(elId,items,v);};
+    d.textContent=labels?labels[idx]:String(v).padStart(2,'0');
+    d.onclick=()=>{if(elId==='wh-h')selH=v;else selM=v;buildWheel(elId,items,v,labels);};
     el.appendChild(d);
   });
   const pb=document.createElement('div');pb.className='wheel-pad';el.appendChild(pb);
@@ -895,18 +963,23 @@ function buildWheel(elId,items,selected){
 
 function setAP(v){selAP=v;document.getElementById('ap-am').classList.toggle('on',v==='AM');document.getElementById('ap-pm').classList.toggle('on',v==='PM');}
 
-// Toggle modal between time mode (hour:min + AM/PM) and a generic 2-wheel mode.
-// timeMode=true → show colon + AM/PM, label second wheel "Min".
-function setModalChrome(timeMode,minLabel){
-  document.getElementById('wheel-colon').style.display=timeMode?'':'none';
-  document.getElementById('ampm-col').style.display=timeMode?'':'none';
-  document.getElementById('wh-m-label').textContent=minLabel;
+// Configure the modal's wheel layout per picker.
+// o: {colon, ampm, secondCol, firstLabel, secondLabel} — booleans show/hide parts.
+function setModalChrome(o){
+  document.getElementById('wheel-colon').style.display=o.colon?'':'none';
+  document.getElementById('ampm-col').style.display=o.ampm?'':'none';
+  document.getElementById('wh-m-col').style.display=o.secondCol?'':'none';
+  document.getElementById('wh-h-label').textContent=o.firstLabel||'Hour';
+  if(o.secondLabel)document.getElementById('wh-m-label').textContent=o.secondLabel;
+  // Single-wheel mode (e.g. weekday names) needs a wider column than the
+  // 110px sized for 2-digit numbers, else long labels clip.
+  document.getElementById('wh-h-col').style.maxWidth=o.secondCol?'':'220px';
 }
 
 function openModal(t){
   pickerTarget=t;document.getElementById('modal-title').textContent=t==='bed'?'Bedtime':'Wake time';
   if(t==='bed'){selH=10;selM=30;selAP='PM';}else{selH=7;selM=0;selAP='AM';}
-  setModalChrome(true,'Min');setAP(selAP);
+  setModalChrome({colon:true,ampm:true,secondCol:true,firstLabel:'Hour',secondLabel:'Min'});setAP(selAP);
   buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);
   buildWheel('wh-m',[0,15,30,45],selM);
   document.getElementById('modal-bg').classList.add('open');
@@ -920,6 +993,9 @@ function confirmTime(){
     // selH = wake-before hour (4–9, AM), selM reused as consecutive-day threshold (2–7)
     const st=getSettings();st.earlyWakeHour=selH;st.earlyWakeDays=selM;
     renderSettings();persistSettings();closeModal();return;
+  }
+  if(pickerTarget==='weekly'){
+    getSettings().weeklyDay=selH;renderSettings();persistSettings();closeModal();return;
   }
   if(pickerTarget==='reminder'){
     getSettings().reminderTime=mins;renderSettings();persistSettings();closeModal();return;
@@ -946,11 +1022,14 @@ function calcSleep(){
 }
 
 function evalWake(h24,m){
-  const wm=h24*60+m;
-  const week=S.entries.slice(-7);
-  const earlyCount=week.filter(e=>e.wakeMin!==null&&e.wakeMin<6*60).length+(wm<6*60?1:0);
   const al=document.getElementById('wake-alert'),tx=document.getElementById('wake-alert-txt');
-  if(earlyCount>=4){al.className='wake-alert red show';tx.textContent='Early waking '+earlyCount+' days in a row — matches your pre-hypomanic pattern. Consider reaching out to your care team.';}
+  const st={...DEFAULT_SETTINGS,...getSettings()};
+  if(!st.earlyWakeOn){al.className='wake-alert';return;}
+  const c=ewCfg();                                    // configured wake-before hour + day threshold
+  const wm=h24*60+m;
+  const week=S.entries.filter(e=>e.date!==flowDate).slice(-7);   // exclude the day being edited
+  const earlyCount=week.filter(e=>e.wakeMin!==null&&e.wakeMin<c.h*60).length+(wm<c.h*60?1:0);
+  if(earlyCount>=c.d){al.className='wake-alert red show';tx.textContent='Early waking '+earlyCount+' days — matches your pre-hypomanic pattern. Consider reaching out to your care team.';}
   else if(earlyCount>=2){al.className='wake-alert yellow show';tx.textContent='Early waking '+earlyCount+' days this week. Sleep disruption often precedes mood shifts — keep an eye on this.';}
   else{al.className='wake-alert';}
 }
@@ -998,7 +1077,9 @@ function renderHistory(){
     const d=new Date(e.date+'T12:00:00');
     const label=i===0?'Today':i===1?'Yesterday':d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     const flagStr=e.flags&&e.flags.length?e.flags.slice(0,2).join(', '):'—';
-    const el=document.createElement('div');el.className='log-item';
+    const el=document.createElement('div');el.className='log-item';el.style.cursor='pointer';
+    el.title='Tap to edit';
+    el.onclick=()=>editEntry(e.date);
     el.innerHTML='<span class="log-date">'+label+'</span><div class="log-dot '+(e.zone||'green')+'"></div><span class="log-num">'+(e.mood>0?'+'+e.mood:e.mood)+'</span><span class="log-sleep">'+fmtTime(e.wakeMin)+' wake · '+(e.sleepH||'—')+'h</span><span class="log-flags">'+flagStr+'</span>';
     list.appendChild(el);
   });
@@ -1081,19 +1162,23 @@ function renderSettings(){
   });
   const rs=document.getElementById('set-reminder-sub');if(rs)rs.firstChild&&(rs.childNodes[0].nodeValue=fmtTime(st.reminderTime)+' daily');
   const ew=document.getElementById('set-earlywake-sub');if(ew)ew.childNodes[0].nodeValue=ewLabel();
+  const rz=document.getElementById('set-redzone-sub');if(rz)rz.childNodes[0].nodeValue='Immediate when you log ±'+st.redZoneThreshold;
   const ws=document.getElementById('set-weekly-sub');if(ws)ws.childNodes[0].nodeValue='Every '+WEEKDAYS[st.weeklyDay]+' morning';
 }
 function persistSettings(){save(S);dbUpsertProfile();}
 function toggleSetting(key,btn){
   const st=getSettings();st[key]=!st[key];btn.classList.toggle('on',st[key]);persistSettings();
-  if(key==='redZoneOn'&&st[key])ensureNotifyPermission();
+  // Any notification toggle being switched on should ask for permission + re-check.
+  if(st[key]&&['redZoneOn','reminderOn','weeklyOn','earlyWakeOn'].includes(key)){
+    ensureNotifyPermission();checkReminders();
+  }
 }
 function openReminderTime(){
   pickerTarget='reminder';
   const t=getSettings().reminderTime;let h=Math.floor(t/60),m=t%60;
   selAP=h>=12?'PM':'AM';selH=h%12||12;selM=[0,15,30,45].reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a,0);
   document.getElementById('modal-title').textContent='Evening reminder';
-  setModalChrome(true,'Min');setAP(selAP);buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);buildWheel('wh-m',[0,15,30,45],selM);
+  setModalChrome({colon:true,ampm:true,secondCol:true,firstLabel:'Hour',secondLabel:'Min'});setAP(selAP);buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);buildWheel('wh-m',[0,15,30,45],selM);
   document.getElementById('modal-bg').classList.add('open');
 }
 // Effective early-wake config with defaults for accounts created before these keys existed.
@@ -1102,14 +1187,29 @@ function ewLabel(){const c=ewCfg();return'Wake before '+c.h+' AM for '+c.d+'+ da
 function openEarlyWake(){
   pickerTarget='earlyWake';const c=ewCfg();selH=c.h;selM=c.d;selAP='AM';
   document.getElementById('modal-title').textContent='Early wake alert';
-  setModalChrome(false,'Days');
+  setModalChrome({colon:false,ampm:false,secondCol:true,firstLabel:'Hour',secondLabel:'Days'});
   buildWheel('wh-h',[4,5,6,7,8,9],selH);   // wake-before hour (AM)
   buildWheel('wh-m',[2,3,4,5,6,7],selM);    // consecutive days threshold
   document.getElementById('modal-bg').classList.add('open');
 }
-function cycleWeeklyDay(){const st=getSettings();st.weeklyDay=(st.weeklyDay+1)%7;renderSettings();persistSettings();}
+// Red-zone alert fires when |mood| >= threshold. Only ±2 / ±3 are meaningful
+// (±1 ≈ baseline). This changes notification sensitivity only — zone colouring
+// elsewhere stays ±3=red / ±2=yellow.
+function rztVal(){const s={...DEFAULT_SETTINGS,...getSettings()};return s.redZoneThreshold;}
+function cycleRedZone(){const st=getSettings();st.redZoneThreshold=rztVal()===3?2:3;renderSettings();persistSettings();}
+// Weekly summary day — single-wheel picker showing weekday names.
+function openWeeklyDay(){
+  pickerTarget='weekly';selH={...DEFAULT_SETTINGS,...getSettings()}.weeklyDay;
+  document.getElementById('modal-title').textContent='Weekly summary';
+  setModalChrome({colon:false,ampm:false,secondCol:false,firstLabel:'Day'});
+  buildWheel('wh-h',[0,1,2,3,4,5,6],selH,WEEKDAYS);
+  document.getElementById('modal-bg').classList.add('open');
+}
 
-// ── Local notifications (fire while app is open; e.g. red zone) ──
+// ── Notifications ────────────────────────────────────────────
+// Web apps can't run a true background scheduler without a push server, so
+// scheduled reminders (evening / weekly) are evaluated whenever the app is
+// open or returns to the foreground. Red-zone fires immediately on save.
 function ensureNotifyPermission(){
   if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
 }
@@ -1117,6 +1217,47 @@ function notify(title,body){
   if('Notification'in window&&Notification.permission==='granted'){try{new Notification(title,{body});return;}catch(e){}}
   showToast(body);
 }
+
+// Per-device record of what we've already fired, so we don't re-notify on every
+// focus. Kept out of synced settings (it's device-specific).
+const NKEY='polarnote_notif';
+function notifState(){try{return JSON.parse(localStorage.getItem(NKEY))||{};}catch{return{};}}
+function setNotifState(o){localStorage.setItem(NKEY,JSON.stringify(o));}
+
+function weeklySummaryText(){
+  const week=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7);
+  const moods=week.filter(e=>e.mood!=null);
+  const avg=moods.length?Math.round(moods.reduce((a,e)=>a+e.mood,0)/moods.length*10)/10:null;
+  const ec=week.filter(e=>e.wakeMin!=null&&e.wakeMin<ewCfg().h*60).length;
+  return 'Last 7 days: '+week.length+' logged'+(avg!=null?', avg mood '+(avg>0?'+'+avg:avg):'')+', '+ec+' early wake'+(ec!==1?'s':'')+'. Tap to review your week.';
+}
+
+// Evaluate scheduled reminders against the clock and fire any that are due.
+function checkReminders(){
+  if(!S||!S.onboarded)return;
+  const st={...DEFAULT_SETTINGS,...getSettings()};
+  const now=new Date(),tk=todayKey(),ns=notifState();
+  if(st.reminderOn){
+    const mins=now.getHours()*60+now.getMinutes();
+    const loggedToday=S.entries.some(e=>e.date===tk);
+    if(!loggedToday&&mins>=st.reminderTime&&ns.reminder!==tk){
+      ns.reminder=tk;setNotifState(ns);
+      notify('PolarNote','Time for your evening check-in. How was today?');
+    }
+  }
+  if(st.weeklyOn&&now.getDay()===st.weeklyDay&&now.getHours()>=8&&ns.weekly!==tk){
+    ns.weekly=tk;setNotifState(ns);
+    notify('PolarNote — weekly summary',weeklySummaryText());
+  }
+}
+
+let reminderTimer=null;
+function startReminderLoop(){
+  checkReminders();
+  if(reminderTimer)clearInterval(reminderTimer);
+  reminderTimer=setInterval(checkReminders,60000);                       // re-check each minute while open
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkReminders();});
 
 async function resetApp(){
   if(!confirm('Reset all tracked data? This deletes your entries and cannot be undone. (Your account stays.)'))return;
@@ -1172,7 +1313,8 @@ function copyReport(){
   const name=S.name||'Patient',today=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   const week=entries.slice(0,7);
   const avgSleep=week.filter(e=>e.sleepH).reduce((a,e)=>a+e.sleepH,0)/Math.max(week.filter(e=>e.sleepH).length,1);
-  const text='POLARNOTE CLINIC REPORT\nGenerated: '+today+'\nPatient: '+name+' | Diagnosis: '+(S.dx||'Bipolar')+'\nTracking: '+fmtDate(S.startDate)+' – '+today+' ('+entries.length+' days)\n\nSLEEP (last 7 days)\nAvg duration: '+Math.round(avgSleep*10)/10+'h\nEarly wakes (<6 AM): '+week.filter(e=>e.wakeMin!==null&&e.wakeMin<6*60).length+' of 7 days\n\nMOOD (all time)\nGreen (−1 to +1): '+entries.filter(e=>e.zone==='green').length+' days\nYellow (±2): '+entries.filter(e=>e.zone==='yellow').length+' days\nRed (±3): '+entries.filter(e=>e.zone==='red').length+' days\n\nRECENT ENTRIES\n'+entries.slice(0,7).map(e=>e.date+': mood '+(e.mood>0?'+'+e.mood:e.mood)+', wake '+fmtTime(e.wakeMin)+', sleep '+(e.sleepH||'—')+'h'+(e.flags&&e.flags.length?' | '+e.flags.join(', '):'')).join('\n')+'\n\nGenerated by PolarNote (validation prototype)';
+  const ewh=ewCfg().h;
+  const text='POLARNOTE CLINIC REPORT\nGenerated: '+today+'\nPatient: '+name+' | Diagnosis: '+(S.dx||'Bipolar')+'\nTracking: '+fmtDate(S.startDate)+' – '+today+' ('+entries.length+' days)\n\nSLEEP (last 7 days)\nAvg duration: '+Math.round(avgSleep*10)/10+'h\nEarly wakes (<'+ewh+' AM): '+week.filter(e=>e.wakeMin!==null&&e.wakeMin<ewh*60).length+' of 7 days\n\nMOOD (all time)\nGreen (−1 to +1): '+entries.filter(e=>e.zone==='green').length+' days\nYellow (±2): '+entries.filter(e=>e.zone==='yellow').length+' days\nRed (±3): '+entries.filter(e=>e.zone==='red').length+' days\n\nRECENT ENTRIES\n'+entries.slice(0,7).map(e=>e.date+': mood '+(e.mood>0?'+'+e.mood:e.mood)+', wake '+fmtTime(e.wakeMin)+', sleep '+(e.sleepH||'—')+'h'+(e.flags&&e.flags.length?' | '+e.flags.join(', '):'')).join('\n')+'\n\nGenerated by PolarNote (validation prototype)';
   navigator.clipboard&&navigator.clipboard.writeText(text).then(()=>showToast('Report copied!')).catch(()=>showToast('Select and copy manually'));
 }
 
@@ -1180,26 +1322,33 @@ function closeReportOutside(e){if(e.target===document.getElementById('report-bg'
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
+function hideBoot(){const b=document.getElementById('boot');if(b){b.classList.add('hide');setTimeout(()=>{b.style.display='none';},300);}}
+
+// Register the service worker (offline shell) and replay queued writes on reconnect.
+if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+window.addEventListener('online',flushQueue);
+
 window.addEventListener('DOMContentLoaded',async()=>{
   const cfg=document.getElementById('auth-config');
   if(!SB_CONFIGURED){
     cfg.style.display='block';
     cfg.innerHTML='⚠️ Backend not configured. Add your project URL and anon key in <code>supabase-config.js</code>, then run <code>supabase-schema.sql</code> in the SQL editor.';
-    return;
+    hideBoot();return;
   }
   // Returning from a password-reset email: show the "set new password" screen
   // instead of silently logging in with the temporary recovery session.
   let recovering = location.hash.includes('type=recovery');
   sb.auth.onAuthStateChange((event)=>{
-    if(event==='PASSWORD_RECOVERY'){recovering=true;enterRecoveryMode();}
+    if(event==='PASSWORD_RECOVERY'){recovering=true;enterRecoveryMode();hideBoot();}
   });
-  if(recovering){enterRecoveryMode();return;}
+  if(recovering){enterRecoveryMode();hideBoot();return;}
 
-  // Already signed in? Skip the auth screen.
-  const {data}=await sb.auth.getSession();
-  if(data.session){
-    await onAuthed(data.session.user);
-  }
+  try{
+    // Already signed in? Skip the auth screen.
+    const {data}=await sb.auth.getSession();
+    if(data.session)await onAuthed(data.session.user);
+  }catch(e){/* fall through to auth screen */}
+  finally{hideBoot();}
 });
 </script>
 <!-- PWA Manifest -->

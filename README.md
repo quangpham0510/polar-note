@@ -35,6 +35,9 @@ Single-file web app (`index.html`) with **Supabase** for email/password auth and
 - **Auth gate** → sign in / sign up (email + password).
 - **Onboarding** (first time only) → name + diagnosis, saved to `profiles`.
 - **Today / History / Insights / Profile** → daily check-ins upsert to `entries` (one row per user per day).
+- **Edit / backfill** → tap any entry in History to edit it, or "Log a missed day" to backfill a past date.
+- **Offline** → a service worker caches the app shell; check-ins made offline are queued locally and replayed on reconnect.
+- **Reminders** → evening / weekly / red-zone notifications fire while the app is open or returns to the foreground (web PWAs can't run a true background scheduler without a push server).
 - **Sign out** clears the local cache; **Reset all data** deletes the account's entries from the database.
 
 ## Files
@@ -42,5 +45,6 @@ Single-file web app (`index.html`) with **Supabase** for email/password auth and
 | File | Purpose |
 |------|---------|
 | `index.html` | The entire app (markup, styles, logic) |
+| `sw.js` | Service worker — caches the app shell for offline use |
 | `supabase-config.js` | Your project URL + anon key |
 | `supabase-schema.sql` | Database schema + RLS policies (run once) |
