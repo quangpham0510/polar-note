@@ -266,6 +266,8 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .pref-row:last-child{border-bottom:none;}
 .pr-title{font-size:15px;font-weight:400;}
 .pr-sub{font-size:12px;color:var(--txt3);margin-top:2px;font-weight:300;}
+.pr-sub.tap{color:var(--blue);cursor:pointer;}
+.pr-sub.tap::after{content:' ›';opacity:.7;}
 .export-btn{margin:0 24px 8px;width:calc(100% - 48px);padding:14px;border:1.5px solid var(--blue);border-radius:var(--r-md);background:none;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;}
 .export-btn:hover{background:var(--blue-dim);}
 .danger-btn{margin:8px 24px;width:calc(100% - 48px);padding:14px;border:1.5px solid rgba(255,69,58,.3);border-radius:var(--r-md);background:none;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
@@ -336,6 +338,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
       <div class="auth-err" id="auth-err"></div>
       <button class="ob-cta" id="auth-cta" onclick="authSubmit()">Sign in</button>
       <button class="ob-skip" id="auth-toggle" onclick="authToggleMode()">Don't have an account? Sign up</button>
+      <button class="ob-skip" id="auth-forgot" onclick="authForgot()" style="margin-top:2px;">Forgot password?</button>
       <div class="auth-config" id="auth-config" style="display:none;"></div>
     </div>
   </div>
@@ -484,10 +487,10 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
     <div class="pref-sec anim">
       <div class="pref-label">Notifications</div>
       <div class="pref-card">
-        <div class="pref-row"><div><div class="pr-title">Evening reminder</div><div class="pr-sub">9:00 PM daily</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Early wake alert</div><div class="pr-sub">Wake before 6 AM for 3+ days</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Red zone alert</div><div class="pr-sub">Immediate when you log ±3</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Weekly summary</div><div class="pr-sub">Every Sunday morning</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Evening reminder</div><div class="pr-sub tap" id="set-reminder-sub" onclick="openReminderTime()">9:00 PM daily</div></div><button class="toggle" id="tg-reminderOn" onclick="toggleSetting('reminderOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Early wake alert</div><div class="pr-sub">Wake before 6 AM for 3+ days</div></div><button class="toggle" id="tg-earlyWakeOn" onclick="toggleSetting('earlyWakeOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Red zone alert</div><div class="pr-sub">Immediate when you log ±3</div></div><button class="toggle" id="tg-redZoneOn" onclick="toggleSetting('redZoneOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Weekly summary</div><div class="pr-sub tap" id="set-weekly-sub" onclick="cycleWeeklyDay()">Every Sunday morning</div></div><button class="toggle" id="tg-weeklyOn" onclick="toggleSetting('weeklyOn',this)"></button></div>
       </div>
     </div>
     <div class="pref-sec anim">
@@ -552,66 +555,64 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase SDK (compat) + credentials -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<!-- Supabase SDK + credentials -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 
 <script>
 const KEY='polarnote_v1';
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||def();}catch{return def();}}
 function save(s){localStorage.setItem(KEY,JSON.stringify(s));}
-function def(){return{onboarded:false,name:'',dx:'',startDate:new Date().toISOString().slice(0,10),entries:[],userId:null,email:''};}
+// Local date key (YYYY-MM-DD) in the user's own timezone — NOT UTC.
+// toISOString() returns UTC, so it rolls the date over at midnight UTC, filing
+// check-ins under the wrong day for anyone east/west of GMT.
+function localDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function todayKey(){return localDateKey(new Date());}
+const DEFAULT_SETTINGS={reminderOn:true,reminderTime:21*60,earlyWakeOn:true,redZoneOn:true,weeklyOn:false,weeklyDay:0};
+function def(){return{onboarded:false,name:'',dx:'',startDate:todayKey(),entries:[],userId:null,email:'',settings:{...DEFAULT_SETTINGS}};}
 
-// ── Firebase client ──────────────────────────────────────────
-const FB_CONFIGURED = !!(window.firebase && window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && !window.FIREBASE_CONFIG.apiKey.includes('YOUR_'));
-let auth=null, db=null;
-if(FB_CONFIGURED){
-  firebase.initializeApp(window.FIREBASE_CONFIG);
-  auth=firebase.auth();
-  db=firebase.firestore();
-}
+// ── Supabase client ──────────────────────────────────────────
+const SB_CONFIGURED = !!(window.supabase && window.SUPABASE_URL && !window.SUPABASE_URL.includes('YOUR_PROJECT'));
+const sb = SB_CONFIGURED ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
 
-// ── DB layer (Firestore) ─────────────────────────────────────
-// profile  → users/{uid}            { name, dx, startDate }
-// entries  → users/{uid}/entries/{date}  (one doc per day)
-function userRef(){return db.collection('users').doc(S.userId);}
+// ── DB layer: map between app (camelCase) and DB (snake_case) ─
+function rowToEntry(r){return{date:r.date,bedMin:r.bed_min,wakeMin:r.wake_min,sleepH:r.sleep_h!=null?Number(r.sleep_h):null,mood:r.mood,zone:r.zone,flags:Array.isArray(r.flags)?r.flags:[],ts:r.ts};}
 
 async function loadFromDB(user){
-  const uid=user.uid;
-  const ref=db.collection('users').doc(uid);
-  const [profSnap,entSnap]=await Promise.all([
-    ref.get(),
-    ref.collection('entries').orderBy('date').get(),
+  const [{data:prof},{data:rows}] = await Promise.all([
+    sb.from('profiles').select('*').eq('id',user.id).maybeSingle(),
+    sb.from('entries').select('*').eq('user_id',user.id).order('date',{ascending:true}),
   ]);
-  const prof=profSnap.exists?profSnap.data():null;
-  S={
+  S = {
     onboarded: !!(prof && prof.name),
     name: prof?.name || '',
     dx: prof?.dx || '',
-    startDate: prof?.startDate || new Date().toISOString().slice(0,10),
-    entries: entSnap.docs.map(d=>d.data()),
-    userId: uid,
+    startDate: prof?.start_date || todayKey(),
+    entries: (rows||[]).map(rowToEntry),
+    userId: user.id,
     email: user.email || '',
+    settings: {...DEFAULT_SETTINGS, ...(prof?.settings||{})},
   };
   save(S); // local cache
 }
 
 async function dbUpsertProfile(){
-  if(!db||!S.userId)return;
-  try{await userRef().set({name:S.name,dx:S.dx,startDate:S.startDate},{merge:true});}
-  catch(e){showToast('Profile sync failed');}
+  if(!sb||!S.userId)return;
+  const {error}=await sb.from('profiles').upsert({id:S.userId,name:S.name,dx:S.dx,start_date:S.startDate,settings:S.settings||{...DEFAULT_SETTINGS}});
+  if(error)showToast('Profile sync failed');
 }
 
 async function dbUpsertEntry(e){
-  if(!db||!S.userId)return;
-  try{await userRef().collection('entries').doc(e.date).set(e);}
-  catch(ex){showToast('Sync failed — saved offline');}
+  if(!sb||!S.userId)return;
+  const {error}=await sb.from('entries').upsert({
+    user_id:S.userId,date:e.date,bed_min:e.bedMin,wake_min:e.wakeMin,
+    sleep_h:e.sleepH,mood:e.mood,zone:e.zone,flags:e.flags,ts:e.ts,
+  },{onConflict:'user_id,date'});
+  if(error)showToast('Sync failed — saved offline');
 }
 
 // ── Auth ─────────────────────────────────────────────────────
-let authMode='signin';
+let authMode='signin'; // 'signin' | 'signup' | 'recovery'
 function authToggleMode(){
   authMode = authMode==='signin' ? 'signup' : 'signin';
   document.getElementById('auth-cta').textContent = authMode==='signin'?'Sign in':'Create account';
@@ -619,19 +620,83 @@ function authToggleMode(){
   document.getElementById('auth-sub').textContent = authMode==='signin'?'Sign in to sync your tracking across devices.':'Create an account to start tracking securely.';
   document.getElementById('auth-err').textContent='';
 }
+
+// Send a password-reset email. Supabase emails a recovery link back to this app;
+// returning via that link fires the PASSWORD_RECOVERY event (see enterRecoveryMode).
+async function authForgot(){
+  const err=document.getElementById('auth-err');
+  err.className='auth-err';err.textContent='';
+  if(!sb){err.textContent='Supabase not configured. See supabase-config.js.';return;}
+  const email=document.getElementById('auth-email').value.trim();
+  if(!email){err.textContent='Enter your email above, then tap "Forgot password?".';return;}
+  try{
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
+    if(error)throw error;
+    err.className='auth-note';
+    err.textContent='Password reset link sent. Check your email and open it on this device.';
+  }catch(ex){
+    err.className='auth-err';err.textContent=ex.message||'Could not send reset email.';
+  }
+}
+
+// Switch the auth screen into "set a new password" mode after the user returns
+// from the recovery email link (Supabase has already created a temporary session).
+function enterRecoveryMode(){
+  authMode='recovery';
+  document.getElementById('page-auth').classList.add('active');
+  document.getElementById('page-onboard').classList.remove('active');
+  document.getElementById('tabbar').style.display='none';
+  document.getElementById('auth-sub').textContent='Choose a new password for your account.';
+  document.getElementById('auth-email').style.display='none';
+  const pass=document.getElementById('auth-pass');
+  pass.placeholder='New password (min. 6 characters)';
+  pass.setAttribute('autocomplete','new-password');pass.value='';
+  document.getElementById('auth-cta').textContent='Update password';
+  document.getElementById('auth-toggle').style.display='none';
+  document.getElementById('auth-forgot').style.display='none';
+  const err=document.getElementById('auth-err');err.className='auth-err';err.textContent='';
+}
+
 async function authSubmit(){
   const err=document.getElementById('auth-err'),btn=document.getElementById('auth-cta');
   err.className='auth-err';err.textContent='';
-  if(!auth){err.textContent='Firebase not configured. See firebase-config.js.';return;}
-  const email=document.getElementById('auth-email').value.trim();
+  if(!sb){err.textContent='Supabase not configured. See supabase-config.js.';return;}
   const pass=document.getElementById('auth-pass').value;
-  if(!email||!pass){err.textContent='Enter your email and password.';return;}
   if(pass.length<6){err.textContent='Password must be at least 6 characters.';return;}
+
+  if(authMode==='recovery'){
+    btn.disabled=true;btn.style.opacity='.6';btn.textContent='Please wait…';
+    try{
+      const {data,error}=await sb.auth.updateUser({password:pass});
+      if(error)throw error;
+      history.replaceState(null,'',location.pathname+location.search); // drop recovery hash
+      await onAuthed(data.user);
+    }catch(ex){
+      err.className='auth-err';err.textContent=ex.message||'Could not update password.';
+      btn.disabled=false;btn.style.opacity='1';btn.textContent='Update password';
+    }
+    return;
+  }
+
+  const email=document.getElementById('auth-email').value.trim();
+  if(!email){err.textContent='Enter your email and password.';return;}
   btn.disabled=true;btn.style.opacity='.6';btn.textContent='Please wait…';
   try{
-    // onAuthStateChanged drives loading + routing after success.
-    if(authMode==='signup') await auth.createUserWithEmailAndPassword(email,pass);
-    else                    await auth.signInWithEmailAndPassword(email,pass);
+    if(authMode==='signup'){
+      const {data,error}=await sb.auth.signUp({email,password:pass});
+      if(error)throw error;
+      if(!data.session){ // email confirmation is ON
+        err.className='auth-note';
+        err.textContent='Account created. Check your email to confirm, then sign in.';
+        authMode='signin';document.getElementById('auth-toggle').textContent="Don't have an account? Sign up";
+        return;
+      }
+      await onAuthed(data.session.user);
+    } else {
+      const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+      await onAuthed(data.user);
+    }
   }catch(ex){
     err.className='auth-err';err.textContent=ex.message||'Authentication failed.';
   }finally{
@@ -655,7 +720,7 @@ async function onAuthed(user){
 }
 
 async function signOut(){
-  if(auth)await auth.signOut();
+  if(sb)await sb.auth.signOut();
   localStorage.removeItem(KEY);
   location.reload();
 }
@@ -686,7 +751,7 @@ function seedDemo(){
   ];
   seed.forEach(({d,bed,wake,mood,flags})=>{
     const dt=new Date(today);dt.setDate(dt.getDate()-d);
-    const date=dt.toISOString().slice(0,10);
+    const date=localDateKey(dt);
     const diff=((wake-bed)+24*60)%(24*60);
     const sleepH=Math.round(diff/6)/10;
     const zone=Math.abs(mood)>=3?'red':Math.abs(mood)>=2?'yellow':'green';
@@ -732,7 +797,7 @@ function switchTab(name,btn){
   if(name==='history')renderHistory();
   if(name==='insights')renderInsights();
   if(name==='today'){
-    const today=new Date().toISOString().slice(0,10);
+    const today=todayKey();
     if(S.entries.some(e=>e.date===today))showDoneState();else resetFlow();
   }
 }
@@ -799,13 +864,16 @@ function flowNext(){
 function flowBack(){if(flowCur>0){flowCur--;showFlowStep(flowCur);}}
 
 function saveEntry(){
-  const today=new Date().toISOString().slice(0,10);
+  const today=todayKey();
   if(S.entries.some(e=>e.date===today))return;
   const flags=Array.from(document.querySelectorAll('.flag-chip.on')).map(b=>b.textContent);
   const entry={date:today,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,ts:Date.now()};
   S.entries.push(entry);
   save(S);
   dbUpsertEntry(entry);
+  if(entry.zone==='red'&&getSettings().redZoneOn){
+    notify('PolarNote — red zone',(entry.mood>0?'You logged +3 (mania/crisis).':'You logged −3 (severe depression).')+' Please reach out to your care team or a crisis line.');
+  }
 }
 
 let pickerTarget='bed',selH=10,selM=0,selAP='PM';
@@ -840,6 +908,9 @@ function closeModalOutside(e){if(e.target===document.getElementById('modal-bg'))
 
 function confirmTime(){
   const h24=selH%12+(selAP==='PM'?12:0),mins=h24*60+selM;
+  if(pickerTarget==='reminder'){
+    getSettings().reminderTime=mins;renderSettings();persistSettings();closeModal();return;
+  }
   const label=String(selH).padStart(2,'0')+':'+String(selM).padStart(2,'0')+'<span class="tt-ap"> '+selAP+'</span>';
   if(pickerTarget==='bed'){
     todayBedMin=mins;document.getElementById('bed-disp').innerHTML=label;document.getElementById('tile-bed').classList.add('set');
@@ -983,21 +1054,56 @@ function updateProfileUI(){
   document.getElementById('prof-name').textContent=n;
   document.getElementById('prof-av').textContent=(n[0]||'?').toUpperCase();
   document.getElementById('prof-dx').textContent=(S.dx||'Bipolar')+' · Tracking since '+fmtDate(S.startDate);
+  renderSettings();
+}
+
+// ── Notification settings (A: persisted prefs + selectable time/day) ──
+const WEEKDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function getSettings(){if(!S.settings)S.settings={...DEFAULT_SETTINGS};return S.settings;}
+function renderSettings(){
+  const st={...DEFAULT_SETTINGS,...getSettings()};S.settings=st;
+  ['reminderOn','earlyWakeOn','redZoneOn','weeklyOn'].forEach(k=>{
+    const b=document.getElementById('tg-'+k);if(b)b.classList.toggle('on',!!st[k]);
+  });
+  const rs=document.getElementById('set-reminder-sub');if(rs)rs.firstChild&&(rs.childNodes[0].nodeValue=fmtTime(st.reminderTime)+' daily');
+  const ws=document.getElementById('set-weekly-sub');if(ws)ws.childNodes[0].nodeValue='Every '+WEEKDAYS[st.weeklyDay]+' morning';
+}
+function persistSettings(){save(S);dbUpsertProfile();}
+function toggleSetting(key,btn){
+  const st=getSettings();st[key]=!st[key];btn.classList.toggle('on',st[key]);persistSettings();
+  if(key==='redZoneOn'&&st[key])ensureNotifyPermission();
+}
+function openReminderTime(){
+  pickerTarget='reminder';
+  const t=getSettings().reminderTime;let h=Math.floor(t/60),m=t%60;
+  selAP=h>=12?'PM':'AM';selH=h%12||12;selM=[0,15,30,45].reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a,0);
+  document.getElementById('modal-title').textContent='Evening reminder';
+  setAP(selAP);buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);buildWheel('wh-m',[0,15,30,45],selM);
+  document.getElementById('modal-bg').classList.add('open');
+}
+function cycleWeeklyDay(){const st=getSettings();st.weeklyDay=(st.weeklyDay+1)%7;renderSettings();persistSettings();}
+
+// ── Local notifications (fire while app is open; e.g. red zone) ──
+function ensureNotifyPermission(){
+  if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
+}
+function notify(title,body){
+  if('Notification'in window&&Notification.permission==='granted'){try{new Notification(title,{body});return;}catch(e){}}
+  showToast(body);
 }
 
 async function resetApp(){
   if(!confirm('Reset all tracked data? This deletes your entries and cannot be undone. (Your account stays.)'))return;
-  if(db&&S.userId){
-    try{
-      const snap=await userRef().collection('entries').get();
-      const batch=db.batch();
-      snap.docs.forEach(d=>batch.delete(d.ref));
-      await batch.commit();
-    }catch(e){showToast('Could not delete data');return;}
+  if(sb&&S.userId){
+    const {error}=await sb.from('entries').delete().eq('user_id',S.userId);
+    if(error){showToast('Could not delete data');return;}
   }
   localStorage.removeItem(KEY);
   location.reload();
 }
+
+// Escape user-supplied text before inserting into innerHTML (prevents stored XSS).
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 function showReport(){
   const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
@@ -1014,8 +1120,8 @@ function showReport(){
   const medD=entries.filter(e=>e.flags&&e.flags.includes('Medication ✓')).length;
   document.getElementById('rp-body').innerHTML=
     '<div class="rp-section"><div class="rp-sec-title">Patient</div>'+
-    '<div class="rp-row"><span class="rp-key">Name</span><span class="rp-val">'+name+'</span></div>'+
-    '<div class="rp-row"><span class="rp-key">Diagnosis</span><span class="rp-val">'+(S.dx||'Bipolar')+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">Name</span><span class="rp-val">'+escapeHtml(name)+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">Diagnosis</span><span class="rp-val">'+escapeHtml(S.dx||'Bipolar')+'</span></div>'+
     '<div class="rp-row"><span class="rp-key">Tracking period</span><span class="rp-val">'+fmtDate(S.startDate)+' – '+today+'</span></div>'+
     '<div class="rp-row"><span class="rp-key">Total days tracked</span><span class="rp-val">'+entries.length+'</span></div></div>'+
     '<div class="rp-section"><div class="rp-sec-title">Sleep — last 7 days</div>'+
@@ -1047,24 +1153,26 @@ function closeReportOutside(e){if(e.target===document.getElementById('report-bg'
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-let curUid=null;
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded',async()=>{
   const cfg=document.getElementById('auth-config');
-  if(!FB_CONFIGURED){
+  if(!SB_CONFIGURED){
     cfg.style.display='block';
-    cfg.innerHTML='⚠️ Backend not configured. Add your Firebase config in <code>firebase-config.js</code>, enable Email/Password auth, and publish the Firestore rules.';
+    cfg.innerHTML='⚠️ Backend not configured. Add your project URL and anon key in <code>supabase-config.js</code>, then run <code>supabase-schema.sql</code> in the SQL editor.';
     return;
   }
-  // Single source of truth for session: fires on load, sign-in, sign-out.
-  auth.onAuthStateChanged(async(user)=>{
-    if(user){
-      if(user.uid===curUid)return; // already loaded this user
-      curUid=user.uid;
-      await onAuthed(user);
-    }else{
-      curUid=null;
-    }
+  // Returning from a password-reset email: show the "set new password" screen
+  // instead of silently logging in with the temporary recovery session.
+  let recovering = location.hash.includes('type=recovery');
+  sb.auth.onAuthStateChange((event)=>{
+    if(event==='PASSWORD_RECOVERY'){recovering=true;enterRecoveryMode();}
   });
+  if(recovering){enterRecoveryMode();return;}
+
+  // Already signed in? Skip the auth screen.
+  const {data}=await sb.auth.getSession();
+  if(data.session){
+    await onAuthed(data.session.user);
+  }
 });
 </script>
 <!-- PWA Manifest -->

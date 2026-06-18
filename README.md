@@ -2,62 +2,45 @@
 
 Bipolar sleep and energy tracking prototype.
 
-Single-file web app (`index.html`) with **Firebase** for email/password auth and cloud data sync. Per-user tracking data lives in Cloud Firestore (protected by security rules); `localStorage` is only a session cache.
+Single-file web app (`index.html`) with **Supabase** for email/password auth and cloud data sync. Per-user tracking data lives in Postgres (protected by Row Level Security); `localStorage` is only a session cache.
 
 ## Setup
 
-1. **Create a Firebase project** at [console.firebase.google.com](https://console.firebase.google.com) (free Spark plan).
+1. **Create a Supabase project** at [supabase.com](https://supabase.com) (free tier).
 
-2. **Enable Email/Password auth** — *Build → Authentication → Get started → Sign-in method → Email/Password → Enable*. (No email confirmation needed; users can sign up and start immediately.)
+2. **Create the database schema** — open *SQL Editor* → *New query*, paste the contents of [`supabase-schema.sql`](supabase-schema.sql), and run it. This creates the `profiles` and `entries` tables with RLS policies.
 
-3. **Create Firestore** — *Build → Firestore Database → Create database* (start in production mode, any region).
-
-4. **Publish security rules** — *Firestore Database → Rules*, paste the contents of [`firestore.rules`](firestore.rules), and click **Publish**.
-
-5. **Register a Web app & copy config** — *Project settings (gear) → General → Your apps → Web (`</>`)*. Copy the `firebaseConfig` values into [`firebase-config.js`](firebase-config.js):
+3. **Add your credentials** — in *Project Settings → API*, copy the **Project URL** and **anon public** key into [`supabase-config.js`](supabase-config.js):
 
    ```js
-   window.FIREBASE_CONFIG = {
-     apiKey: '...',
-     authDomain: '...firebaseapp.com',
-     projectId: '...',
-     storageBucket: '...appspot.com',
-     messagingSenderId: '...',
-     appId: '...',
-   };
+   window.SUPABASE_URL = 'https://xxxx.supabase.co';
+   window.SUPABASE_ANON_KEY = 'eyJ...';
    ```
 
-   (These values are safe in the browser — access is restricted by the Firestore rules.)
+   (The anon key is safe to expose in the browser — access is restricted by RLS.)
 
-6. **Serve the folder** over HTTP (auth needs a real origin, not `file://`):
+4. **(Recommended) Simplify sign-up** — in *Authentication → Sign In / Providers → Email*, turn **off** "Confirm email" so users can sign up and start tracking immediately. Leave it on if you want email verification (the app will prompt users to confirm before signing in).
+
+5. **Serve the folder** over HTTP (auth needs a real origin, not `file://`):
 
    ```bash
    npx serve .
    # or: python -m http.server 8000
    ```
 
-   Open the printed URL, create an account, and start tracking. (Add your dev domain under *Authentication → Settings → Authorized domains* if needed — `localhost` is allowed by default.)
-
-## Data model (Firestore)
-
-```
-users/{uid}                       → { name, dx, startDate }
-users/{uid}/entries/{YYYY-MM-DD}  → { date, bedMin, wakeMin, sleepH, mood, zone, flags, ts }
-```
-
-One entry document per user per day (the date is the doc id, so re-saving a day overwrites it).
+   Open the printed URL, create an account, and start tracking.
 
 ## How it works
 
 - **Auth gate** → sign in / sign up (email + password).
-- **Onboarding** (first time only) → name + diagnosis, saved to the user profile doc.
-- **Today / History / Insights / Profile** → daily check-ins write to the `entries` subcollection.
-- **Sign out** clears the local cache; **Reset all data** deletes the account's entries from Firestore.
+- **Onboarding** (first time only) → name + diagnosis, saved to `profiles`.
+- **Today / History / Insights / Profile** → daily check-ins upsert to `entries` (one row per user per day).
+- **Sign out** clears the local cache; **Reset all data** deletes the account's entries from the database.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
 | `index.html` | The entire app (markup, styles, logic) |
-| `firebase-config.js` | Your Firebase web config |
-| `firestore.rules` | Firestore security rules (publish once) |
+| `supabase-config.js` | Your project URL + anon key |
+| `supabase-schema.sql` | Database schema + RLS policies (run once) |
