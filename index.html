@@ -488,7 +488,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
       <div class="pref-label">Notifications</div>
       <div class="pref-card">
         <div class="pref-row"><div><div class="pr-title">Evening reminder</div><div class="pr-sub tap" id="set-reminder-sub" onclick="openReminderTime()">9:00 PM daily</div></div><button class="toggle" id="tg-reminderOn" onclick="toggleSetting('reminderOn',this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Early wake alert</div><div class="pr-sub">Wake before 6 AM for 3+ days</div></div><button class="toggle" id="tg-earlyWakeOn" onclick="toggleSetting('earlyWakeOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Early wake alert</div><div class="pr-sub tap" id="set-earlywake-sub" onclick="openEarlyWake()">Wake before 6 AM for 3+ days</div></div><button class="toggle" id="tg-earlyWakeOn" onclick="toggleSetting('earlyWakeOn',this)"></button></div>
         <div class="pref-row"><div><div class="pr-title">Red zone alert</div><div class="pr-sub">Immediate when you log ±3</div></div><button class="toggle" id="tg-redZoneOn" onclick="toggleSetting('redZoneOn',this)"></button></div>
         <div class="pref-row"><div><div class="pr-title">Weekly summary</div><div class="pr-sub tap" id="set-weekly-sub" onclick="cycleWeeklyDay()">Every Sunday morning</div></div><button class="toggle" id="tg-weeklyOn" onclick="toggleSetting('weeklyOn',this)"></button></div>
       </div>
@@ -532,9 +532,9 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
     </div>
     <div class="wheel-outer">
       <div class="wheel-col"><div class="wcol-label">Hour</div><div class="wheel-scroll" id="wh-h"><div class="wheel-hl"></div></div></div>
-      <div class="wheel-colon">:</div>
-      <div class="wheel-col"><div class="wcol-label">Min</div><div class="wheel-scroll" id="wh-m"><div class="wheel-hl"></div></div></div>
-      <div class="ampm-col">
+      <div class="wheel-colon" id="wheel-colon">:</div>
+      <div class="wheel-col"><div class="wcol-label" id="wh-m-label">Min</div><div class="wheel-scroll" id="wh-m"><div class="wheel-hl"></div></div></div>
+      <div class="ampm-col" id="ampm-col">
         <button class="ampm-pill" id="ap-am" onclick="setAP('AM')">AM</button>
         <button class="ampm-pill on" id="ap-pm" onclick="setAP('PM')">PM</button>
       </div>
@@ -568,7 +568,7 @@ function save(s){localStorage.setItem(KEY,JSON.stringify(s));}
 // check-ins under the wrong day for anyone east/west of GMT.
 function localDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function todayKey(){return localDateKey(new Date());}
-const DEFAULT_SETTINGS={reminderOn:true,reminderTime:21*60,earlyWakeOn:true,redZoneOn:true,weeklyOn:false,weeklyDay:0};
+const DEFAULT_SETTINGS={reminderOn:true,reminderTime:21*60,earlyWakeOn:true,earlyWakeHour:6,earlyWakeDays:3,redZoneOn:true,weeklyOn:false,weeklyDay:0};
 function def(){return{onboarded:false,name:'',dx:'',startDate:todayKey(),entries:[],userId:null,email:'',settings:{...DEFAULT_SETTINGS}};}
 
 // ── Supabase client ──────────────────────────────────────────
@@ -895,10 +895,18 @@ function buildWheel(elId,items,selected){
 
 function setAP(v){selAP=v;document.getElementById('ap-am').classList.toggle('on',v==='AM');document.getElementById('ap-pm').classList.toggle('on',v==='PM');}
 
+// Toggle modal between time mode (hour:min + AM/PM) and a generic 2-wheel mode.
+// timeMode=true → show colon + AM/PM, label second wheel "Min".
+function setModalChrome(timeMode,minLabel){
+  document.getElementById('wheel-colon').style.display=timeMode?'':'none';
+  document.getElementById('ampm-col').style.display=timeMode?'':'none';
+  document.getElementById('wh-m-label').textContent=minLabel;
+}
+
 function openModal(t){
   pickerTarget=t;document.getElementById('modal-title').textContent=t==='bed'?'Bedtime':'Wake time';
   if(t==='bed'){selH=10;selM=30;selAP='PM';}else{selH=7;selM=0;selAP='AM';}
-  setAP(selAP);
+  setModalChrome(true,'Min');setAP(selAP);
   buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);
   buildWheel('wh-m',[0,15,30,45],selM);
   document.getElementById('modal-bg').classList.add('open');
@@ -908,6 +916,11 @@ function closeModalOutside(e){if(e.target===document.getElementById('modal-bg'))
 
 function confirmTime(){
   const h24=selH%12+(selAP==='PM'?12:0),mins=h24*60+selM;
+  if(pickerTarget==='earlyWake'){
+    // selH = wake-before hour (4–9, AM), selM reused as consecutive-day threshold (2–7)
+    const st=getSettings();st.earlyWakeHour=selH;st.earlyWakeDays=selM;
+    renderSettings();persistSettings();closeModal();return;
+  }
   if(pickerTarget==='reminder'){
     getSettings().reminderTime=mins;renderSettings();persistSettings();closeModal();return;
   }
@@ -1023,14 +1036,15 @@ function renderInsights(){
   const body=document.getElementById('insights-body');body.innerHTML='';
   if(entries.length<3){body.innerHTML='<div class="insight-card locked anim" style="margin:0 24px 12px;"><div class="badge muted" style="margin-bottom:12px;"><i class="ti ti-lock" style="font-size:11px"></i> Not enough data</div><p class="ic-body" style="color:var(--txt3)">Track at least 3 days to start seeing patterns.</p></div>';return;}
   const week=entries.slice(0,7);
-  const earlyWakes=week.filter(e=>e.wakeMin!==null&&e.wakeMin<6*60);
+  const ew=ewCfg();                                   // user-configured wake-before hour + day threshold
+  const earlyWakes=week.filter(e=>e.wakeMin!==null&&e.wakeMin<ew.h*60);
   const avgWakeArr=week.filter(e=>e.wakeMin!==null);
   const avgWake=avgWakeArr.length?avgWakeArr.reduce((a,e)=>a+e.wakeMin,0)/avgWakeArr.length:null;
   let wakeBody='',wakeSev='blue';
-  if(earlyWakes.length>=4){wakeSev='red';wakeBody='You\'ve woken before 6 AM <strong>'+earlyWakes.length+' times this week.</strong> Early morning waking is a key warning sign of approaching hypomania. Consider contacting your care team.';}
-  else if(earlyWakes.length>=2){wakeSev='yellow';wakeBody='Early waking <strong>'+earlyWakes.length+' times this week</strong> (before 6 AM). Sleep disruption often precedes mood shifts — monitor closely.';}
+  if(earlyWakes.length>=ew.d){wakeSev='red';wakeBody='You\'ve woken before '+ew.h+' AM <strong>'+earlyWakes.length+' times this week.</strong> Early morning waking is a key warning sign of approaching hypomania. Consider contacting your care team.';}
+  else if(earlyWakes.length>=2){wakeSev='yellow';wakeBody='Early waking <strong>'+earlyWakes.length+' times this week</strong> (before '+ew.h+' AM). Sleep disruption often precedes mood shifts — monitor closely.';}
   else{wakeBody='Sleep timing looks stable this week. Avg wake: <strong>'+fmtTime(avgWake?Math.round(avgWake):null)+'</strong>. Keep protecting your sleep schedule.';}
-  body.innerHTML+='<div class="insight-card anim"><div class="badge '+wakeSev+'" style="margin-bottom:12px;"><i class="ti ti-moon" style="font-size:11px"></i> Wake time</div><p class="ic-body">'+wakeBody+'</p><div class="ic-table"><div class="ic-row"><span class="ic-rl">Early wakes this week (&lt;6 AM)</span><span class="ic-rv" style="color:'+(earlyWakes.length>=4?'var(--red)':earlyWakes.length>=2?'var(--yellow)':'var(--green)')+'">'+earlyWakes.length+' day'+(earlyWakes.length!==1?'s':'')+'</span></div><div class="ic-row"><span class="ic-rl">Avg wake this week</span><span class="ic-rv">'+fmtTime(avgWake?Math.round(avgWake):null)+'</span></div><div class="ic-row"><span class="ic-rl">Most recent wake</span><span class="ic-rv">'+fmtTime(entries[0]&&entries[0].wakeMin)+'</span></div></div><div class="ic-meta" style="margin-top:10px">Based on last 7 entries</div></div>';
+  body.innerHTML+='<div class="insight-card anim"><div class="badge '+wakeSev+'" style="margin-bottom:12px;"><i class="ti ti-moon" style="font-size:11px"></i> Wake time</div><p class="ic-body">'+wakeBody+'</p><div class="ic-table"><div class="ic-row"><span class="ic-rl">Early wakes this week (&lt;'+ew.h+' AM)</span><span class="ic-rv" style="color:'+(earlyWakes.length>=ew.d?'var(--red)':earlyWakes.length>=2?'var(--yellow)':'var(--green)')+'">'+earlyWakes.length+' day'+(earlyWakes.length!==1?'s':'')+'</span></div><div class="ic-row"><span class="ic-rl">Avg wake this week</span><span class="ic-rv">'+fmtTime(avgWake?Math.round(avgWake):null)+'</span></div><div class="ic-row"><span class="ic-rl">Most recent wake</span><span class="ic-rv">'+fmtTime(entries[0]&&entries[0].wakeMin)+'</span></div></div><div class="ic-meta" style="margin-top:10px">Based on last 7 entries</div></div>';
   const mr=entries.slice(0,5).map(e=>e.mood).filter(m=>m!==null&&m!==undefined);
   if(mr.length>=2){
     const avg=Math.round(mr.reduce((a,b)=>a+b,0)/mr.length*10)/10;
@@ -1066,6 +1080,7 @@ function renderSettings(){
     const b=document.getElementById('tg-'+k);if(b)b.classList.toggle('on',!!st[k]);
   });
   const rs=document.getElementById('set-reminder-sub');if(rs)rs.firstChild&&(rs.childNodes[0].nodeValue=fmtTime(st.reminderTime)+' daily');
+  const ew=document.getElementById('set-earlywake-sub');if(ew)ew.childNodes[0].nodeValue=ewLabel();
   const ws=document.getElementById('set-weekly-sub');if(ws)ws.childNodes[0].nodeValue='Every '+WEEKDAYS[st.weeklyDay]+' morning';
 }
 function persistSettings(){save(S);dbUpsertProfile();}
@@ -1078,7 +1093,18 @@ function openReminderTime(){
   const t=getSettings().reminderTime;let h=Math.floor(t/60),m=t%60;
   selAP=h>=12?'PM':'AM';selH=h%12||12;selM=[0,15,30,45].reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a,0);
   document.getElementById('modal-title').textContent='Evening reminder';
-  setAP(selAP);buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);buildWheel('wh-m',[0,15,30,45],selM);
+  setModalChrome(true,'Min');setAP(selAP);buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);buildWheel('wh-m',[0,15,30,45],selM);
+  document.getElementById('modal-bg').classList.add('open');
+}
+// Effective early-wake config with defaults for accounts created before these keys existed.
+function ewCfg(){const s={...DEFAULT_SETTINGS,...getSettings()};return{h:s.earlyWakeHour,d:s.earlyWakeDays};}
+function ewLabel(){const c=ewCfg();return'Wake before '+c.h+' AM for '+c.d+'+ days';}
+function openEarlyWake(){
+  pickerTarget='earlyWake';const c=ewCfg();selH=c.h;selM=c.d;selAP='AM';
+  document.getElementById('modal-title').textContent='Early wake alert';
+  setModalChrome(false,'Days');
+  buildWheel('wh-h',[4,5,6,7,8,9],selH);   // wake-before hour (AM)
+  buildWheel('wh-m',[2,3,4,5,6,7],selM);    // consecutive days threshold
   document.getElementById('modal-bg').classList.add('open');
 }
 function cycleWeeklyDay(){const st=getSettings();st.weeklyDay=(st.weeklyDay+1)%7;renderSettings();persistSettings();}
@@ -1113,7 +1139,8 @@ function showReport(){
   const avgSleep=week.filter(e=>e.sleepH).reduce((a,e)=>a+e.sleepH,0)/Math.max(week.filter(e=>e.sleepH).length,1);
   const avgWakeArr=week.filter(e=>e.wakeMin!==null);
   const avgWake=avgWakeArr.length?avgWakeArr.reduce((a,e)=>a+e.wakeMin,0)/avgWakeArr.length:null;
-  const ew=week.filter(e=>e.wakeMin!==null&&e.wakeMin<6*60).length;
+  const ewc=ewCfg();
+  const ew=week.filter(e=>e.wakeMin!==null&&e.wakeMin<ewc.h*60).length;
   const moodArr=week.filter(e=>e.mood!==null&&e.mood!==undefined);
   const moodAvg=moodArr.length?moodArr.reduce((a,e)=>a+e.mood,0)/moodArr.length:null;
   const redD=entries.filter(e=>e.zone==='red').length,yelD=entries.filter(e=>e.zone==='yellow').length,grnD=entries.filter(e=>e.zone==='green').length;
@@ -1127,7 +1154,7 @@ function showReport(){
     '<div class="rp-section"><div class="rp-sec-title">Sleep — last 7 days</div>'+
     '<div class="rp-row"><span class="rp-key">Avg sleep duration</span><span class="rp-val">'+Math.round(avgSleep*10)/10+'h</span></div>'+
     '<div class="rp-row"><span class="rp-key">Avg wake time</span><span class="rp-val">'+fmtTime(avgWake?Math.round(avgWake):null)+'</span></div>'+
-    '<div class="rp-row"><span class="rp-key">Early wakes (&lt;6 AM)</span><span class="rp-val" style="color:'+(ew>=3?'var(--red)':ew>=1?'var(--yellow)':'var(--green)')+'">'+ew+' of 7 days</span></div></div>'+
+    '<div class="rp-row"><span class="rp-key">Early wakes (&lt;'+ewc.h+' AM)</span><span class="rp-val" style="color:'+(ew>=ewc.d?'var(--red)':ew>=1?'var(--yellow)':'var(--green)')+'">'+ew+' of 7 days</span></div></div>'+
     '<div class="rp-section"><div class="rp-sec-title">Mood distribution — all time</div>'+
     '<div class="rp-row"><span class="rp-key">Green zone (−1 to +1)</span><span class="rp-val" style="color:var(--green)">'+grnD+' days</span></div>'+
     '<div class="rp-row"><span class="rp-key">Yellow zone (±2)</span><span class="rp-val" style="color:var(--yellow)">'+yelD+' days</span></div>'+
