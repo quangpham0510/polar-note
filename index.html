@@ -101,6 +101,15 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .ob-sel-btn{padding:14px 18px;background:var(--s1);border:1.5px solid var(--s3);border-radius:var(--r-md);font-family:var(--sans);font-size:15px;color:var(--txt2);cursor:pointer;text-align:left;transition:all .15s;}
 .ob-sel-btn.on{background:var(--blue-dim);border-color:var(--blue);color:var(--txt);}
 
+/* AUTH */
+#page-auth{background:var(--bg);}
+.auth-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 32px 44px;}
+.auth-brand{margin-bottom:28px;}
+.auth-err{font-size:13px;color:var(--red);min-height:18px;margin:2px 2px 10px;line-height:1.4;}
+.auth-note{font-size:13px;color:var(--green);min-height:0;margin:2px 2px 10px;line-height:1.4;}
+.auth-config{margin-top:18px;padding:14px 16px;background:var(--yellow-dim);border-radius:var(--r-md);font-size:13px;color:var(--yellow);line-height:1.5;}
+.auth-config code{font-family:monospace;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px;}
+
 /* TODAY FLOW */
 #page-today{padding-bottom:0;}
 .flow-nav{display:flex;justify-content:space-between;align-items:center;padding:10px 24px 6px;flex-shrink:0;}
@@ -314,8 +323,25 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
     <div class="sb-icons"><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div>
   </div>
 
+  <!-- AUTH -->
+  <div class="page active" id="page-auth">
+    <div class="auth-wrap">
+      <div class="auth-brand">
+        <div class="ob-icon">🌊</div>
+        <div class="ob-h">Welcome to <em>PolarNote</em></div>
+        <div class="ob-body" id="auth-sub" style="margin-bottom:0;">Sign in to sync your tracking across devices.</div>
+      </div>
+      <input class="ob-input" id="auth-email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
+      <input class="ob-input" id="auth-pass" type="password" placeholder="Password (min. 6 characters)" autocomplete="current-password">
+      <div class="auth-err" id="auth-err"></div>
+      <button class="ob-cta" id="auth-cta" onclick="authSubmit()">Sign in</button>
+      <button class="ob-skip" id="auth-toggle" onclick="authToggleMode()">Don't have an account? Sign up</button>
+      <div class="auth-config" id="auth-config" style="display:none;"></div>
+    </div>
+  </div>
+
   <!-- ONBOARDING -->
-  <div class="page active" id="page-onboard" style="padding-bottom:0;">
+  <div class="page" id="page-onboard" style="padding-bottom:0;">
     <div class="ob-steps">
       <div class="ob-step active" id="obs-0">
         <div class="ob-icon">🌊</div>
@@ -478,6 +504,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
       </div>
     </div>
     <button class="export-btn anim" onclick="showReport()"><i class="ti ti-file-text"></i>Preview clinic report</button>
+    <button class="export-btn anim" onclick="signOut()"><i class="ti ti-logout"></i>Sign out</button>
     <button class="danger-btn anim" onclick="resetApp()"><i class="ti ti-trash"></i>Reset all data</button>
     <div class="version">PolarNote · v0.1 Beta · For validation only</div>
   </div>
@@ -525,11 +552,113 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 
 <div class="toast" id="toast"></div>
 
+<!-- Firebase SDK (compat) + credentials -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
 <script>
 const KEY='polarnote_v1';
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||def();}catch{return def();}}
 function save(s){localStorage.setItem(KEY,JSON.stringify(s));}
-function def(){return{onboarded:false,name:'',dx:'',startDate:new Date().toISOString().slice(0,10),entries:[]};}
+function def(){return{onboarded:false,name:'',dx:'',startDate:new Date().toISOString().slice(0,10),entries:[],userId:null,email:''};}
+
+// ── Firebase client ──────────────────────────────────────────
+const FB_CONFIGURED = !!(window.firebase && window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && !window.FIREBASE_CONFIG.apiKey.includes('YOUR_'));
+let auth=null, db=null;
+if(FB_CONFIGURED){
+  firebase.initializeApp(window.FIREBASE_CONFIG);
+  auth=firebase.auth();
+  db=firebase.firestore();
+}
+
+// ── DB layer (Firestore) ─────────────────────────────────────
+// profile  → users/{uid}            { name, dx, startDate }
+// entries  → users/{uid}/entries/{date}  (one doc per day)
+function userRef(){return db.collection('users').doc(S.userId);}
+
+async function loadFromDB(user){
+  const uid=user.uid;
+  const ref=db.collection('users').doc(uid);
+  const [profSnap,entSnap]=await Promise.all([
+    ref.get(),
+    ref.collection('entries').orderBy('date').get(),
+  ]);
+  const prof=profSnap.exists?profSnap.data():null;
+  S={
+    onboarded: !!(prof && prof.name),
+    name: prof?.name || '',
+    dx: prof?.dx || '',
+    startDate: prof?.startDate || new Date().toISOString().slice(0,10),
+    entries: entSnap.docs.map(d=>d.data()),
+    userId: uid,
+    email: user.email || '',
+  };
+  save(S); // local cache
+}
+
+async function dbUpsertProfile(){
+  if(!db||!S.userId)return;
+  try{await userRef().set({name:S.name,dx:S.dx,startDate:S.startDate},{merge:true});}
+  catch(e){showToast('Profile sync failed');}
+}
+
+async function dbUpsertEntry(e){
+  if(!db||!S.userId)return;
+  try{await userRef().collection('entries').doc(e.date).set(e);}
+  catch(ex){showToast('Sync failed — saved offline');}
+}
+
+// ── Auth ─────────────────────────────────────────────────────
+let authMode='signin';
+function authToggleMode(){
+  authMode = authMode==='signin' ? 'signup' : 'signin';
+  document.getElementById('auth-cta').textContent = authMode==='signin'?'Sign in':'Create account';
+  document.getElementById('auth-toggle').textContent = authMode==='signin'?"Don't have an account? Sign up":'Already have an account? Sign in';
+  document.getElementById('auth-sub').textContent = authMode==='signin'?'Sign in to sync your tracking across devices.':'Create an account to start tracking securely.';
+  document.getElementById('auth-err').textContent='';
+}
+async function authSubmit(){
+  const err=document.getElementById('auth-err'),btn=document.getElementById('auth-cta');
+  err.className='auth-err';err.textContent='';
+  if(!auth){err.textContent='Firebase not configured. See firebase-config.js.';return;}
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  if(!email||!pass){err.textContent='Enter your email and password.';return;}
+  if(pass.length<6){err.textContent='Password must be at least 6 characters.';return;}
+  btn.disabled=true;btn.style.opacity='.6';btn.textContent='Please wait…';
+  try{
+    // onAuthStateChanged drives loading + routing after success.
+    if(authMode==='signup') await auth.createUserWithEmailAndPassword(email,pass);
+    else                    await auth.signInWithEmailAndPassword(email,pass);
+  }catch(ex){
+    err.className='auth-err';err.textContent=ex.message||'Authentication failed.';
+  }finally{
+    btn.disabled=false;btn.style.opacity='1';
+    btn.textContent=authMode==='signin'?'Sign in':'Create account';
+  }
+}
+
+async function onAuthed(user){
+  await loadFromDB(user);
+  document.getElementById('page-auth').classList.remove('active');
+  if(S.onboarded){
+    document.getElementById('page-onboard').classList.remove('active');
+    document.getElementById('tabbar').style.display='flex';
+    switchTab('today',document.querySelector('.tbtn'));
+    updateProfileUI();renderHistory();renderInsights();
+  } else {
+    obCur=0;
+    document.getElementById('page-onboard').classList.add('active');
+  }
+}
+
+async function signOut(){
+  if(auth)await auth.signOut();
+  localStorage.removeItem(KEY);
+  location.reload();
+}
 let S=load();
 
 function seedDemo(){
@@ -577,7 +706,7 @@ function selDx(btn){document.querySelectorAll('.ob-sel-btn').forEach(b=>b.classL
 function obNext(){
   if(obCur===3){
     S.name=document.getElementById('ob-name').value.trim()||'Friend';
-    S.dx=selDxVal||'Bipolar';S.onboarded=true;save(S);seedDemo();launchApp();return;
+    S.dx=selDxVal||'Bipolar';S.onboarded=true;save(S);dbUpsertProfile();launchApp();return;
   }
   const cur=document.getElementById('obs-'+obCur);
   cur.classList.remove('active');cur.classList.add('exit');
@@ -673,8 +802,10 @@ function saveEntry(){
   const today=new Date().toISOString().slice(0,10);
   if(S.entries.some(e=>e.date===today))return;
   const flags=Array.from(document.querySelectorAll('.flag-chip.on')).map(b=>b.textContent);
-  S.entries.push({date:today,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,ts:Date.now()});
+  const entry={date:today,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,ts:Date.now()};
+  S.entries.push(entry);
   save(S);
+  dbUpsertEntry(entry);
 }
 
 let pickerTarget='bed',selH=10,selM=0,selAP='PM';
@@ -854,7 +985,19 @@ function updateProfileUI(){
   document.getElementById('prof-dx').textContent=(S.dx||'Bipolar')+' · Tracking since '+fmtDate(S.startDate);
 }
 
-function resetApp(){if(confirm('Reset all data? This cannot be undone.')){localStorage.removeItem(KEY);location.reload();}}
+async function resetApp(){
+  if(!confirm('Reset all tracked data? This deletes your entries and cannot be undone. (Your account stays.)'))return;
+  if(db&&S.userId){
+    try{
+      const snap=await userRef().collection('entries').get();
+      const batch=db.batch();
+      snap.docs.forEach(d=>batch.delete(d.ref));
+      await batch.commit();
+    }catch(e){showToast('Could not delete data');return;}
+  }
+  localStorage.removeItem(KEY);
+  location.reload();
+}
 
 function showReport(){
   const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
@@ -904,14 +1047,24 @@ function closeReportOutside(e){if(e.target===document.getElementById('report-bg'
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
+let curUid=null;
 window.addEventListener('DOMContentLoaded',()=>{
-  if(S.onboarded){
-    seedDemo();
-    document.getElementById('page-onboard').classList.remove('active');
-    document.getElementById('tabbar').style.display='flex';
-    switchTab('today',document.querySelector('.tbtn'));
-    updateProfileUI();
+  const cfg=document.getElementById('auth-config');
+  if(!FB_CONFIGURED){
+    cfg.style.display='block';
+    cfg.innerHTML='⚠️ Backend not configured. Add your Firebase config in <code>firebase-config.js</code>, enable Email/Password auth, and publish the Firestore rules.';
+    return;
   }
+  // Single source of truth for session: fires on load, sign-in, sign-out.
+  auth.onAuthStateChanged(async(user)=>{
+    if(user){
+      if(user.uid===curUid)return; // already loaded this user
+      curUid=user.uid;
+      await onAuthed(user);
+    }else{
+      curUid=null;
+    }
+  });
 });
 </script>
 <!-- PWA Manifest -->
