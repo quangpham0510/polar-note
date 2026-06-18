@@ -259,6 +259,12 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .prof-av{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#5856D6);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:22px;font-weight:300;flex-shrink:0;}
 .prof-name{font-family:var(--serif);font-size:24px;font-weight:400;letter-spacing:-.3px;}
 .prof-dx{font-size:13px;color:var(--txt3);margin-top:2px;font-weight:300;}
+.prof-meta{flex:1;min-width:0;}
+.prof-edit{margin-left:auto;flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--s1);border:1px solid var(--s3);color:var(--txt2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:background .15s;}
+.prof-edit:active{background:var(--s3);}
+.epf-body{padding:20px;}
+.epf-label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);margin:0 0 8px 2px;font-weight:600;}
+.epf-label:not(:first-child){margin-top:18px;}
 .pref-sec{padding:0 24px;margin-bottom:20px;}
 .pref-label{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;}
 .pref-card{background:var(--s1);border-radius:var(--r-md);overflow:hidden;}
@@ -501,7 +507,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 
   <!-- PROFILE -->
   <div class="page" id="page-profile" style="padding-bottom:100px;">
-    <div class="prof-hdr anim"><div class="prof-av" id="prof-av">?</div><div><div class="prof-name" id="prof-name">Your Name</div><div class="prof-dx" id="prof-dx">Bipolar · Tracking since today</div></div></div>
+    <div class="prof-hdr anim"><div class="prof-av" id="prof-av">?</div><div class="prof-meta"><div class="prof-name" id="prof-name">Your Name</div><div class="prof-dx" id="prof-dx">Bipolar · Tracking since today</div></div><button class="prof-edit" onclick="openEditProfile()" aria-label="Edit profile"><i class="ti ti-pencil"></i></button></div>
     <div class="pref-sec anim">
       <div class="pref-label">Notifications</div>
       <div class="pref-card">
@@ -555,6 +561,29 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
       <div class="ampm-col" id="ampm-col">
         <button class="ampm-pill" id="ap-am" onclick="setAP('AM')">AM</button>
         <button class="ampm-pill on" id="ap-pm" onclick="setAP('PM')">PM</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-bg" id="editprof-bg" onclick="closeEditProfileOutside(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <button class="modal-cancel" onclick="closeEditProfile()">Cancel</button>
+      <div class="modal-htitle">Edit profile</div>
+      <button class="modal-done" onclick="saveEditProfile()">Save</button>
+    </div>
+    <div class="epf-body">
+      <label class="epf-label" for="epf-name">Name</label>
+      <input class="ob-input" id="epf-name" type="text" placeholder="Your first name" maxlength="30" autocomplete="given-name">
+      <label class="epf-label">Diagnosis</label>
+      <div class="ob-sel-group" id="epf-dx-group">
+        <button class="ob-sel-btn epf-sel-btn" data-dx="Bipolar I" onclick="selEditDx(this)">Bipolar I</button>
+        <button class="ob-sel-btn epf-sel-btn" data-dx="Bipolar II" onclick="selEditDx(this)">Bipolar II</button>
+        <button class="ob-sel-btn epf-sel-btn" data-dx="Cyclothymia" onclick="selEditDx(this)">Cyclothymia</button>
+        <button class="ob-sel-btn epf-sel-btn" data-dx="Unspecified / exploring" onclick="selEditDx(this)">Unspecified / exploring</button>
       </div>
     </div>
   </div>
@@ -1150,6 +1179,25 @@ function updateProfileUI(){
   document.getElementById('prof-av').textContent=(n[0]||'?').toUpperCase();
   document.getElementById('prof-dx').textContent=(S.dx||'Bipolar')+' · Tracking since '+fmtDate(S.startDate);
   renderSettings();
+}
+
+// ── Edit profile (name + diagnosis) ──────────────────────────
+function selEditDx(btn){document.querySelectorAll('.epf-sel-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function openEditProfile(){
+  document.getElementById('epf-name').value=S.name||'';
+  const cur=S.dx||'';
+  document.querySelectorAll('.epf-sel-btn').forEach(b=>b.classList.toggle('on',b.dataset.dx===cur));
+  document.getElementById('editprof-bg').classList.add('open');
+}
+function closeEditProfile(){document.getElementById('editprof-bg').classList.remove('open');}
+function closeEditProfileOutside(e){if(e.target===document.getElementById('editprof-bg'))closeEditProfile();}
+function saveEditProfile(){
+  const name=document.getElementById('epf-name').value.trim();
+  if(!name){showToast('Please enter your name');return;}
+  const sel=document.querySelector('.epf-sel-btn.on');
+  S.name=name;
+  if(sel)S.dx=sel.dataset.dx;
+  save(S);dbUpsertProfile();updateProfileUI();closeEditProfile();showToast('Profile updated');
 }
 
 // ── Notification settings (A: persisted prefs + selectable time/day) ──
