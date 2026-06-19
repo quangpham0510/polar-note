@@ -317,6 +317,14 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .export-btn:hover{background:var(--blue-dim);}
 #install-btn{border-color:var(--green);color:var(--green);}
 #install-btn:hover{background:var(--green-dim);}
+.install-bar{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:250;display:none;align-items:center;gap:12px;padding:11px 12px 11px 14px;background:rgba(28,28,30,.94);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:.5px solid rgba(255,255,255,.14);border-radius:16px;box-shadow:0 10px 34px rgba(0,0,0,.45);}
+.install-bar.show{display:flex;}
+.ib-icon{flex:0 0 38px;width:38px;height:38px;border-radius:10px;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.ib-text{flex:1;min-width:0;}
+.ib-title{font-size:14px;font-weight:600;color:var(--txt);letter-spacing:-.01em;}
+.ib-sub{font-size:12px;color:var(--txt2);margin-top:1px;}
+.ib-cta{flex:0 0 auto;padding:8px 18px;border:none;border-radius:980px;background:var(--green);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;}
+.ib-close{flex:0 0 auto;background:none;border:none;color:var(--txt3);font-size:24px;line-height:1;cursor:pointer;padding:0 4px;}
 .danger-btn{margin:8px 24px;width:calc(100% - 48px);padding:14px;border:1.5px solid rgba(255,69,58,.3);border-radius:var(--r-md);background:none;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
 .version{text-align:center;font-size:12px;color:var(--txt3);padding:20px;font-weight:300;}
 
@@ -576,6 +584,14 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
     <button class="export-btn anim" onclick="signOut()"><i class="ti ti-logout"></i>Sign out</button>
     <button class="danger-btn anim" onclick="resetApp()"><i class="ti ti-trash"></i>Reset all data</button>
     <div class="version">PolarNote · v0.1 Beta · For validation only</div>
+  </div>
+
+  <!-- Floating install banner — shows on every screen until installed or dismissed -->
+  <div class="install-bar" id="install-bar">
+    <div class="ib-icon"><i class="ti ti-device-mobile-down"></i></div>
+    <div class="ib-text"><div class="ib-title">Install PolarNote</div><div class="ib-sub">Add it to your home screen</div></div>
+    <button class="ib-cta" onclick="installApp()">Install</button>
+    <button class="ib-close" onclick="dismissInstallBar()" aria-label="Dismiss">&times;</button>
   </div>
 
   <!-- TAB BAR -->
@@ -1517,25 +1533,36 @@ window.addEventListener('DOMContentLoaded',async()=>{
     || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
   const standalone = ()=> window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone===true;
+  const DISMISS_KEY='pn_install_dismissed';
   let deferred=null;
   const btn=()=>document.getElementById('install-btn');
-  const show=()=>{const b=btn();if(b&&!standalone())b.style.display='flex';};
-  const hide=()=>{const b=btn();if(b)b.style.display='none';};
+  const bar=()=>document.getElementById('install-bar');
 
-  // Android/Chrome: capture the prompt so the button can trigger it on demand.
-  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;show();});
-  window.addEventListener('appinstalled',()=>{deferred=null;hide();if(window.showToast)showToast('App installed');});
-
-  // Always surface the button whenever the app isn't already installed — desktop
+  // Surface both entry points whenever the app isn't already installed — desktop
   // Chrome and iOS Safari often never fire beforeinstallprompt, so we can't rely on
-  // it for visibility. installApp() then picks the right flow per platform.
-  document.addEventListener('DOMContentLoaded',()=>{ if(!standalone()) show(); });
+  // it for visibility. The floating banner shows on every screen (until dismissed);
+  // the Profile button stays as a permanent fallback. installApp() picks the flow.
+  function refresh(){
+    if(standalone()){return hideAll();}
+    const b=btn();if(b)b.style.display='flex';
+    const bn=bar();if(bn&&localStorage.getItem(DISMISS_KEY)!=='1')bn.classList.add('show');
+  }
+  function hideAll(){
+    const b=btn();if(b)b.style.display='none';
+    const bn=bar();if(bn)bn.classList.remove('show');
+  }
+
+  // Android/Chrome: capture the prompt so the button/banner can trigger it on demand.
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;refresh();});
+  window.addEventListener('appinstalled',()=>{deferred=null;hideAll();if(window.showToast)showToast('App installed');});
+  document.addEventListener('DOMContentLoaded',refresh);
 
   window.installApp=async function(){
-    if(deferred){deferred.prompt();const r=await deferred.userChoice;deferred=null;if(r&&r.outcome==='accepted')hide();return;}
+    if(deferred){deferred.prompt();const r=await deferred.userChoice;deferred=null;if(r&&r.outcome==='accepted')hideAll();return;}
     if(isIOS){document.getElementById('iosinstall-bg').classList.add('open');return;}
     if(window.showToast)showToast('Open your browser menu → "Add to Home screen"');
   };
+  window.dismissInstallBar=function(){const bn=bar();if(bn)bn.classList.remove('show');try{localStorage.setItem(DISMISS_KEY,'1');}catch(e){}};
   window.closeIOSInstall=function(){document.getElementById('iosinstall-bg').classList.remove('open');};
   window.closeIOSInstallOutside=function(e){if(e.target===document.getElementById('iosinstall-bg'))window.closeIOSInstall();};
 })();
