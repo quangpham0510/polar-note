@@ -422,7 +422,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
     </div>
     <div class="ob-cta-wrap">
       <button class="ob-cta" id="ob-cta" onclick="obNext()">Get started</button>
-      <button class="ob-skip" id="ob-skip" onclick="obNext()">Skip</button>
+      <button class="ob-skip" id="ob-skip" onclick="obSkip()">Skip</button>
     </div>
   </div>
 
@@ -469,15 +469,15 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
         <div class="step-h">Anything <em>else?</em></div>
         <div class="step-sub">Select all that apply — helps reveal patterns over time.</div>
         <div class="flag-wrap">
-          <button class="flag-chip" onclick="this.classList.toggle('on')">Racing thoughts</button>
-          <button class="flag-chip" onclick="this.classList.toggle('on')">Irritable</button>
-          <button class="flag-chip" onclick="this.classList.toggle('on')">Low motivation</button>
-          <button class="flag-chip" onclick="this.classList.toggle('on')">Spending ↑</button>
-          <button class="flag-chip" onclick="this.classList.toggle('on')">Withdrew socially</button>
-          <button class="flag-chip" onclick="this.classList.toggle('on')">Medication ✓</button>
-          <button class="flag-chip" onclick="this.classList.toggle('on')">Appetite change</button>
-          <button class="flag-chip" onclick="this.classList.toggle('on')">Hard to focus</button>
-          <button class="flag-chip" onclick="this.classList.toggle('on')">Risky behavior</button>
+          <button class="flag-chip" data-flag="Racing thoughts" onclick="this.classList.toggle('on')">Racing thoughts</button>
+          <button class="flag-chip" data-flag="Irritable" onclick="this.classList.toggle('on')">Irritable</button>
+          <button class="flag-chip" data-flag="Low motivation" onclick="this.classList.toggle('on')">Low motivation</button>
+          <button class="flag-chip" data-flag="Spending ↑" onclick="this.classList.toggle('on')">Spending ↑</button>
+          <button class="flag-chip" data-flag="Withdrew socially" onclick="this.classList.toggle('on')">Withdrew socially</button>
+          <button class="flag-chip" data-flag="Medication ✓" onclick="this.classList.toggle('on')">Medication ✓</button>
+          <button class="flag-chip" data-flag="Appetite change" onclick="this.classList.toggle('on')">Appetite change</button>
+          <button class="flag-chip" data-flag="Hard to focus" onclick="this.classList.toggle('on')">Hard to focus</button>
+          <button class="flag-chip" data-flag="Risky behavior" onclick="this.classList.toggle('on')">Risky behavior</button>
         </div>
       </div>
       <div class="step" id="step-done">
@@ -812,7 +812,13 @@ async function authSubmit(){
 
 async function onAuthed(user){
   await loadFromDB(user);
-  flushQueue();              // replay any writes made while offline
+  // Replay offline writes BEFORE picking a screen. A profile created while offline
+  // sits in the queue; if we decided the screen first, the user would re-see
+  // onboarding even though their profile is about to sync. Flush, then re-read DB
+  // so onboarding state reflects the just-synced profile.
+  const hadPendingProfile = pending().some(op=>op.type==='profile');
+  await flushQueue();
+  if(!S.onboarded && hadPendingProfile) await loadFromDB(user);
   startReminderLoop();       // begin checking scheduled notifications
   document.getElementById('page-auth').classList.remove('active');
   if(S.onboarded){
@@ -839,20 +845,40 @@ let S=load();
   setTimeout(tick,10000);
 })();
 
-let obCur=0,selDxVal='';
+let obCur=0,selDxVal='',obBusy=false;
 function selDx(btn){document.querySelectorAll('.ob-sel-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');selDxVal=btn.dataset.dx;}
-function obNext(){
-  if(obCur===3){
-    S.name=document.getElementById('ob-name').value.trim()||'Friend';
-    S.dx=selDxVal||'Bipolar';S.onboarded=true;save(S);dbUpsertProfile();launchApp();return;
-  }
+
+// Persist the profile and enter the app. Defaults cover the "Skip setup" path.
+function finishOnboarding(){
+  S.name=document.getElementById('ob-name').value.trim()||'Friend';
+  S.dx=selDxVal||'Bipolar';S.onboarded=true;save(S);dbUpsertProfile();launchApp();
+}
+
+// Animate from the current step to `n` (supports multi-step jumps for Skip).
+function goToStep(n){
+  if(n===obCur)return;
   const cur=document.getElementById('obs-'+obCur);
   cur.classList.remove('active');cur.classList.add('exit');
-  obCur++;
+  obCur=n;
   setTimeout(()=>cur.classList.remove('exit'),300);
   setTimeout(()=>document.getElementById('obs-'+obCur).classList.add('active'),20);
-  if(obCur===3){document.getElementById('ob-cta').textContent='Start tracking';document.getElementById('ob-skip').textContent='Skip setup';}
-  else{document.getElementById('ob-cta').textContent='Continue';}
+  document.getElementById('ob-cta').textContent=obCur===3?'Start tracking':'Continue';
+  if(obCur===3)document.getElementById('ob-skip').textContent='Skip setup';
+}
+
+function obNext(){
+  if(obBusy)return;                       // ignore rapid double-taps mid-transition
+  if(obCur===3){obBusy=true;finishOnboarding();return;}
+  obBusy=true;goToStep(obCur+1);
+  setTimeout(()=>{obBusy=false;},320);    // matches the 300ms step transition
+}
+
+// Skip the intro tour straight to profile setup; on the setup step, finish with defaults.
+function obSkip(){
+  if(obBusy)return;
+  if(obCur===3){obBusy=true;finishOnboarding();return;}
+  obBusy=true;goToStep(3);
+  setTimeout(()=>{obBusy=false;},320);
 }
 
 function launchApp(){
@@ -915,7 +941,7 @@ function prefillFlow(e){
   if(e.wakeMin!=null){todayWakeMin=e.wakeMin;document.getElementById('wake-disp').innerHTML=tileLabel(e.wakeMin);document.getElementById('tile-wake').classList.add('set');evalWake(Math.floor(e.wakeMin/60),e.wakeMin%60);}
   if(todayBedMin!=null&&todayWakeMin!=null)calcSleep();
   if(e.mood!=null&&e.mood!==undefined){const chip=document.querySelector('.mood-chip[data-v="'+e.mood+'"]');if(chip)pickMood(chip);}
-  (e.flags||[]).forEach(f=>document.querySelectorAll('.flag-chip').forEach(c=>{if(c.textContent===f)c.classList.add('on');}));
+  (e.flags||[]).forEach(f=>document.querySelectorAll('.flag-chip').forEach(c=>{if(c.dataset.flag===f)c.classList.add('on');}));
 }
 
 function resetFlow(){
@@ -984,7 +1010,7 @@ function flowNext(){
 function flowBack(){if(flowCur>0){flowCur--;showFlowStep(flowCur);}}
 
 function saveEntry(){
-  const flags=Array.from(document.querySelectorAll('.flag-chip.on')).map(b=>b.textContent);
+  const flags=Array.from(document.querySelectorAll('.flag-chip.on')).map(b=>b.dataset.flag);
   const entry={date:flowDate,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,ts:Date.now()};
   // Upsert in place: editing a day or backfilling replaces, never duplicates.
   const idx=S.entries.findIndex(e=>e.date===flowDate);
