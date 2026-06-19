@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>PolarNote</title>
 
 <!-- Apple PWA -->
@@ -52,7 +52,7 @@
 }
 html,body{height:100%;overflow:hidden;background:#000;}
 body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased;}
-.app{position:fixed;inset:0;max-width:430px;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
+.app{position:fixed;inset:0;max-width:430px;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
 .sb{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;font-size:15px;font-weight:600;flex-shrink:0;}
 .sb-icons{display:flex;gap:6px;align-items:center;}
 .sb-icons i{font-size:13px;}
@@ -61,7 +61,10 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .page.active{display:flex;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .anim{animation:fadeUp .3s cubic-bezier(.4,0,.2,1) both;}
-.tabbar{display:flex;background:rgba(0,0,0,.88);backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--border);padding:8px 0 28px;flex-shrink:0;}
+/* Accessibility: respect users who reduce motion (Apple HIG) */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+/* Tab bar clears the home indicator via safe-area inset, keeps comfortable gap on non-notch */
+.tabbar{display:flex;background:rgba(0,0,0,.88);backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--border);padding:8px 0;padding-bottom:max(28px,calc(10px + env(safe-area-inset-bottom)));flex-shrink:0;}
 .tbtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:5px 0;font-family:var(--sans);font-size:10px;font-weight:500;color:var(--txt3);transition:color .2s;letter-spacing:.02em;}
 .tbtn i{font-size:22px;line-height:1;}
 .tbtn.on{color:var(--blue);}
@@ -131,12 +134,20 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .step-h em{font-style:italic;color:var(--txt2);}
 .step-sub{font-size:15px;color:var(--txt2);line-height:1.5;margin-bottom:24px;font-weight:300;}
 .time-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-.time-tile{background:var(--s1);border-radius:var(--r-md);padding:16px;cursor:pointer;border:1.5px solid transparent;transition:border-color .2s,background .15s;}
+.time-tile{background:var(--s1);border-radius:var(--r-md);padding:16px;cursor:pointer;border:1.5px solid transparent;transition:border-color .2s,background .15s,transform .12s;}
 .time-tile:hover{background:var(--s2);}
+.time-tile:active{background:var(--s2);transform:scale(.98);}
 .time-tile.set{border-color:var(--blue);}
-.tt-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;}
+.tt-head{display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.tt-ico{font-size:14px;color:var(--txt3);transition:color .2s;}
+.time-tile.set .tt-ico{color:var(--blue);}
+.tt-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);}
+.tt-chev{margin-left:auto;font-size:16px;color:var(--txt3);opacity:.55;transition:transform .15s;}
+.time-tile:active .tt-chev{transform:translateX(2px);}
 .tt-val{font-family:var(--serif);font-size:30px;font-weight:300;color:var(--txt3);line-height:1;letter-spacing:-1px;transition:color .2s;}
 .time-tile.set .tt-val{color:var(--txt);}
+/* Empty state: a tappable blue control (iOS), not a dead dash */
+.time-tile:not(.set) .tt-val{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--blue);letter-spacing:0;}
 .tt-ap{font-size:14px;font-weight:400;margin-left:3px;color:var(--txt2);}
 .sleep-result{background:var(--s1);border-radius:var(--r-md);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;opacity:0;transition:opacity .3s;margin-bottom:10px;}
 .sleep-result.show{opacity:1;}
@@ -260,7 +271,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .prof-name{font-family:var(--serif);font-size:24px;font-weight:400;letter-spacing:-.3px;}
 .prof-dx{font-size:13px;color:var(--txt3);margin-top:2px;font-weight:300;}
 .prof-meta{flex:1;min-width:0;}
-.prof-edit{margin-left:auto;flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--s1);border:1px solid var(--s3);color:var(--txt2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:background .15s;}
+.prof-edit{margin-left:auto;flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--s1);border:1px solid var(--s3);color:var(--txt2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:background .15s;}
 .prof-edit:active{background:var(--s3);}
 .epf-body{padding:20px;}
 .epf-label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);margin:0 0 8px 2px;font-weight:600;}
@@ -272,8 +283,10 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .pref-row:last-child{border-bottom:none;}
 .pr-title{font-size:15px;font-weight:400;}
 .pr-sub{font-size:12px;color:var(--txt3);margin-top:2px;font-weight:300;}
-.pr-sub.tap{color:var(--blue);cursor:pointer;}
-.pr-sub.tap::after{content:' ›';opacity:.7;}
+/* Tappable settings value → tinted pill that reads as an iOS inline picker button */
+.pr-sub.tap{display:inline-flex;align-items:center;gap:2px;margin-top:6px;padding:4px 7px 4px 10px;background:var(--blue-dim);color:var(--blue);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s;}
+.pr-sub.tap::after{content:'›';opacity:.85;font-size:14px;line-height:1;}
+.pr-sub.tap:active{background:rgba(10,132,255,.28);}
 .export-btn{margin:0 24px 8px;width:calc(100% - 48px);padding:14px;border:1.5px solid var(--blue);border-radius:var(--r-md);background:none;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;}
 .export-btn:hover{background:var(--blue-dim);}
 .danger-btn{margin:8px 24px;width:calc(100% - 48px);padding:14px;border:1.5px solid rgba(255,69,58,.3);border-radius:var(--r-md);background:none;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
@@ -285,10 +298,10 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .modal-sheet{background:#1C1C1E;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:0 0 44px;transform:translateY(40px);transition:transform .3s cubic-bezier(.4,0,.2,1);}
 .modal-bg.open .modal-sheet{transform:translateY(0);}
 .modal-handle{width:36px;height:4px;background:var(--s3);border-radius:2px;margin:12px auto 0;}
-.modal-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:.5px solid var(--border);}
-.modal-cancel{background:none;border:none;cursor:pointer;color:var(--txt2);font-family:var(--sans);font-size:17px;}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:.5px solid var(--border);}
+.modal-cancel{background:none;border:none;cursor:pointer;color:var(--txt2);font-family:var(--sans);font-size:17px;padding:11px 8px;}
 .modal-htitle{font-size:15px;font-weight:600;}
-.modal-done{background:none;border:none;cursor:pointer;color:var(--blue);font-family:var(--sans);font-size:17px;font-weight:600;}
+.modal-done{background:none;border:none;cursor:pointer;color:var(--blue);font-family:var(--sans);font-size:17px;font-weight:600;padding:11px 8px;}
 .wheel-outer{display:flex;justify-content:center;align-items:flex-start;padding:12px 24px;}
 .wheel-col{flex:1;max-width:110px;}
 .wcol-label{text-align:center;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;}
@@ -421,8 +434,8 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
         <div class="step-h">When did you <em>sleep?</em></div>
         <div class="step-sub">Bedtime and wake time reveal more than duration alone.</div>
         <div class="time-grid">
-          <div class="time-tile" id="tile-bed" onclick="openModal('bed')" role="button" tabindex="0"><div class="tt-label">Went to bed</div><div class="tt-val" id="bed-disp">—</div></div>
-          <div class="time-tile" id="tile-wake" onclick="openModal('wake')" role="button" tabindex="0"><div class="tt-label">Woke up</div><div class="tt-val" id="wake-disp">—</div></div>
+          <div class="time-tile" id="tile-bed" onclick="openModal('bed')" role="button" tabindex="0" aria-label="Set bedtime"><div class="tt-head"><i class="ti ti-bed tt-ico"></i><span class="tt-label">Went to bed</span><i class="ti ti-chevron-right tt-chev"></i></div><div class="tt-val" id="bed-disp">Tap to set</div></div>
+          <div class="time-tile" id="tile-wake" onclick="openModal('wake')" role="button" tabindex="0" aria-label="Set wake time"><div class="tt-head"><i class="ti ti-sun tt-ico"></i><span class="tt-label">Woke up</span><i class="ti ti-chevron-right tt-chev"></i></div><div class="tt-val" id="wake-disp">Tap to set</div></div>
         </div>
         <div class="sleep-result" id="sleep-result"><span class="sr-label">Total sleep</span><span class="sr-val" id="sr-val">—</span></div>
         <div class="wake-alert" id="wake-alert"><i class="ti ti-alert-triangle"></i><span id="wake-alert-txt"></span></div>
@@ -894,8 +907,8 @@ function resetFlow(){
   flowCur=0;todayBedMin=todayWakeMin=todaySleepH=todayMood=todayZone=null;
   document.getElementById('tile-bed').classList.remove('set');
   document.getElementById('tile-wake').classList.remove('set');
-  document.getElementById('bed-disp').innerHTML='—';
-  document.getElementById('wake-disp').innerHTML='—';
+  document.getElementById('bed-disp').innerHTML='Tap to set';
+  document.getElementById('wake-disp').innerHTML='Tap to set';
   document.getElementById('sleep-result').classList.remove('show');
   document.getElementById('wake-alert').className='wake-alert';
   document.querySelectorAll('.mood-chip').forEach(c=>c.classList.remove('sel'));
