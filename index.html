@@ -701,7 +701,11 @@ async function dbUpsertProfile(){
   if(!sb||!S.userId)return;
   const snap={name:S.name,dx:S.dx,startDate:S.startDate,settings:S.settings||{...DEFAULT_SETTINGS}};
   if(!navigator.onLine){queueOp({type:'profile',profile:snap});return;}
-  const {error}=await sb.from('profiles').upsert({id:S.userId,...snap,start_date:snap.startDate});
+  // Map app camelCase -> DB snake_case explicitly. Spreading `snap` would leak a
+  // `startDate` key the profiles table has no column for, which makes PostgREST
+  // reject the whole upsert (PGRST204) — so the profile never persists and the
+  // user is bounced back to onboarding on their next sign-in.
+  const {error}=await sb.from('profiles').upsert({id:S.userId,name:snap.name,dx:snap.dx,start_date:snap.startDate,settings:snap.settings});
   if(error)queueOp({type:'profile',profile:snap});
 }
 
