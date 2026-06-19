@@ -550,23 +550,23 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
     <div class="pref-sec anim">
       <div class="pref-label">Notifications</div>
       <div class="pref-card">
-        <div class="pref-row"><div><div class="pr-title">Evening reminder</div><div class="pr-sub tap" id="set-reminder-sub" onclick="openReminderTime()">9:00 PM daily</div></div><button class="toggle" id="tg-reminderOn" onclick="toggleSetting('reminderOn',this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Early wake alert</div><div class="pr-sub tap" id="set-earlywake-sub" onclick="openEarlyWake()">Wake before 6 AM for 3+ days</div></div><button class="toggle" id="tg-earlyWakeOn" onclick="toggleSetting('earlyWakeOn',this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Red zone alert</div><div class="pr-sub tap" id="set-redzone-sub" onclick="cycleRedZone()">Immediate when you log ±3</div></div><button class="toggle" id="tg-redZoneOn" onclick="toggleSetting('redZoneOn',this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Weekly summary</div><div class="pr-sub tap" id="set-weekly-sub" onclick="openWeeklyDay()">Every Sunday morning</div></div><button class="toggle" id="tg-weeklyOn" onclick="toggleSetting('weeklyOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Evening reminder</div><div class="pr-sub tap" id="set-reminder-sub" onclick="openReminderTime()">9:00 PM daily</div></div><button class="toggle" id="tg-reminderOn" role="switch" aria-checked="false" aria-label="Evening reminder" onclick="toggleSetting('reminderOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Early wake alert</div><div class="pr-sub tap" id="set-earlywake-sub" onclick="openEarlyWake()">Wake before 6 AM for 3+ days</div></div><button class="toggle" id="tg-earlyWakeOn" role="switch" aria-checked="false" aria-label="Early wake alert" onclick="toggleSetting('earlyWakeOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Red zone alert</div><div class="pr-sub tap" id="set-redzone-sub" onclick="cycleRedZone()">Immediate when you log ±3</div></div><button class="toggle" id="tg-redZoneOn" role="switch" aria-checked="false" aria-label="Red zone alert" onclick="toggleSetting('redZoneOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Weekly summary</div><div class="pr-sub tap" id="set-weekly-sub" onclick="openWeeklyDay()">Every Sunday morning</div></div><button class="toggle" id="tg-weeklyOn" role="switch" aria-checked="false" aria-label="Weekly summary" onclick="toggleSetting('weeklyOn',this)"></button></div>
       </div>
     </div>
     <div class="pref-sec anim">
       <div class="pref-label">Clinic report</div>
       <div class="pref-card">
-        <div class="pref-row"><div><div class="pr-title">Include wake times</div><div class="pr-sub">Bedtime + wake in report</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Include medications</div><div class="pr-sub">From daily flag entries</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Include wake times</div><div class="pr-sub">Bedtime + wake in report</div></div><button class="toggle on" role="switch" aria-checked="true" aria-label="Include wake times in report" onclick="toggleSwitch(this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Include medications</div><div class="pr-sub">From daily flag entries</div></div><button class="toggle on" role="switch" aria-checked="true" aria-label="Include medications in report" onclick="toggleSwitch(this)"></button></div>
       </div>
     </div>
     <div class="pref-sec anim">
       <div class="pref-label">Data &amp; privacy</div>
       <div class="pref-card">
-        <div class="pref-row"><div><div class="pr-title">Anonymized research opt-in</div><div class="pr-sub">Help improve bipolar care. No personal info shared.</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+        <div class="pref-row"><div><div class="pr-title">Anonymized research opt-in</div><div class="pr-sub">Help improve bipolar care. No personal info shared.</div></div><button class="toggle" role="switch" aria-checked="false" aria-label="Anonymized research opt-in" onclick="toggleSwitch(this)"></button></div>
       </div>
     </div>
     <button class="export-btn anim" onclick="showReport()"><i class="ti ti-file-text"></i>Preview clinic report</button>
@@ -1278,7 +1278,7 @@ function getSettings(){if(!S.settings)S.settings={...DEFAULT_SETTINGS};return S.
 function renderSettings(){
   const st={...DEFAULT_SETTINGS,...getSettings()};S.settings=st;
   ['reminderOn','earlyWakeOn','redZoneOn','weeklyOn'].forEach(k=>{
-    const b=document.getElementById('tg-'+k);if(b)b.classList.toggle('on',!!st[k]);
+    const b=document.getElementById('tg-'+k);if(b){b.classList.toggle('on',!!st[k]);b.setAttribute('aria-checked',!!st[k]);}
   });
   const rs=document.getElementById('set-reminder-sub');if(rs)rs.firstChild&&(rs.childNodes[0].nodeValue=fmtTime(st.reminderTime)+' daily');
   const ew=document.getElementById('set-earlywake-sub');if(ew)ew.childNodes[0].nodeValue=ewLabel();
@@ -1286,8 +1286,11 @@ function renderSettings(){
   const ws=document.getElementById('set-weekly-sub');if(ws)ws.childNodes[0].nodeValue='Every '+WEEKDAYS[st.weeklyDay]+' morning';
 }
 function persistSettings(){save(S);dbUpsertProfile();}
+// Flip a presentational switch button, keeping role="switch" aria-checked in sync
+// for VoiceOver. Used by the report/research toggles that have no backing setting.
+function toggleSwitch(btn){const on=!btn.classList.contains('on');btn.classList.toggle('on',on);btn.setAttribute('aria-checked',on);}
 function toggleSetting(key,btn){
-  const st=getSettings();st[key]=!st[key];btn.classList.toggle('on',st[key]);persistSettings();
+  const st=getSettings();st[key]=!st[key];btn.classList.toggle('on',st[key]);btn.setAttribute('aria-checked',st[key]);persistSettings();
   // Any notification toggle being switched on should ask for permission + re-check.
   if(st[key]&&['redZoneOn','reminderOn','weeklyOn','earlyWakeOn'].includes(key)){
     ensureNotifyPermission();checkReminders();
