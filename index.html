@@ -1526,8 +1526,10 @@ window.addEventListener('DOMContentLoaded',async()=>{
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;show();});
   window.addEventListener('appinstalled',()=>{deferred=null;hide();if(window.showToast)showToast('App installed');});
 
-  // iOS Safari never fires beforeinstallprompt — show the button to reveal manual steps.
-  document.addEventListener('DOMContentLoaded',()=>{ if(isIOS && !standalone()) show(); });
+  // Always surface the button whenever the app isn't already installed — desktop
+  // Chrome and iOS Safari often never fire beforeinstallprompt, so we can't rely on
+  // it for visibility. installApp() then picks the right flow per platform.
+  document.addEventListener('DOMContentLoaded',()=>{ if(!standalone()) show(); });
 
   window.installApp=async function(){
     if(deferred){deferred.prompt();const r=await deferred.userChoice;deferred=null;if(r&&r.outcome==='accepted')hide();return;}
