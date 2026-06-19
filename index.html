@@ -569,6 +569,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
         <div class="pref-row"><div><div class="pr-title">Anonymized research opt-in</div><div class="pr-sub">Help improve bipolar care. No personal info shared.</div></div><button class="toggle" role="switch" aria-checked="false" aria-label="Anonymized research opt-in" onclick="toggleSwitch(this)"></button></div>
       </div>
     </div>
+    <button class="export-btn anim" id="install-btn" style="display:none;" onclick="installApp()"><i class="ti ti-device-mobile-down"></i>Install app on your phone</button>
     <button class="export-btn anim" onclick="showReport()"><i class="ti ti-file-text"></i>Preview clinic report</button>
     <button class="export-btn anim" onclick="signOut()"><i class="ti ti-logout"></i>Sign out</button>
     <button class="danger-btn anim" onclick="resetApp()"><i class="ti ti-trash"></i>Reset all data</button>
@@ -624,6 +625,26 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
         <button class="ob-sel-btn epf-sel-btn" data-dx="Cyclothymia" onclick="selEditDx(this)">Cyclothymia</button>
         <button class="ob-sel-btn epf-sel-btn" data-dx="Unspecified / exploring" onclick="selEditDx(this)">Unspecified / exploring</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- iOS INSTALL INSTRUCTIONS -->
+<div class="modal-bg" id="iosinstall-bg" onclick="closeIOSInstallOutside(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <button class="modal-cancel" onclick="closeIOSInstall()">Close</button>
+      <div class="modal-htitle">Install app</div>
+      <span style="width:48px;"></span>
+    </div>
+    <div class="epf-body">
+      <p style="color:var(--txt2);font-size:14px;line-height:1.5;margin:0 0 16px;">iPhone & iPad install from Safari's Share menu — there's no automatic prompt.</p>
+      <ol style="color:var(--txt);font-size:15px;line-height:1.9;padding-left:20px;margin:0;">
+        <li>Tap the <strong>Share</strong> button <i class="ti ti-upload" style="vertical-align:-2px;"></i> in Safari's toolbar.</li>
+        <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+        <li>Tap <strong>Add</strong> — PolarNote appears on your Home Screen.</li>
+      </ol>
     </div>
   </div>
 </div>
@@ -1481,6 +1502,38 @@ window.addEventListener('DOMContentLoaded',async()=>{
   const b=new Blob([JSON.stringify(m)],{type:'application/json'});
   const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(b);
   document.head.appendChild(l);
+})();
+</script>
+
+<!-- PWA install button — surface a reliable in-app install entry point.
+     Browsers only show their native install banner inconsistently (once, then
+     hidden for weeks) and iOS Safari never shows one at all, so we drive it from
+     a Profile button: beforeinstallprompt on Android/Chrome, manual steps on iOS. -->
+<script>
+(function(){
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+    || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  const standalone = ()=> window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone===true;
+  let deferred=null;
+  const btn=()=>document.getElementById('install-btn');
+  const show=()=>{const b=btn();if(b&&!standalone())b.style.display='flex';};
+  const hide=()=>{const b=btn();if(b)b.style.display='none';};
+
+  // Android/Chrome: capture the prompt so the button can trigger it on demand.
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;show();});
+  window.addEventListener('appinstalled',()=>{deferred=null;hide();if(window.showToast)showToast('App installed');});
+
+  // iOS Safari never fires beforeinstallprompt — show the button to reveal manual steps.
+  document.addEventListener('DOMContentLoaded',()=>{ if(isIOS && !standalone()) show(); });
+
+  window.installApp=async function(){
+    if(deferred){deferred.prompt();const r=await deferred.userChoice;deferred=null;if(r&&r.outcome==='accepted')hide();return;}
+    if(isIOS){document.getElementById('iosinstall-bg').classList.add('open');return;}
+    if(window.showToast)showToast('Open your browser menu → "Add to Home screen"');
+  };
+  window.closeIOSInstall=function(){document.getElementById('iosinstall-bg').classList.remove('open');};
+  window.closeIOSInstallOutside=function(e){if(e.target===document.getElementById('iosinstall-bg'))window.closeIOSInstall();};
 })();
 </script>
 
