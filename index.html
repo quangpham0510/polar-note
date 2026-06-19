@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>PolarNote</title>
 
+<!-- Google Analytics (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2P4PDBLHSG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2P4PDBLHSG');
+</script>
+
 <!-- Apple PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -854,6 +863,7 @@ function switchTab(name,btn){
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
   document.getElementById('page-'+name).classList.add('active');
   btn.classList.add('on');
+  if(typeof gtag==='function')gtag('event','screen_view',{screen_name:name});  // SPA: tabs aren't URL changes, track manually
   if(name==='history')renderHistory();
   if(name==='insights')renderInsights();
   if(name==='today'){
@@ -874,7 +884,8 @@ function showDoneState(){
   document.getElementById('prog-meta').textContent='Complete';
   document.getElementById('cta-wrap').style.display='none';
   document.getElementById('flow-back').classList.remove('vis');
-  document.getElementById('flow-skip').style.opacity='0';
+  flowCur=STEPS.length-1;                 // park at 'done' so a stray tap can't re-enter the flow
+  const sk=document.getElementById('flow-skip');sk.style.opacity='0';sk.style.pointerEvents='none';
 }
 
 const STEPS=['sleep','mood','flags','done'];
@@ -978,7 +989,8 @@ function saveEntry(){
   save(S);
   dbUpsertEntry(entry);
   if(flowDate===todayKey()){const ns=notifState();ns.reminder=flowDate;setNotifState(ns);}  // don't nag after logging
-  if(entry.mood!==null&&Math.abs(entry.mood)>=rztVal()&&getSettings().redZoneOn){
+  // Crisis alert only for TODAY's check-in — editing/backfilling a past red day must not fire a false alarm.
+  if(flowDate===todayKey()&&entry.mood!==null&&Math.abs(entry.mood)>=rztVal()&&getSettings().redZoneOn){
     const info=MOOD_INFO[String(entry.mood)],lbl=info?' ('+info.t.split(' — ')[0]+')':'';
     notify('PolarNote — red zone','You logged '+(entry.mood>0?'+'+entry.mood:entry.mood)+lbl+'. Please reach out to your care team or a crisis line.');
   }
