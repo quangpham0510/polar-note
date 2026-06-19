@@ -12,6 +12,23 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-2P4PDBLHSG');
+
+  // Central event tracker. Safe no-op if gtag/the GA script is blocked.
+  function track(event, params){
+    try{ if(typeof gtag==='function') gtag('event', event, params||{}); }catch(_){}
+  }
+
+  // Auto-track every click on an interactive element: WHICH page + WHICH item.
+  // One delegated listener (capture phase, so it fires even when a handler stops
+  // propagation) covers all buttons/tabs/chips — no per-element wiring, no user
+  // state/health data ever sent. label = data-track > aria-label > text > id.
+  document.addEventListener('click',function(e){
+    const t=e.target.closest('button,a,[onclick],.tbtn,.flag-chip,.pref-row,.log-item,.ob-sel-btn,.epf-sel-btn');
+    if(!t)return;
+    const page=(document.querySelector('.page.active')||{}).id||'app';
+    const label=(t.getAttribute('data-track')||t.getAttribute('aria-label')||(t.textContent||'').trim().replace(/\s+/g,' ')||t.id||t.className||'unknown').slice(0,80);
+    track('ui_click',{page:page,label:label});
+  },true);
 </script>
 
 <!-- Apple PWA -->
@@ -893,7 +910,7 @@ function switchTab(name,btn){
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
   document.getElementById('page-'+name).classList.add('active');
   btn.classList.add('on');
-  if(typeof gtag==='function')gtag('event','screen_view',{screen_name:name});  // SPA: tabs aren't URL changes, track manually
+  track('screen_view',{screen_name:name});  // SPA: tabs aren't URL changes, track manually
   if(name==='history')renderHistory();
   if(name==='insights')renderInsights();
   if(name==='today'){
