@@ -698,7 +698,19 @@ function def(){return{onboarded:false,name:'',dx:'',startDate:todayKey(),entries
 
 // ── Supabase client ──────────────────────────────────────────
 const SB_CONFIGURED = !!(window.supabase && window.SUPABASE_URL && !window.SUPABASE_URL.includes('YOUR_PROJECT'));
-const sb = SB_CONFIGURED ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+// Keep users signed in across reloads/app restarts: persist the session in
+// localStorage and silently refresh the access token before it expires. These
+// are Supabase defaults, but we set them explicitly so "stay signed in" is
+// guaranteed and obvious. (We also request persistent storage on load below so
+// the browser doesn't evict the saved session — see DOMContentLoaded.)
+const sb = SB_CONFIGURED ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+  },
+}) : null;
 
 // ── DB layer: map between app (camelCase) and DB (snake_case) ─
 function rowToEntry(r){return{date:r.date,bedMin:r.bed_min,wakeMin:r.wake_min,sleepH:r.sleep_h!=null?Number(r.sleep_h):null,mood:r.mood,zone:r.zone,flags:Array.isArray(r.flags)?r.flags:[],ts:r.ts};}
@@ -1489,6 +1501,11 @@ function hideBoot(){const b=document.getElementById('boot');if(b){b.classList.ad
 // Register the service worker (offline shell) and replay queued writes on reconnect.
 if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 window.addEventListener('online',flushQueue);
+
+// Ask the browser to keep our storage (session + cached data) durable so it
+// isn't auto-evicted after a few days of inactivity — the usual reason a PWA
+// "forgets" the login and asks the user to sign in again.
+if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
 
 window.addEventListener('DOMContentLoaded',async()=>{
   const cfg=document.getElementById('auth-config');
