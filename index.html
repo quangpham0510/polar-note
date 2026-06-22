@@ -254,6 +254,22 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .cta.blue{background:var(--blue);color:#fff;}
 .cta.grn{background:var(--green);color:#000;}
 
+/* DONE SCREEN — calm daily quote + evening note */
+.done-check{width:46px;height:46px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;margin-bottom:18px;animation:ringBurst .5s cubic-bezier(.175,.885,.32,1.275);}
+.done-check i{font-size:22px;color:var(--green);}
+.done-streak-line{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;letter-spacing:.02em;color:var(--txt3);margin-bottom:30px;}
+.done-streak-line i{font-size:14px;color:var(--green);}
+.done-quote{font-family:var(--serif);font-size:25px;font-weight:400;line-height:1.5;letter-spacing:-.2px;color:var(--txt);margin:0 0 30px;max-width:340px;}
+.done-quote::before{content:'\201C';}
+.done-quote::after{content:'\201D';}
+.done-note-preview{background:var(--s1);border-radius:var(--r-md);padding:14px 16px;font-size:14px;line-height:1.55;color:var(--txt2);font-weight:300;text-align:left;width:100%;margin-bottom:18px;white-space:pre-wrap;word-break:break-word;}
+.done-cta{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border:none;border-radius:100px;background:var(--blue);color:#fff;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s,background .15s;margin-bottom:6px;}
+.done-cta:active{transform:scale(.98);}
+.done-cta.has{background:var(--s2);color:var(--txt);}
+.done-cta i{font-size:18px;}
+.note-area{width:100%;min-height:150px;padding:14px 16px;background:var(--s1);border:1.5px solid var(--s3);border-radius:var(--r-md);font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--txt);outline:none;resize:none;transition:border-color .2s;}
+.note-area:focus{border-color:var(--blue);}
+
 /* HISTORY */
 #page-history{padding-bottom:100px;}
 .page-hdr{padding:20px 24px 4px;}
@@ -544,10 +560,11 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
       </div>
       <div class="step" id="step-done">
         <div class="done-wrap">
-          <div class="done-ring"><i class="ti ti-check"></i></div>
-          <div class="done-h" data-i18n="done.h">Logged.</div>
-          <p class="done-sub" id="done-sub" data-i18n="done.sub.default">Your data is building something real.</p>
-          <div class="streak-tile"><div class="streak-num" id="streak-num">0</div><div class="streak-txt"><strong data-i18n="done.days">Days tracked</strong><span id="streak-sub" data-i18n="streak.lockedHint">Clinic report unlocks at 30 days</span></div></div>
+          <div class="done-check"><i class="ti ti-check"></i></div>
+          <div class="done-streak-line" id="done-streak-line"></div>
+          <p class="done-quote serif" id="done-quote">—</p>
+          <div class="done-note-preview" id="done-note-preview" style="display:none;"></div>
+          <button class="done-cta" id="done-note-btn" onclick="openNoteModal()"><i class="ti ti-note"></i><span data-i18n="done.addNote">Add an evening note</span></button>
           <button class="ob-skip" id="done-edit" onclick="editEntry(flowDate)" style="margin-top:14px;" data-i18n="done.edit">Edit this entry</button>
         </div>
       </div>
@@ -691,6 +708,21 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
   </div>
 </div>
 
+<!-- EVENING NOTE MODAL (second check-in) -->
+<div class="modal-bg" id="note-bg" onclick="closeNoteOutside(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <button class="modal-cancel" onclick="closeNoteModal()" data-i18n="modal.cancel">Cancel</button>
+      <div class="modal-htitle" data-i18n="note.title">Evening note</div>
+      <button class="modal-done" onclick="saveTodayNote()" data-i18n="note.save">Save</button>
+    </div>
+    <div class="epf-body">
+      <textarea class="note-area" id="note-input" placeholder="A few lines about your day…" data-i18n-ph="note.placeholder" maxlength="2000"></textarea>
+    </div>
+  </div>
+</div>
+
 <!-- iOS INSTALL INSTRUCTIONS -->
 <div class="modal-bg" id="iosinstall-bg" onclick="closeIOSInstallOutside(event)">
   <div class="modal-sheet">
@@ -814,6 +846,8 @@ const I18N={en:{
   'step.flags.eye':'Notes','step.flags.h':'Anything <em>else?</em>','step.flags.sub':'Select all that apply — helps reveal patterns over time.',
   'flag.racing':'Racing thoughts','flag.irritable':'Irritable','flag.lowmot':'Low motivation','flag.spending':'Spending ↑','flag.withdrew':'Withdrew socially','flag.med':'Medication ✓','flag.appetite':'Appetite change','flag.focus':'Hard to focus','flag.risky':'Risky behavior',
   'done.h':'Logged.','done.sub.default':'Your data is building something real.','done.days':'Days tracked','done.edit':'Edit this entry',
+  'done.streakLine':'{n} day{s} tracked','done.addNote':'Add an evening note','done.editNote':'Edit your evening note',
+  'note.title':'Evening note','note.save':'Save','note.placeholder':'A few lines about your day — how it felt, what helped, anything on your mind…','toast.noteSaved':'Note saved',
   'cta.continue':'Continue','cta.save':'Save check-in',
   'streak.ready':'Clinic report ready!','streak.unlock':'Clinic report unlocks in {n} days','streak.lockedHint':'Clinic report unlocks at 30 days',
   'done.sub.count':'{n} day{s} tracked and counting.',
@@ -908,6 +942,8 @@ const I18N={en:{
   'step.flags.eye':'Ghi chú','step.flags.h':'Còn gì <em>khác không?</em>','step.flags.sub':'Chọn tất cả mục phù hợp — giúp hé lộ quy luật theo thời gian.',
   'flag.racing':'Suy nghĩ dồn dập','flag.irritable':'Dễ cáu gắt','flag.lowmot':'Thiếu động lực','flag.spending':'Chi tiêu ↑','flag.withdrew':'Thu mình xã hội','flag.med':'Uống thuốc ✓','flag.appetite':'Thay đổi khẩu vị','flag.focus':'Khó tập trung','flag.risky':'Hành vi rủi ro',
   'done.h':'Đã ghi.','done.sub.default':'Dữ liệu của bạn đang tạo nên điều thực sự ý nghĩa.','done.days':'Số ngày theo dõi','done.edit':'Sửa mục này',
+  'done.streakLine':'{n} ngày theo dõi','done.addNote':'Ghi chú buổi tối','done.editNote':'Sửa ghi chú buổi tối',
+  'note.title':'Ghi chú buổi tối','note.save':'Lưu','note.placeholder':'Vài dòng về ngày hôm nay — bạn cảm thấy thế nào, điều gì giúp ích, có gì trong tâm trí…','toast.noteSaved':'Đã lưu ghi chú',
   'cta.continue':'Tiếp tục','cta.save':'Lưu nhật ký',
   'streak.ready':'Báo cáo phòng khám đã sẵn sàng!','streak.unlock':'Báo cáo phòng khám mở khoá sau {n} ngày','streak.lockedHint':'Báo cáo phòng khám mở khoá ở 30 ngày',
   'done.sub.count':'{n} ngày theo dõi và đang tiếp tục.',
@@ -969,6 +1005,50 @@ const I18N={en:{
   'confirm.reset':'Xoá toàn bộ dữ liệu đã theo dõi? Thao tác này xoá các mục của bạn và không thể hoàn tác. (Tài khoản vẫn được giữ.)',
   'report.copyText':'BÁO CÁO PHÒNG KHÁM POLARNOTE\nTạo: {date}\nBệnh nhân: {name} | Chẩn đoán: {dx}\nTheo dõi: {start} – {today} ({n} ngày)\n\nGIẤC NGỦ (7 ngày qua)\nThời lượng TB: {avgSleep}h\nThức sớm (<{h} giờ sáng): {ew}/7 ngày\n\nTÂM TRẠNG (toàn thời gian)\nXanh (−1 đến +1): {grn} ngày\nVàng (±2): {yel} ngày\nĐỏ (±3): {red} ngày\n\nMỤC GẦN ĐÂY\n{entries}\n\nTạo bởi PolarNote (bản kiểm thử)'
 }};
+
+// ── Daily quote bank ─────────────────────────────────────────
+// Curated, vetted for people with bipolar disorder (hopeful, non-preachy, no
+// medical advice). One quote per day, chosen deterministically by day-of-year so
+// it stays the same all day. No external API / key — offline, free, safe.
+const QUOTES=[
+  {en:"A hard day doesn't erase the progress you've made.",vi:"Một ngày khó khăn không xoá đi những tiến bộ của bạn."},
+  {en:"You are not your diagnosis — you are the person learning to live well with it.",vi:"Bạn không phải là chẩn đoán của mình — bạn là người đang học cách sống tốt cùng nó."},
+  {en:"Moods rise and fall like tides. You are the steady shore beneath them.",vi:"Tâm trạng lên xuống như thuỷ triều. Bạn là bờ cát vững vàng bên dưới."},
+  {en:"Tracking today is an act of self-respect.",vi:"Ghi lại hôm nay là một cách bạn tôn trọng chính mình."},
+  {en:"Rest is not weakness. Protecting your sleep is protecting your future.",vi:"Nghỉ ngơi không phải là yếu đuối. Bảo vệ giấc ngủ là bảo vệ tương lai của bạn."},
+  {en:"Reaching out is a sign of strength, not of failure.",vi:"Tìm đến người khác là dấu hiệu của sức mạnh, không phải thất bại."},
+  {en:"This feeling is real, and it is also temporary.",vi:"Cảm giác này là thật, và nó cũng sẽ qua."},
+  {en:"Small steps still move you forward.",vi:"Những bước nhỏ vẫn đưa bạn tiến về phía trước."},
+  {en:"You have survived every difficult day so far. That is strength, not luck.",vi:"Bạn đã vượt qua mọi ngày khó khăn cho đến giờ. Đó là sức mạnh, không phải may mắn."},
+  {en:"Be as gentle with yourself as you would be with a good friend.",vi:"Hãy dịu dàng với bản thân như bạn dịu dàng với một người bạn thân."},
+  {en:"Stability is built one quiet day at a time.",vi:"Sự ổn định được xây nên từ từng ngày bình lặng."},
+  {en:"Your worth doesn't rise and fall with your mood.",vi:"Giá trị của bạn không lên xuống theo tâm trạng."},
+  {en:"Noticing the pattern is the first step to changing it.",vi:"Nhận ra quy luật là bước đầu tiên để thay đổi nó."},
+  {en:"On bright days, build the habits that carry you through the dark ones.",vi:"Vào những ngày tươi sáng, hãy xây thói quen để nâng đỡ bạn qua những ngày tối."},
+  {en:"You don't have to feel okay to be doing okay.",vi:"Bạn không cần phải thấy ổn mới là đang làm tốt."},
+  {en:"Healing isn't linear, and that's allowed.",vi:"Hồi phục không đi theo đường thẳng, và điều đó hoàn toàn ổn."},
+  {en:"One check-in at a time, you're learning your own rhythm.",vi:"Từng lần ghi nhận, bạn đang hiểu nhịp điệu của riêng mình."},
+  {en:"The storm always passes. Hold on through the wind.",vi:"Cơn bão luôn qua đi. Hãy bám trụ qua những cơn gió."},
+  {en:"Asking for help today protects the person you'll be tomorrow.",vi:"Nhờ giúp đỡ hôm nay là bảo vệ con người bạn của ngày mai."},
+  {en:"You are more than your hardest moments.",vi:"Bạn lớn hơn những khoảnh khắc khó khăn nhất của mình."},
+  {en:"Consistency, not perfection, is what keeps you steady.",vi:"Sự đều đặn, không phải hoàn hảo, mới giữ bạn vững vàng."},
+  {en:"Even on low days, showing up counts.",vi:"Ngay cả những ngày trũng, việc bạn có mặt vẫn đáng giá."},
+  {en:"Your mind is not your enemy — it's learning to find balance.",vi:"Tâm trí bạn không phải kẻ thù — nó đang học cách tìm lại cân bằng."},
+  {en:"Tomorrow can feel different from today.",vi:"Ngày mai có thể rất khác hôm nay."},
+  {en:"Caring for yourself is the bravest thing you'll do today.",vi:"Chăm sóc bản thân là điều dũng cảm nhất bạn làm hôm nay."},
+  {en:"The fact that you're here, tracking, means you haven't given up.",vi:"Việc bạn ở đây, ghi lại từng ngày, nghĩa là bạn chưa bỏ cuộc."},
+  {en:"Let today be enough. You did show up.",vi:"Hãy để hôm nay là đủ. Bạn đã có mặt."},
+  {en:"Your future self will thank you for the notes you keep today.",vi:"Bạn của tương lai sẽ cảm ơn những ghi chú bạn giữ hôm nay."},
+  {en:"Calm is a skill, and every steady day is practice.",vi:"Bình tâm là một kỹ năng, và mỗi ngày vững vàng là một lần luyện tập."},
+  {en:"You are allowed to be a work in progress and worthy at the same time.",vi:"Bạn được phép vừa là một hành trình đang tiếp diễn, vừa xứng đáng ngay lúc này."}
+];
+// Deterministic day-of-year index → same quote all day, rotates daily.
+function dailyQuote(){
+  const d=new Date(),start=new Date(d.getFullYear(),0,0);
+  const doy=Math.floor((d-start)/864e5);
+  const q=QUOTES[doy%QUOTES.length];
+  return (q&&(q[LANG]||q.en))||'';
+}
 // Local date key (YYYY-MM-DD) in the user's own timezone — NOT UTC.
 // toISOString() returns UTC, so it rolls the date over at midnight UTC, filing
 // check-ins under the wrong day for anyone east/west of GMT.
@@ -994,7 +1074,7 @@ const sb = SB_CONFIGURED ? window.supabase.createClient(window.SUPABASE_URL, win
 }) : null;
 
 // ── DB layer: map between app (camelCase) and DB (snake_case) ─
-function rowToEntry(r){return{date:r.date,bedMin:r.bed_min,wakeMin:r.wake_min,sleepH:r.sleep_h!=null?Number(r.sleep_h):null,mood:r.mood,zone:r.zone,flags:Array.isArray(r.flags)?r.flags:[],ts:r.ts};}
+function rowToEntry(r){return{date:r.date,bedMin:r.bed_min,wakeMin:r.wake_min,sleepH:r.sleep_h!=null?Number(r.sleep_h):null,mood:r.mood,zone:r.zone,flags:Array.isArray(r.flags)?r.flags:[],note:r.note||'',ts:r.ts};}
 
 async function loadFromDB(user){
   const [{data:prof},{data:rows}] = await Promise.all([
@@ -1029,7 +1109,14 @@ function queueOp(op){
   if(i>=0)q[i]=op;else q.push(op);
   setPending(q);
 }
-function entryPayload(e){return{user_id:S.userId,date:e.date,bed_min:e.bedMin,wake_min:e.wakeMin,sleep_h:e.sleepH,mood:e.mood,zone:e.zone,flags:e.flags,ts:e.ts};}
+function entryPayload(e){return{user_id:S.userId,date:e.date,bed_min:e.bedMin,wake_min:e.wakeMin,sleep_h:e.sleepH,mood:e.mood,zone:e.zone,flags:e.flags,note:e.note||null,ts:e.ts};}
+// Upsert an entry; if the `note` column hasn't been migrated yet, retry without it
+// so the rest of the check-in still syncs (the note stays in the local cache).
+async function upsertEntryRow(e){
+  let r=await sb.from('entries').upsert(entryPayload(e),{onConflict:'user_id,date'});
+  if(r.error){const p=entryPayload(e);delete p.note;r=await sb.from('entries').upsert(p,{onConflict:'user_id,date'});}
+  return r;
+}
 async function flushQueue(){
   if(!sb||!S.userId||!navigator.onLine)return;
   const q=pending();if(!q.length)return;
@@ -1037,7 +1124,7 @@ async function flushQueue(){
   for(const op of q){
     try{
       const r=op.type==='entry'
-        ? await sb.from('entries').upsert(entryPayload(op.entry),{onConflict:'user_id,date'})
+        ? await upsertEntryRow(op.entry)
         : await sb.from('profiles').upsert({id:S.userId,name:op.profile.name,dx:op.profile.dx,start_date:op.profile.startDate,settings:op.profile.settings});
       if(r.error)throw r.error;
     }catch{remain.push(op);}
@@ -1061,7 +1148,7 @@ async function dbUpsertProfile(){
 async function dbUpsertEntry(e){
   if(!sb||!S.userId)return;
   if(!navigator.onLine){queueOp({type:'entry',entry:e});showToast(t('toast.savedOffline'));return;}
-  const {error}=await sb.from('entries').upsert(entryPayload(e),{onConflict:'user_id,date'});
+  const {error}=await upsertEntryRow(e);
   if(error){queueOp({type:'entry',entry:e});showToast(t('toast.savedOffline'));}
 }
 
@@ -1256,11 +1343,40 @@ function switchTab(name,btn){
   }
 }
 
-function showDoneState(){
+// Fill the done screen: streak line, daily quote, and the evening-note button/preview.
+function renderDoneExtras(){
   const n=S.entries.length;
-  document.getElementById('streak-num').textContent=n;
-  document.getElementById('streak-sub').textContent=n>=30?t('streak.ready'):t('streak.unlock',{n:30-n});
-  document.getElementById('done-sub').textContent=t('done.sub.count',{n,s:n!==1?'s':''});
+  const sl=document.getElementById('done-streak-line');
+  if(sl)sl.innerHTML='<i class="ti ti-circle-check"></i> '+t('done.streakLine',{n,s:n!==1?'s':''});
+  const q=document.getElementById('done-quote');if(q)q.textContent=dailyQuote();
+  const e=S.entries.find(x=>x.date===flowDate);
+  const hasNote=!!(e&&e.note&&e.note.trim());
+  const btn=document.getElementById('done-note-btn');
+  if(btn){btn.innerHTML='<i class="ti ti-'+(hasNote?'pencil':'note')+'"></i><span>'+(hasNote?t('done.editNote'):t('done.addNote'))+'</span>';btn.classList.toggle('has',hasNote);}
+  const np=document.getElementById('done-note-preview');
+  if(np){if(hasNote){np.textContent=e.note;np.style.display='block';}else{np.style.display='none';}}
+}
+
+// Evening note (second check-in) — a free-text reflection saved onto the day's entry.
+function openNoteModal(){
+  const e=S.entries.find(x=>x.date===flowDate);
+  document.getElementById('note-input').value=(e&&e.note)||'';
+  document.getElementById('note-bg').classList.add('open');
+  setTimeout(()=>{const ta=document.getElementById('note-input');ta.focus();},160);
+}
+function closeNoteModal(){document.getElementById('note-bg').classList.remove('open');}
+function closeNoteOutside(e){if(e.target===document.getElementById('note-bg'))closeNoteModal();}
+function saveTodayNote(){
+  const e=S.entries.find(x=>x.date===flowDate);
+  if(!e){closeNoteModal();return;}                 // note attaches to an existing check-in
+  e.note=document.getElementById('note-input').value.trim();
+  e.ts=Date.now();
+  save(S);dbUpsertEntry(e);
+  closeNoteModal();renderDoneExtras();showToast(t('toast.noteSaved'));
+}
+
+function showDoneState(){
+  renderDoneExtras();
   updateFlowDateBanner();
   STEPS.forEach(s=>{const el=document.getElementById('step-'+s);el.classList.remove('active','exit');});
   document.getElementById('step-done').classList.add('active');
@@ -1346,10 +1462,7 @@ function showFlowStep(i){
   const btn=document.getElementById('cta-btn'),wrap=document.getElementById('cta-wrap');
   if(STEPS[i]==='done'){
     wrap.style.display='none';
-    const n=S.entries.length;
-    document.getElementById('streak-num').textContent=n;
-    document.getElementById('streak-sub').textContent=n>=30?t('streak.ready'):t('streak.unlock',{n:30-n});
-    document.getElementById('done-sub').textContent=t('done.sub.count',{n,s:n!==1?'s':''});
+    renderDoneExtras();
   } else {
     wrap.style.display='block';
     if(STEPS[i]==='flags'){btn.textContent=t('cta.save');btn.className='cta grn';}
@@ -1365,7 +1478,8 @@ function flowBack(){if(flowCur>0){flowCur--;showFlowStep(flowCur);}}
 
 function saveEntry(){
   const flags=Array.from(document.querySelectorAll('.flag-chip.on')).map(b=>b.dataset.flag);
-  const entry={date:flowDate,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,ts:Date.now()};
+  const prev=S.entries.find(e=>e.date===flowDate);                    // keep any evening note already written
+  const entry={date:flowDate,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,note:(prev&&prev.note)||'',ts:Date.now()};
   // Upsert in place: editing a day or backfilling replaces, never duplicates.
   const idx=S.entries.findIndex(e=>e.date===flowDate);
   if(idx>=0)S.entries[idx]=entry;else S.entries.push(entry);

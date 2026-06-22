@@ -28,10 +28,14 @@ create table if not exists public.entries (
   mood        int,
   zone        text,
   flags       jsonb default '[]'::jsonb,
+  note        text,                  -- optional evening reflection (second check-in)
   ts          bigint,
   created_at  timestamptz default now(),
   unique (user_id, date)            -- one entry per user per day
 );
+
+-- (for existing projects created before the note column was added)
+alter table public.entries add column if not exists note text;
 
 create index if not exists entries_user_date_idx
   on public.entries (user_id, date);
