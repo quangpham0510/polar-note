@@ -678,8 +678,8 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
       <div class="wheel-colon" id="wheel-colon">:</div>
       <div class="wheel-col" id="wh-m-col"><div class="wcol-label" id="wh-m-label">Min</div><div class="wheel-scroll" id="wh-m"><div class="wheel-hl"></div></div></div>
       <div class="ampm-col" id="ampm-col">
-        <button class="ampm-pill" id="ap-am" onclick="setAP('AM')">AM</button>
-        <button class="ampm-pill on" id="ap-pm" onclick="setAP('PM')">PM</button>
+        <button class="ampm-pill" id="ap-am" onclick="setAP('AM')" data-i18n="time.am">AM</button>
+        <button class="ampm-pill on" id="ap-pm" onclick="setAP('PM')" data-i18n="time.pm">PM</button>
       </div>
     </div>
   </div>
@@ -889,6 +889,7 @@ const I18N={en:{
   'install.title':'Install PolarNote','install.sub':'Add it to your home screen','install.cta':'Install','install.dismiss':'Dismiss',
   'tab.today':'Today','tab.history':'History','tab.insights':'Insights','tab.profile':'Profile',
   'default.name':'Friend','default.patient':'Patient',
+  'time.am':'AM','time.pm':'PM',
   // Modals
   'modal.cancel':'Cancel','modal.done':'Done','modal.bedtime':'Bedtime','modal.waketime':'Wake time','modal.hour':'Hour','modal.min':'Min','modal.days':'Days','modal.day':'Day',
   'modal.eveningReminder':'Evening reminder','modal.earlyWake':'Early wake alert','modal.weekly':'Weekly summary',
@@ -985,6 +986,7 @@ const I18N={en:{
   'install.title':'Cài đặt PolarNote','install.sub':'Thêm vào màn hình chính','install.cta':'Cài đặt','install.dismiss':'Đóng',
   'tab.today':'Hôm nay','tab.history':'Lịch sử','tab.insights':'Phân tích','tab.profile':'Hồ sơ',
   'default.name':'Bạn','default.patient':'Bệnh nhân',
+  'time.am':'SA','time.pm':'CH',
   // Modals
   'modal.cancel':'Huỷ','modal.done':'Xong','modal.bedtime':'Giờ đi ngủ','modal.waketime':'Giờ thức','modal.hour':'Giờ','modal.min':'Phút','modal.days':'Ngày','modal.day':'Thứ',
   'modal.eveningReminder':'Nhắc buổi tối','modal.earlyWake':'Cảnh báo thức sớm','modal.weekly':'Tóm tắt hàng tuần',
@@ -1394,7 +1396,8 @@ const STEPS=['sleep','mood','flags','done'];
 let flowCur=0,flowDate=todayKey(),todayBedMin=null,todayWakeMin=null,todaySleepH=null,todayMood=null,todayZone=null;
 
 // Time label for the bed/wake tiles: "10:30<span> PM</span>".
-function tileLabel(min){const h=Math.floor(min/60)%24,m=min%60,ap=h>=12?'PM':'AM',hh=String(h%12||12).padStart(2,'0');return hh+':'+String(m).padStart(2,'0')+'<span class="tt-ap"> '+ap+'</span>';}
+function apLabel(h){return h>=12?t('time.pm'):t('time.am');}                 // AM/PM localized (SA/CH in vi)
+function tileLabel(min){const h=Math.floor(min/60)%24,m=min%60,hh=String(h%12||12).padStart(2,'0');return hh+':'+String(m).padStart(2,'0')+'<span class="tt-ap"> '+apLabel(h)+'</span>';}
 
 // Show a banner when logging/editing a day other than today.
 function updateFlowDateBanner(){
@@ -1552,7 +1555,7 @@ function confirmTime(){
   if(pickerTarget==='reminder'){
     getSettings().reminderTime=mins;renderSettings();persistSettings();closeModal();return;
   }
-  const label=String(selH).padStart(2,'0')+':'+String(selM).padStart(2,'0')+'<span class="tt-ap"> '+selAP+'</span>';
+  const label=String(selH).padStart(2,'0')+':'+String(selM).padStart(2,'0')+'<span class="tt-ap"> '+(selAP==='PM'?t('time.pm'):t('time.am'))+'</span>';
   if(pickerTarget==='bed'){
     todayBedMin=mins;document.getElementById('bed-disp').innerHTML=label;document.getElementById('tile-bed').classList.add('set');
   } else {
@@ -1600,8 +1603,8 @@ function pickMood(el){
 
 function fmtTime(min){
   if(min===null||min===undefined)return'—';
-  const h=Math.floor(min/60)%24,m=min%60,ap=h>=12?'PM':'AM',hh=h%12||12;
-  return hh+':'+String(m).padStart(2,'0')+' '+ap;
+  const h=Math.floor(min/60)%24,m=min%60,hh=h%12||12;
+  return hh+':'+String(m).padStart(2,'0')+' '+apLabel(h);
 }
 function fmtDate(iso){
   if(!iso)return'—';
