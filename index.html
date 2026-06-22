@@ -129,6 +129,23 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .ob-sel-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
 .ob-sel-btn{padding:14px 18px;background:var(--s1);border:1.5px solid var(--s3);border-radius:var(--r-md);font-family:var(--sans);font-size:15px;color:var(--txt2);cursor:pointer;text-align:left;transition:all .15s;}
 .ob-sel-btn.on{background:var(--blue-dim);border-color:var(--blue);color:var(--txt);}
+/* Language picker (onboarding) — flag cards with a selection dot underneath */
+.lang-grid{display:flex;gap:14px;margin-bottom:28px;}
+.lang-card{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 12px 16px;background:var(--s1);border:1.5px solid var(--s3);border-radius:var(--r-md);cursor:pointer;transition:all .18s;font-family:var(--sans);}
+.lang-card:active{transform:scale(.97);}
+.lang-card.on{background:var(--blue-dim);border-color:var(--blue);}
+.lang-flag{width:54px;height:38px;border-radius:7px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.35);flex-shrink:0;}
+.lang-flag svg{display:block;width:100%;height:100%;}
+.lang-name{font-size:15px;font-weight:500;color:var(--txt2);transition:color .18s;}
+.lang-card.on .lang-name{color:var(--txt);}
+.lang-dot{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--s3);position:relative;transition:all .18s;}
+.lang-card.on .lang-dot{border-color:var(--blue);}
+.lang-card.on .lang-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--blue);}
+/* Profile language segmented control */
+.lang-seg{display:flex;gap:8px;padding:12px 16px;}
+.lang-seg-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 0;border:1.5px solid var(--s3);border-radius:var(--r-sm);background:none;font-family:var(--sans);font-size:14px;font-weight:500;color:var(--txt2);cursor:pointer;transition:all .15s;}
+.lang-seg-btn .lang-flag{width:24px;height:17px;border-radius:3px;box-shadow:none;}
+.lang-seg-btn.on{background:var(--blue-dim);border-color:var(--blue);color:var(--txt);}
 
 /* AUTH */
 #page-auth{background:var(--bg);}
@@ -399,15 +416,15 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
     <div class="auth-wrap">
       <div class="auth-brand">
         <div class="ob-icon">🌊</div>
-        <div class="ob-h">Welcome to <em>PolarNote</em></div>
-        <div class="ob-body" id="auth-sub" style="margin-bottom:0;">Sign in to sync your tracking across devices.</div>
+        <div class="ob-h" data-i18n="auth.welcome">Welcome to <em>PolarNote</em></div>
+        <div class="ob-body" id="auth-sub" data-i18n="auth.sub.signin" style="margin-bottom:0;">Sign in to sync your tracking across devices.</div>
       </div>
-      <input class="ob-input" id="auth-email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
-      <input class="ob-input" id="auth-pass" type="password" placeholder="Password (min. 6 characters)" autocomplete="current-password">
+      <input class="ob-input" id="auth-email" type="email" placeholder="Email" data-i18n-ph="auth.email.ph" autocomplete="email" inputmode="email">
+      <input class="ob-input" id="auth-pass" type="password" placeholder="Password (min. 6 characters)" data-i18n-ph="auth.pass.ph" autocomplete="current-password">
       <div class="auth-err" id="auth-err"></div>
-      <button class="ob-cta" id="auth-cta" onclick="authSubmit()">Sign in</button>
-      <button class="ob-skip" id="auth-toggle" onclick="authToggleMode()">Don't have an account? Sign up</button>
-      <button class="ob-skip" id="auth-forgot" onclick="authForgot()" style="margin-top:2px;">Forgot password?</button>
+      <button class="ob-cta" id="auth-cta" onclick="authSubmit()" data-i18n="auth.cta.signin">Sign in</button>
+      <button class="ob-skip" id="auth-toggle" onclick="authToggleMode()" data-i18n="auth.toggle.toSignup">Don't have an account? Sign up</button>
+      <button class="ob-skip" id="auth-forgot" onclick="authForgot()" style="margin-top:2px;" data-i18n="auth.forgot">Forgot password?</button>
       <div class="auth-config" id="auth-config" style="display:none;"></div>
     </div>
   </div>
@@ -416,48 +433,66 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
   <div class="page" id="page-onboard" style="padding-bottom:0;">
     <div class="ob-steps">
       <div class="ob-step active" id="obs-0">
-        <div class="ob-icon">🌊</div>
-        <div class="ob-h">Track your <em>poles.</em><br>Understand your cycle.</div>
-        <div class="ob-body">PolarNote is built for people with bipolar — not for general mood tracking. Every feature is designed for how your mind actually works.</div>
-        <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+        <div class="ob-icon">🌐</div>
+        <div class="ob-h" data-i18n="ob.lang.h">Choose your <em>language.</em></div>
+        <div class="ob-body" data-i18n="ob.lang.body">You can change this later in your profile.</div>
+        <div class="lang-grid">
+          <button class="lang-card" data-lang-opt="en" onclick="pickLang('en')">
+            <span class="lang-flag"><svg viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#fff" stroke-width="8"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="4"/><rect x="25" width="10" height="40" fill="#fff"/><rect y="15" width="60" height="10" fill="#fff"/><rect x="27" width="6" height="40" fill="#C8102E"/><rect y="17" width="60" height="6" fill="#C8102E"/></svg></span>
+            <span class="lang-name" data-i18n="lang.en">English</span>
+            <span class="lang-dot"></span>
+          </button>
+          <button class="lang-card" data-lang-opt="vi" onclick="pickLang('vi')">
+            <span class="lang-flag"><svg viewBox="0 0 60 40"><rect width="60" height="40" fill="#DA251D"/><polygon points="30,8 32.7,16.3 41.4,16.3 34.4,21.4 37.1,29.7 30,24.6 22.9,29.7 25.6,21.4 18.6,16.3 27.3,16.3" fill="#FFFF00"/></svg></span>
+            <span class="lang-name" data-i18n="lang.vi">Tiếng Việt</span>
+            <span class="lang-dot"></span>
+          </button>
+        </div>
+        <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
       </div>
       <div class="ob-step" id="obs-1">
-        <div class="ob-icon">🌙</div>
-        <div class="ob-h">Sleep is your <em>first signal.</em></div>
-        <div class="ob-body">Waking at 5 AM three days in a row? That's your early warning system. We track bedtime and wake time so you can see the pattern before the episode arrives.</div>
-        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+        <div class="ob-icon">🌊</div>
+        <div class="ob-h" data-i18n="ob0.h">Track your <em>poles.</em><br>Understand your cycle.</div>
+        <div class="ob-body" data-i18n="ob0.body">PolarNote is built for people with bipolar — not for general mood tracking. Every feature is designed for how your mind actually works.</div>
+        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
       </div>
       <div class="ob-step" id="obs-2">
-        <div class="ob-icon">📊</div>
-        <div class="ob-h">Not good or bad —<br><em>which pole.</em></div>
-        <div class="ob-body">We use a −3 to +3 scale. Green means functioning. Yellow means watch closely. Red means reach out now. Simple, clinically grounded, never ambiguous.</div>
-        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div></div>
+        <div class="ob-icon">🌙</div>
+        <div class="ob-h" data-i18n="ob1.h">Sleep is your <em>first signal.</em></div>
+        <div class="ob-body" data-i18n="ob1.body">Waking at 5 AM three days in a row? That's your early warning system. We track bedtime and wake time so you can see the pattern before the episode arrives.</div>
+        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
       </div>
       <div class="ob-step" id="obs-3">
+        <div class="ob-icon">📊</div>
+        <div class="ob-h" data-i18n="ob2.h">Not good or bad —<br><em>which pole.</em></div>
+        <div class="ob-body" data-i18n="ob2.body">We use a −3 to +3 scale. Green means functioning. Yellow means watch closely. Red means reach out now. Simple, clinically grounded, never ambiguous.</div>
+        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div></div>
+      </div>
+      <div class="ob-step" id="obs-4">
         <div class="ob-icon">👋</div>
-        <div class="ob-h">Let's set up <em>your profile.</em></div>
-        <div class="ob-body" style="margin-bottom:14px;">Two things to get started.</div>
-        <input class="ob-input" id="ob-name" type="text" placeholder="Your first name" maxlength="30">
+        <div class="ob-h" data-i18n="ob3.h">Let's set up <em>your profile.</em></div>
+        <div class="ob-body" style="margin-bottom:14px;" data-i18n="ob3.body">Two things to get started.</div>
+        <input class="ob-input" id="ob-name" type="text" placeholder="Your first name" data-i18n-ph="ob.name.ph" maxlength="30">
         <div class="ob-sel-group">
-          <button class="ob-sel-btn" data-dx="Bipolar I" onclick="selDx(this)">Bipolar I</button>
-          <button class="ob-sel-btn" data-dx="Bipolar II" onclick="selDx(this)">Bipolar II</button>
-          <button class="ob-sel-btn" data-dx="Cyclothymia" onclick="selDx(this)">Cyclothymia</button>
-          <button class="ob-sel-btn" data-dx="Unspecified / exploring" onclick="selDx(this)">Unspecified / exploring</button>
+          <button class="ob-sel-btn" data-dx="Bipolar I" data-i18n="dx.bp1" onclick="selDx(this)">Bipolar I</button>
+          <button class="ob-sel-btn" data-dx="Bipolar II" data-i18n="dx.bp2" onclick="selDx(this)">Bipolar II</button>
+          <button class="ob-sel-btn" data-dx="Cyclothymia" data-i18n="dx.cyclo" onclick="selDx(this)">Cyclothymia</button>
+          <button class="ob-sel-btn" data-dx="Unspecified / exploring" data-i18n="dx.unspec" onclick="selDx(this)">Unspecified / exploring</button>
         </div>
-        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div></div>
+        <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div></div>
       </div>
     </div>
     <div class="ob-cta-wrap">
-      <button class="ob-cta" id="ob-cta" onclick="obNext()">Get started</button>
-      <button class="ob-skip" id="ob-skip" onclick="obSkip()">Skip</button>
+      <button class="ob-cta" id="ob-cta" onclick="obNext()" data-i18n="ob.cta.continue">Continue</button>
+      <button class="ob-skip" id="ob-skip" onclick="obSkip()" data-i18n="ob.skip">Skip</button>
     </div>
   </div>
 
   <!-- TODAY -->
   <div class="page" id="page-today" style="padding-bottom:0;">
     <div class="flow-nav">
-      <button class="flow-back" id="flow-back" onclick="flowBack()"><i class="ti ti-chevron-left"></i>Back</button>
-      <button class="flow-skip" id="flow-skip" onclick="flowNext()">Skip</button>
+      <button class="flow-back" id="flow-back" onclick="flowBack()"><i class="ti ti-chevron-left"></i><span data-i18n="flow.back">Back</span></button>
+      <button class="flow-skip" id="flow-skip" onclick="flowNext()" data-i18n="flow.skip">Skip</button>
     </div>
     <div class="flow-date-banner" id="flow-date-banner" style="display:none;"></div>
     <div class="flow-prog">
@@ -466,140 +501,149 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
     </div>
     <div class="steps-outer">
       <div class="step active" id="step-sleep">
-        <div class="eyebrow step-eye">Sleep</div>
-        <div class="step-h">When did you <em>sleep?</em></div>
-        <div class="step-sub">Bedtime and wake time reveal more than duration alone.</div>
+        <div class="eyebrow step-eye" data-i18n="step.sleep.eye">Sleep</div>
+        <div class="step-h" data-i18n="step.sleep.h">When did you <em>sleep?</em></div>
+        <div class="step-sub" data-i18n="step.sleep.sub">Bedtime and wake time reveal more than duration alone.</div>
         <div class="time-grid">
-          <div class="time-tile" id="tile-bed" onclick="openModal('bed')" role="button" tabindex="0" aria-label="Set bedtime"><div class="tt-head"><i class="ti ti-bed tt-ico"></i><span class="tt-label">Went to bed</span><i class="ti ti-chevron-right tt-chev"></i></div><div class="tt-val" id="bed-disp">Tap to set</div></div>
-          <div class="time-tile" id="tile-wake" onclick="openModal('wake')" role="button" tabindex="0" aria-label="Set wake time"><div class="tt-head"><i class="ti ti-sun tt-ico"></i><span class="tt-label">Woke up</span><i class="ti ti-chevron-right tt-chev"></i></div><div class="tt-val" id="wake-disp">Tap to set</div></div>
+          <div class="time-tile" id="tile-bed" onclick="openModal('bed')" role="button" tabindex="0" aria-label="Set bedtime"><div class="tt-head"><i class="ti ti-bed tt-ico"></i><span class="tt-label" data-i18n="tile.bed">Went to bed</span><i class="ti ti-chevron-right tt-chev"></i></div><div class="tt-val" id="bed-disp" data-i18n="tile.tap">Tap to set</div></div>
+          <div class="time-tile" id="tile-wake" onclick="openModal('wake')" role="button" tabindex="0" aria-label="Set wake time"><div class="tt-head"><i class="ti ti-sun tt-ico"></i><span class="tt-label" data-i18n="tile.wake">Woke up</span><i class="ti ti-chevron-right tt-chev"></i></div><div class="tt-val" id="wake-disp" data-i18n="tile.tap">Tap to set</div></div>
         </div>
-        <div class="sleep-result" id="sleep-result"><span class="sr-label">Total sleep</span><span class="sr-val" id="sr-val">—</span></div>
+        <div class="sleep-result" id="sleep-result"><span class="sr-label" data-i18n="sleep.total">Total sleep</span><span class="sr-val" id="sr-val">—</span></div>
         <div class="wake-alert" id="wake-alert"><i class="ti ti-alert-triangle"></i><span id="wake-alert-txt"></span></div>
       </div>
       <div class="step" id="step-mood">
-        <div class="eyebrow step-eye">Mood</div>
-        <div class="step-h">Where are you <em>today?</em></div>
-        <div class="step-sub">Tap the number that feels closest. Size reflects intensity.</div>
+        <div class="eyebrow step-eye" data-i18n="step.mood.eye">Mood</div>
+        <div class="step-h" data-i18n="step.mood.h">Where are you <em>today?</em></div>
+        <div class="step-sub" data-i18n="step.mood.sub">Tap the number that feels closest. Size reflects intensity.</div>
         <div class="mood-col">
-          <div class="mood-chip" data-v="3"  data-z="red"    style="height:86px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">+3</span><span class="chip-name">Mania / crisis</span></div><div class="chip-dot"></div></div>
-          <div class="mood-chip" data-v="2"  data-z="yellow" style="height:72px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">+2</span><span class="chip-name">Mild hypomania</span></div><div class="chip-dot"></div></div>
-          <div class="mood-chip" data-v="1"  data-z="green"  style="height:62px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">+1</span><span class="chip-name">Slightly elevated</span></div><div class="chip-dot"></div></div>
-          <div class="mood-chip" data-v="0"  data-z="green"  style="height:54px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">0</span><span class="chip-name">Baseline</span></div><div class="chip-dot"></div></div>
-          <div class="mood-chip" data-v="-1" data-z="green"  style="height:62px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">−1</span><span class="chip-name">Slightly low</span></div><div class="chip-dot"></div></div>
-          <div class="mood-chip" data-v="-2" data-z="yellow" style="height:72px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">−2</span><span class="chip-name">Mild depression</span></div><div class="chip-dot"></div></div>
-          <div class="mood-chip" data-v="-3" data-z="red"    style="height:86px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">−3</span><span class="chip-name">Severe depression</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="3"  data-z="red"    style="height:86px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">+3</span><span class="chip-name" data-i18n="mood.name.3">Mania / crisis</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="2"  data-z="yellow" style="height:72px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">+2</span><span class="chip-name" data-i18n="mood.name.2">Mild hypomania</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="1"  data-z="green"  style="height:62px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">+1</span><span class="chip-name" data-i18n="mood.name.1">Slightly elevated</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="0"  data-z="green"  style="height:54px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">0</span><span class="chip-name" data-i18n="mood.name.0">Baseline</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="-1" data-z="green"  style="height:62px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">−1</span><span class="chip-name" data-i18n="mood.name.-1">Slightly low</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="-2" data-z="yellow" style="height:72px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">−2</span><span class="chip-name" data-i18n="mood.name.-2">Mild depression</span></div><div class="chip-dot"></div></div>
+          <div class="mood-chip" data-v="-3" data-z="red"    style="height:86px" onclick="pickMood(this)"><div class="chip-left"><span class="chip-num">−3</span><span class="chip-name" data-i18n="mood.name.-3">Severe depression</span></div><div class="chip-dot"></div></div>
         </div>
         <div class="mood-fb" id="mood-fb"><div class="mft" id="mft"></div><div class="mfb" id="mfb"></div></div>
       </div>
       <div class="step" id="step-flags">
-        <div class="eyebrow step-eye">Notes</div>
-        <div class="step-h">Anything <em>else?</em></div>
-        <div class="step-sub">Select all that apply — helps reveal patterns over time.</div>
+        <div class="eyebrow step-eye" data-i18n="step.flags.eye">Notes</div>
+        <div class="step-h" data-i18n="step.flags.h">Anything <em>else?</em></div>
+        <div class="step-sub" data-i18n="step.flags.sub">Select all that apply — helps reveal patterns over time.</div>
         <div class="flag-wrap">
-          <button class="flag-chip" data-flag="Racing thoughts" onclick="this.classList.toggle('on')">Racing thoughts</button>
-          <button class="flag-chip" data-flag="Irritable" onclick="this.classList.toggle('on')">Irritable</button>
-          <button class="flag-chip" data-flag="Low motivation" onclick="this.classList.toggle('on')">Low motivation</button>
-          <button class="flag-chip" data-flag="Spending ↑" onclick="this.classList.toggle('on')">Spending ↑</button>
-          <button class="flag-chip" data-flag="Withdrew socially" onclick="this.classList.toggle('on')">Withdrew socially</button>
-          <button class="flag-chip" data-flag="Medication ✓" onclick="this.classList.toggle('on')">Medication ✓</button>
-          <button class="flag-chip" data-flag="Appetite change" onclick="this.classList.toggle('on')">Appetite change</button>
-          <button class="flag-chip" data-flag="Hard to focus" onclick="this.classList.toggle('on')">Hard to focus</button>
-          <button class="flag-chip" data-flag="Risky behavior" onclick="this.classList.toggle('on')">Risky behavior</button>
+          <button class="flag-chip" data-flag="Racing thoughts" data-i18n="flag.racing" onclick="this.classList.toggle('on')">Racing thoughts</button>
+          <button class="flag-chip" data-flag="Irritable" data-i18n="flag.irritable" onclick="this.classList.toggle('on')">Irritable</button>
+          <button class="flag-chip" data-flag="Low motivation" data-i18n="flag.lowmot" onclick="this.classList.toggle('on')">Low motivation</button>
+          <button class="flag-chip" data-flag="Spending ↑" data-i18n="flag.spending" onclick="this.classList.toggle('on')">Spending ↑</button>
+          <button class="flag-chip" data-flag="Withdrew socially" data-i18n="flag.withdrew" onclick="this.classList.toggle('on')">Withdrew socially</button>
+          <button class="flag-chip" data-flag="Medication ✓" data-i18n="flag.med" onclick="this.classList.toggle('on')">Medication ✓</button>
+          <button class="flag-chip" data-flag="Appetite change" data-i18n="flag.appetite" onclick="this.classList.toggle('on')">Appetite change</button>
+          <button class="flag-chip" data-flag="Hard to focus" data-i18n="flag.focus" onclick="this.classList.toggle('on')">Hard to focus</button>
+          <button class="flag-chip" data-flag="Risky behavior" data-i18n="flag.risky" onclick="this.classList.toggle('on')">Risky behavior</button>
         </div>
       </div>
       <div class="step" id="step-done">
         <div class="done-wrap">
           <div class="done-ring"><i class="ti ti-check"></i></div>
-          <div class="done-h">Logged.</div>
-          <p class="done-sub" id="done-sub">Your data is building something real.</p>
-          <div class="streak-tile"><div class="streak-num" id="streak-num">0</div><div class="streak-txt"><strong>Days tracked</strong><span id="streak-sub">Clinic report unlocks at 30 days</span></div></div>
-          <button class="ob-skip" id="done-edit" onclick="editEntry(flowDate)" style="margin-top:14px;">Edit this entry</button>
+          <div class="done-h" data-i18n="done.h">Logged.</div>
+          <p class="done-sub" id="done-sub" data-i18n="done.sub.default">Your data is building something real.</p>
+          <div class="streak-tile"><div class="streak-num" id="streak-num">0</div><div class="streak-txt"><strong data-i18n="done.days">Days tracked</strong><span id="streak-sub" data-i18n="streak.lockedHint">Clinic report unlocks at 30 days</span></div></div>
+          <button class="ob-skip" id="done-edit" onclick="editEntry(flowDate)" style="margin-top:14px;" data-i18n="done.edit">Edit this entry</button>
         </div>
       </div>
     </div>
-    <div class="cta-wrap" id="cta-wrap"><button class="cta blue" id="cta-btn" onclick="flowNext()">Continue</button></div>
+    <div class="cta-wrap" id="cta-wrap"><button class="cta blue" id="cta-btn" onclick="flowNext()" data-i18n="cta.continue">Continue</button></div>
   </div>
 
   <!-- HISTORY -->
   <div class="page" id="page-history" style="padding-bottom:100px;">
-    <div class="page-hdr anim"><div class="page-title">Your <em>journey</em></div><div class="page-sub" id="hist-sub">—</div></div>
+    <div class="page-hdr anim"><div class="page-title" data-i18n="hist.title">Your <em>journey</em></div><div class="page-sub" id="hist-sub">—</div></div>
     <div class="stat-grid anim">
-      <div class="stat-tile"><div class="stl">Days tracked</div><div class="stv" id="h-days">0</div><div class="sts">of last 30</div></div>
-      <div class="stat-tile"><div class="stl">Avg wake time</div><div class="stv" id="h-wake">—</div><div class="sts">this week</div></div>
-      <div class="stat-tile"><div class="stl">Avg sleep</div><div class="stv" id="h-sleep">—</div><div class="sts">this week</div></div>
-      <div class="stat-tile"><div class="stl">Stable since</div><div class="stv green" id="h-stable">—</div><div class="sts">no red/yellow</div></div>
+      <div class="stat-tile"><div class="stl" data-i18n="hist.daysTracked">Days tracked</div><div class="stv" id="h-days">0</div><div class="sts" data-i18n="hist.of30">of last 30</div></div>
+      <div class="stat-tile"><div class="stl" data-i18n="hist.avgWake">Avg wake time</div><div class="stv" id="h-wake">—</div><div class="sts" data-i18n="hist.thisWeek">this week</div></div>
+      <div class="stat-tile"><div class="stl" data-i18n="hist.avgSleep">Avg sleep</div><div class="stv" id="h-sleep">—</div><div class="sts" data-i18n="hist.thisWeek">this week</div></div>
+      <div class="stat-tile"><div class="stl" data-i18n="hist.stableSince">Stable since</div><div class="stv green" id="h-stable">—</div><div class="sts" data-i18n="hist.noRedYellow">no red/yellow</div></div>
     </div>
     <div class="unlock-card anim">
-      <div class="eyebrow uc-eye">Clinic Report</div>
-      <div class="uc-h">Doctor-ready summary</div>
-      <div class="uc-sub" id="uc-sub">Track 30 days to unlock your personalized report.</div>
+      <div class="eyebrow uc-eye" data-i18n="uc.eye">Clinic Report</div>
+      <div class="uc-h" data-i18n="uc.h">Doctor-ready summary</div>
+      <div class="uc-sub" id="uc-sub">—</div>
       <div class="uc-bar"><div class="uc-fill" id="uc-fill" style="width:0%"></div></div>
-      <div class="uc-meta"><span id="uc-left">0 / 30 days</span><span id="uc-right">Unlocks in 30 days</span></div>
+      <div class="uc-meta"><span id="uc-left">—</span><span id="uc-right">—</span></div>
     </div>
     <div class="chart-card anim">
-      <div class="cc-hdr"><span class="cc-title">Life chart</span><span class="cc-sub">Mood · Wake time</span></div>
+      <div class="cc-hdr"><span class="cc-title" data-i18n="chart.title">Life chart</span><span class="cc-sub" data-i18n="chart.sub">Mood · Wake time</span></div>
       <svg id="life-chart" width="100%" viewBox="0 0 340 120" role="img" aria-label="Life chart"></svg>
     </div>
     <div class="log-wrap anim">
-      <div class="log-sec-label">Recent entries</div>
+      <div class="log-sec-label" data-i18n="log.recent">Recent entries</div>
       <div id="log-list"></div>
-      <button class="missed-btn" onclick="promptMissedDay()"><i class="ti ti-calendar-plus"></i>Log a missed day</button>
+      <button class="missed-btn" onclick="promptMissedDay()"><i class="ti ti-calendar-plus"></i><span data-i18n="log.missed">Log a missed day</span></button>
       <input type="date" id="missed-date" onchange="onMissedDate(this.value)" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
     </div>
   </div>
 
   <!-- INSIGHTS -->
   <div class="page" id="page-insights" style="padding-bottom:100px;">
-    <div class="page-hdr anim"><div class="page-title">What your <em>data says</em></div><div class="page-sub" id="ins-sub">—</div></div>
+    <div class="page-hdr anim"><div class="page-title" data-i18n="ins.title">What your <em>data says</em></div><div class="page-sub" id="ins-sub">—</div></div>
     <div id="insights-body"></div>
   </div>
 
   <!-- PROFILE -->
   <div class="page" id="page-profile" style="padding-bottom:100px;">
-    <div class="prof-hdr anim"><div class="prof-av" id="prof-av">?</div><div class="prof-meta"><div class="prof-name" id="prof-name">Your Name</div><div class="prof-dx" id="prof-dx">Bipolar · Tracking since today</div></div><button class="prof-edit" onclick="openEditProfile()" aria-label="Edit profile"><i class="ti ti-pencil"></i></button></div>
+    <div class="prof-hdr anim"><div class="prof-av" id="prof-av">?</div><div class="prof-meta"><div class="prof-name" id="prof-name">Your Name</div><div class="prof-dx" id="prof-dx">—</div></div><button class="prof-edit" onclick="openEditProfile()" data-i18n-aria="prof.edit" aria-label="Edit profile"><i class="ti ti-pencil"></i></button></div>
     <div class="pref-sec anim">
-      <div class="pref-label">Notifications</div>
+      <div class="pref-label" data-i18n="pref.language">Language</div>
       <div class="pref-card">
-        <div class="pref-row"><div><div class="pr-title">Evening reminder</div><div class="pr-sub tap" id="set-reminder-sub" onclick="openReminderTime()">9:00 PM daily</div></div><button class="toggle" id="tg-reminderOn" role="switch" aria-checked="false" aria-label="Evening reminder" onclick="toggleSetting('reminderOn',this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Early wake alert</div><div class="pr-sub tap" id="set-earlywake-sub" onclick="openEarlyWake()">Wake before 6 AM for 3+ days</div></div><button class="toggle" id="tg-earlyWakeOn" role="switch" aria-checked="false" aria-label="Early wake alert" onclick="toggleSetting('earlyWakeOn',this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Red zone alert</div><div class="pr-sub tap" id="set-redzone-sub" onclick="cycleRedZone()">Immediate when you log ±3</div></div><button class="toggle" id="tg-redZoneOn" role="switch" aria-checked="false" aria-label="Red zone alert" onclick="toggleSetting('redZoneOn',this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Weekly summary</div><div class="pr-sub tap" id="set-weekly-sub" onclick="openWeeklyDay()">Every Sunday morning</div></div><button class="toggle" id="tg-weeklyOn" role="switch" aria-checked="false" aria-label="Weekly summary" onclick="toggleSetting('weeklyOn',this)"></button></div>
+        <div class="lang-seg">
+          <button class="lang-seg-btn" data-lang-opt="en" onclick="pickLang('en',true)"><span class="lang-flag"><svg viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#fff" stroke-width="8"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="4"/><rect x="25" width="10" height="40" fill="#fff"/><rect y="15" width="60" height="10" fill="#fff"/><rect x="27" width="6" height="40" fill="#C8102E"/><rect y="17" width="60" height="6" fill="#C8102E"/></svg></span><span data-i18n="lang.en">English</span></button>
+          <button class="lang-seg-btn" data-lang-opt="vi" onclick="pickLang('vi',true)"><span class="lang-flag"><svg viewBox="0 0 60 40"><rect width="60" height="40" fill="#DA251D"/><polygon points="30,8 32.7,16.3 41.4,16.3 34.4,21.4 37.1,29.7 30,24.6 22.9,29.7 25.6,21.4 18.6,16.3 27.3,16.3" fill="#FFFF00"/></svg></span><span data-i18n="lang.vi">Tiếng Việt</span></button>
+        </div>
       </div>
     </div>
     <div class="pref-sec anim">
-      <div class="pref-label">Clinic report</div>
+      <div class="pref-label" data-i18n="pref.notifications">Notifications</div>
       <div class="pref-card">
-        <div class="pref-row"><div><div class="pr-title">Include wake times</div><div class="pr-sub">Bedtime + wake in report</div></div><button class="toggle on" role="switch" aria-checked="true" aria-label="Include wake times in report" onclick="toggleSwitch(this)"></button></div>
-        <div class="pref-row"><div><div class="pr-title">Include medications</div><div class="pr-sub">From daily flag entries</div></div><button class="toggle on" role="switch" aria-checked="true" aria-label="Include medications in report" onclick="toggleSwitch(this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title" data-i18n="pref.eveningReminder">Evening reminder</div><div class="pr-sub tap" id="set-reminder-sub" onclick="openReminderTime()">9:00 PM daily</div></div><button class="toggle" id="tg-reminderOn" role="switch" aria-checked="false" data-i18n-aria="pref.eveningReminder" aria-label="Evening reminder" onclick="toggleSetting('reminderOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title" data-i18n="pref.earlyWake">Early wake alert</div><div class="pr-sub tap" id="set-earlywake-sub" onclick="openEarlyWake()">Wake before 6 AM for 3+ days</div></div><button class="toggle" id="tg-earlyWakeOn" role="switch" aria-checked="false" data-i18n-aria="pref.earlyWake" aria-label="Early wake alert" onclick="toggleSetting('earlyWakeOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title" data-i18n="pref.redZone">Red zone alert</div><div class="pr-sub tap" id="set-redzone-sub" onclick="cycleRedZone()">Immediate when you log ±3</div></div><button class="toggle" id="tg-redZoneOn" role="switch" aria-checked="false" data-i18n-aria="pref.redZone" aria-label="Red zone alert" onclick="toggleSetting('redZoneOn',this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title" data-i18n="pref.weekly">Weekly summary</div><div class="pr-sub tap" id="set-weekly-sub" onclick="openWeeklyDay()">Every Sunday morning</div></div><button class="toggle" id="tg-weeklyOn" role="switch" aria-checked="false" data-i18n-aria="pref.weekly" aria-label="Weekly summary" onclick="toggleSetting('weeklyOn',this)"></button></div>
       </div>
     </div>
     <div class="pref-sec anim">
-      <div class="pref-label">Data &amp; privacy</div>
+      <div class="pref-label" data-i18n="pref.clinicReport">Clinic report</div>
       <div class="pref-card">
-        <div class="pref-row"><div><div class="pr-title">Anonymized research opt-in</div><div class="pr-sub">Help improve bipolar care. No personal info shared.</div></div><button class="toggle" role="switch" aria-checked="false" aria-label="Anonymized research opt-in" onclick="toggleSwitch(this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title" data-i18n="pref.includeWake">Include wake times</div><div class="pr-sub" data-i18n="pref.includeWakeSub">Bedtime + wake in report</div></div><button class="toggle on" role="switch" aria-checked="true" aria-label="Include wake times in report" onclick="toggleSwitch(this)"></button></div>
+        <div class="pref-row"><div><div class="pr-title" data-i18n="pref.includeMeds">Include medications</div><div class="pr-sub" data-i18n="pref.includeMedsSub">From daily flag entries</div></div><button class="toggle on" role="switch" aria-checked="true" aria-label="Include medications in report" onclick="toggleSwitch(this)"></button></div>
       </div>
     </div>
-    <button class="export-btn anim" id="install-btn" style="display:none;" onclick="installApp()"><i class="ti ti-device-mobile-down"></i>Install app on your phone</button>
-    <button class="export-btn anim" onclick="showReport()"><i class="ti ti-file-text"></i>Preview clinic report</button>
-    <button class="export-btn anim" onclick="signOut()"><i class="ti ti-logout"></i>Sign out</button>
-    <button class="danger-btn anim" onclick="resetApp()"><i class="ti ti-trash"></i>Reset all data</button>
-    <div class="version">PolarNote · v0.1 Beta · For validation only</div>
+    <div class="pref-sec anim">
+      <div class="pref-label" data-i18n="pref.dataPrivacy">Data &amp; privacy</div>
+      <div class="pref-card">
+        <div class="pref-row"><div><div class="pr-title" data-i18n="pref.research">Anonymized research opt-in</div><div class="pr-sub" data-i18n="pref.researchSub">Help improve bipolar care. No personal info shared.</div></div><button class="toggle" role="switch" aria-checked="false" aria-label="Anonymized research opt-in" onclick="toggleSwitch(this)"></button></div>
+      </div>
+    </div>
+    <button class="export-btn anim" id="install-btn" style="display:none;" onclick="installApp()"><i class="ti ti-device-mobile-down"></i><span data-i18n="btn.install">Install app on your phone</span></button>
+    <button class="export-btn anim" onclick="showReport()"><i class="ti ti-file-text"></i><span data-i18n="btn.previewReport">Preview clinic report</span></button>
+    <button class="export-btn anim" onclick="signOut()"><i class="ti ti-logout"></i><span data-i18n="btn.signout">Sign out</span></button>
+    <button class="danger-btn anim" onclick="resetApp()"><i class="ti ti-trash"></i><span data-i18n="btn.reset">Reset all data</span></button>
+    <div class="version" data-i18n="app.version">PolarNote · v0.1 Beta · For validation only</div>
   </div>
 
   <!-- Floating install banner — shows on every screen until installed or dismissed -->
   <div class="install-bar" id="install-bar">
     <div class="ib-icon"><i class="ti ti-device-mobile-down"></i></div>
-    <div class="ib-text"><div class="ib-title">Install PolarNote</div><div class="ib-sub">Add it to your home screen</div></div>
-    <button class="ib-cta" onclick="installApp()">Install</button>
-    <button class="ib-close" onclick="dismissInstallBar()" aria-label="Dismiss">&times;</button>
+    <div class="ib-text"><div class="ib-title" data-i18n="install.title">Install PolarNote</div><div class="ib-sub" data-i18n="install.sub">Add it to your home screen</div></div>
+    <button class="ib-cta" onclick="installApp()" data-i18n="install.cta">Install</button>
+    <button class="ib-close" onclick="dismissInstallBar()" data-i18n-aria="install.dismiss" aria-label="Dismiss">&times;</button>
   </div>
 
   <!-- TAB BAR -->
   <nav class="tabbar" id="tabbar" style="display:none;">
-    <button class="tbtn on" onclick="switchTab('today',this)"><i class="ti ti-home"></i>Today</button>
-    <button class="tbtn" onclick="switchTab('history',this)"><i class="ti ti-chart-bar"></i>History</button>
-    <button class="tbtn" onclick="switchTab('insights',this)"><i class="ti ti-bulb"></i>Insights</button>
-    <button class="tbtn" onclick="switchTab('profile',this)"><i class="ti ti-user"></i>Profile</button>
+    <button class="tbtn on" onclick="switchTab('today',this)"><i class="ti ti-home"></i><span data-i18n="tab.today">Today</span></button>
+    <button class="tbtn" onclick="switchTab('history',this)"><i class="ti ti-chart-bar"></i><span data-i18n="tab.history">History</span></button>
+    <button class="tbtn" onclick="switchTab('insights',this)"><i class="ti ti-bulb"></i><span data-i18n="tab.insights">Insights</span></button>
+    <button class="tbtn" onclick="switchTab('profile',this)"><i class="ti ti-user"></i><span data-i18n="tab.profile">Profile</span></button>
   </nav>
 </div>
 
@@ -608,9 +652,9 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-hdr">
-      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-cancel" onclick="closeModal()" data-i18n="modal.cancel">Cancel</button>
       <div class="modal-htitle" id="modal-title">Bedtime</div>
-      <button class="modal-done" onclick="confirmTime()">Done</button>
+      <button class="modal-done" onclick="confirmTime()" data-i18n="modal.done">Done</button>
     </div>
     <div class="wheel-outer">
       <div class="wheel-col" id="wh-h-col"><div class="wcol-label" id="wh-h-label">Hour</div><div class="wheel-scroll" id="wh-h"><div class="wheel-hl"></div></div></div>
@@ -629,19 +673,19 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-hdr">
-      <button class="modal-cancel" onclick="closeEditProfile()">Cancel</button>
-      <div class="modal-htitle">Edit profile</div>
-      <button class="modal-done" onclick="saveEditProfile()">Save</button>
+      <button class="modal-cancel" onclick="closeEditProfile()" data-i18n="modal.cancel">Cancel</button>
+      <div class="modal-htitle" data-i18n="editprof.title">Edit profile</div>
+      <button class="modal-done" onclick="saveEditProfile()" data-i18n="editprof.save">Save</button>
     </div>
     <div class="epf-body">
-      <label class="epf-label" for="epf-name">Name</label>
-      <input class="ob-input" id="epf-name" type="text" placeholder="Your first name" maxlength="30" autocomplete="given-name">
-      <label class="epf-label">Diagnosis</label>
+      <label class="epf-label" for="epf-name" data-i18n="editprof.name">Name</label>
+      <input class="ob-input" id="epf-name" type="text" placeholder="Your first name" data-i18n-ph="ob.name.ph" maxlength="30" autocomplete="given-name">
+      <label class="epf-label" data-i18n="editprof.diagnosis">Diagnosis</label>
       <div class="ob-sel-group" id="epf-dx-group">
-        <button class="ob-sel-btn epf-sel-btn" data-dx="Bipolar I" onclick="selEditDx(this)">Bipolar I</button>
-        <button class="ob-sel-btn epf-sel-btn" data-dx="Bipolar II" onclick="selEditDx(this)">Bipolar II</button>
-        <button class="ob-sel-btn epf-sel-btn" data-dx="Cyclothymia" onclick="selEditDx(this)">Cyclothymia</button>
-        <button class="ob-sel-btn epf-sel-btn" data-dx="Unspecified / exploring" onclick="selEditDx(this)">Unspecified / exploring</button>
+        <button class="ob-sel-btn epf-sel-btn" data-dx="Bipolar I" data-i18n="dx.bp1" onclick="selEditDx(this)">Bipolar I</button>
+        <button class="ob-sel-btn epf-sel-btn" data-dx="Bipolar II" data-i18n="dx.bp2" onclick="selEditDx(this)">Bipolar II</button>
+        <button class="ob-sel-btn epf-sel-btn" data-dx="Cyclothymia" data-i18n="dx.cyclo" onclick="selEditDx(this)">Cyclothymia</button>
+        <button class="ob-sel-btn epf-sel-btn" data-dx="Unspecified / exploring" data-i18n="dx.unspec" onclick="selEditDx(this)">Unspecified / exploring</button>
       </div>
     </div>
   </div>
@@ -652,16 +696,16 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-hdr">
-      <button class="modal-cancel" onclick="closeIOSInstall()">Close</button>
-      <div class="modal-htitle">Install app</div>
+      <button class="modal-cancel" onclick="closeIOSInstall()" data-i18n="ios.close">Close</button>
+      <div class="modal-htitle" data-i18n="ios.title">Install app</div>
       <span style="width:48px;"></span>
     </div>
     <div class="epf-body">
-      <p style="color:var(--txt2);font-size:14px;line-height:1.5;margin:0 0 16px;">iPhone & iPad install from Safari's Share menu — there's no automatic prompt.</p>
+      <p style="color:var(--txt2);font-size:14px;line-height:1.5;margin:0 0 16px;" data-i18n="ios.intro">iPhone & iPad install from Safari's Share menu — there's no automatic prompt.</p>
       <ol style="color:var(--txt);font-size:15px;line-height:1.9;padding-left:20px;margin:0;">
-        <li>Tap the <strong>Share</strong> button <i class="ti ti-upload" style="vertical-align:-2px;"></i> in Safari's toolbar.</li>
-        <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
-        <li>Tap <strong>Add</strong> — PolarNote appears on your Home Screen.</li>
+        <li><span data-i18n="ios.step1pre">Tap the </span><strong data-i18n="ios.step1strong">Share</strong> <i class="ti ti-upload" style="vertical-align:-2px;"></i><span data-i18n="ios.step1post"> button in Safari's toolbar.</span></li>
+        <li><span data-i18n="ios.step2pre">Scroll down and tap </span><strong data-i18n="ios.step2strong">Add to Home Screen</strong><span data-i18n="ios.step2post">.</span></li>
+        <li><span data-i18n="ios.step3pre">Tap </span><strong data-i18n="ios.step3strong">Add</strong><span data-i18n="ios.step3post"> — PolarNote appears on your Home Screen.</span></li>
       </ol>
     </div>
   </div>
@@ -671,10 +715,10 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 <div class="report-bg" id="report-bg" onclick="closeReportOutside(event)">
   <div class="report-sheet">
     <div class="rp-handle"></div>
-    <div class="rp-title">Clinic Report</div>
+    <div class="rp-title" data-i18n="report.title">Clinic Report</div>
     <div class="rp-sub" id="rp-sub">—</div>
     <div id="rp-body"></div>
-    <button class="rp-copy-btn" onclick="copyReport()">Copy report text</button>
+    <button class="rp-copy-btn" onclick="copyReport()" data-i18n="report.copy">Copy report text</button>
   </div>
 </div>
 
@@ -688,6 +732,243 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 const KEY='polarnote_v1';
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||def();}catch{return def();}}
 function save(s){localStorage.setItem(KEY,JSON.stringify(s));}
+
+// ── i18n (English / Tiếng Việt) ──────────────────────────────
+// Language is chosen in onboarding (flag picker) and can be re-picked in Profile.
+// Stored device-locally so the auth/onboarding screens are localized before a
+// profile exists; also mirrored into S.settings.lang so it syncs across devices.
+const LANG_KEY='polarnote_lang';
+function getLang(){
+  const saved=localStorage.getItem(LANG_KEY);
+  if(saved==='vi'||saved==='en')return saved;
+  return (navigator.language||'').toLowerCase().startsWith('vi')?'vi':'en';
+}
+let LANG=getLang();
+function localeTag(){return LANG==='vi'?'vi-VN':'en-US';}
+// t(key, vars): look up translation, fall back to English then the raw key.
+// Interpolates {name} placeholders from vars.
+function t(key,vars){
+  let s=(I18N[LANG]&&I18N[LANG][key]!=null)?I18N[LANG][key]:(I18N.en[key]!=null?I18N.en[key]:key);
+  if(vars)for(const k in vars)s=s.split('{'+k+'}').join(vars[k]);
+  return s;
+}
+// Populate every [data-i18n] element (innerHTML, so <em>/<br> in copy survive),
+// plus placeholders and aria-labels. Dynamic screens re-render via their own t() calls.
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.innerHTML=t(el.getAttribute('data-i18n'));});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{el.setAttribute('placeholder',t(el.getAttribute('data-i18n-ph')));});
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>{el.setAttribute('aria-label',t(el.getAttribute('data-i18n-aria')));});
+  document.documentElement.lang=LANG;
+  syncLangPicker();
+}
+// Reflect the active language on the onboarding flag cards + Profile rows.
+function syncLangPicker(){
+  document.querySelectorAll('[data-lang-opt]').forEach(b=>b.classList.toggle('on',b.getAttribute('data-lang-opt')===LANG));
+}
+// Onboarding: live-apply (no dynamic screens visible yet). Profile: reload so every
+// already-rendered dynamic screen is rebuilt in the new language with zero edge cases.
+function pickLang(l,reload){
+  LANG=l;localStorage.setItem(LANG_KEY,l);
+  if(typeof S!=='undefined'&&S){S.settings=S.settings||{};S.settings.lang=l;save(S);if(S.userId&&S.onboarded)dbUpsertProfile();}
+  if(reload){location.reload();return;}
+  applyI18n();
+}
+
+// Diagnosis + flag values are stored in English (DB keys); only their display is localized.
+const DX_KEYS={'Bipolar I':'dx.bp1','Bipolar II':'dx.bp2','Cyclothymia':'dx.cyclo','Unspecified / exploring':'dx.unspec','Bipolar':'dx.bipolar'};
+function dxLabel(dx){return DX_KEYS[dx]?t(DX_KEYS[dx]):(dx||t('dx.bipolar'));}
+const FLAG_KEYS={'Racing thoughts':'flag.racing','Irritable':'flag.irritable','Low motivation':'flag.lowmot','Spending ↑':'flag.spending','Withdrew socially':'flag.withdrew','Medication ✓':'flag.med','Appetite change':'flag.appetite','Hard to focus':'flag.focus','Risky behavior':'flag.risky'};
+function flagLabel(f){return FLAG_KEYS[f]?t(FLAG_KEYS[f]):f;}
+
+const I18N={en:{
+  // Auth
+  'auth.welcome':'Welcome to <em>PolarNote</em>',
+  'auth.sub.signin':'Sign in to sync your tracking across devices.',
+  'auth.sub.signup':'Create an account to start tracking securely.',
+  'auth.sub.recovery':'Choose a new password for your account.',
+  'auth.email.ph':'Email','auth.pass.ph':'Password (min. 6 characters)','auth.pass.ph.new':'New password (min. 6 characters)',
+  'auth.cta.signin':'Sign in','auth.cta.signup':'Create account','auth.cta.update':'Update password','auth.cta.wait':'Please wait…',
+  'auth.toggle.toSignup':"Don't have an account? Sign up",'auth.toggle.toSignin':'Already have an account? Sign in','auth.forgot':'Forgot password?',
+  'err.notConfigured':'Supabase not configured. See supabase-config.js.',
+  'err.enterEmailFirst':'Enter your email above, then tap "Forgot password?".',
+  'note.resetSent':'Password reset link sent. Check your email and open it on this device.',
+  'err.resetFail':'Could not send reset email.','err.passShort':'Password must be at least 6 characters.',
+  'err.updatePassFail':'Could not update password.','err.enterEmailPass':'Enter your email and password.',
+  'note.accountCreated':'Account created. Check your email to confirm, then sign in.','err.authFail':'Authentication failed.',
+  'config.notSet':'⚠️ Backend not configured. Add your project URL and anon key in <code>supabase-config.js</code>, then run <code>supabase-schema.sql</code> in the SQL editor.',
+  // Onboarding language step
+  'ob.lang.h':'Choose your <em>language.</em>','ob.lang.body':'You can change this later in your profile.',
+  'lang.en':'English','lang.vi':'Tiếng Việt',
+  // Onboarding intro
+  'ob0.h':'Track your <em>poles.</em><br>Understand your cycle.','ob0.body':'PolarNote is built for people with bipolar — not for general mood tracking. Every feature is designed for how your mind actually works.',
+  'ob1.h':'Sleep is your <em>first signal.</em>','ob1.body':"Waking at 5 AM three days in a row? That's your early warning system. We track bedtime and wake time so you can see the pattern before the episode arrives.",
+  'ob2.h':'Not good or bad —<br><em>which pole.</em>','ob2.body':'We use a −3 to +3 scale. Green means functioning. Yellow means watch closely. Red means reach out now. Simple, clinically grounded, never ambiguous.',
+  'ob3.h':"Let's set up <em>your profile.</em>",'ob3.body':'Two things to get started.','ob.name.ph':'Your first name',
+  'dx.bp1':'Bipolar I','dx.bp2':'Bipolar II','dx.cyclo':'Cyclothymia','dx.unspec':'Unspecified / exploring','dx.bipolar':'Bipolar',
+  'ob.cta.start':'Get started','ob.cta.continue':'Continue','ob.cta.startTracking':'Start tracking','ob.skip':'Skip','ob.skip.setup':'Skip setup',
+  // Today / flow
+  'flow.back':'Back','flow.skip':'Skip','step.sleep.eye':'Sleep','step.sleep.h':'When did you <em>sleep?</em>','step.sleep.sub':'Bedtime and wake time reveal more than duration alone.',
+  'tile.bed':'Went to bed','tile.wake':'Woke up','tile.tap':'Tap to set','sleep.total':'Total sleep',
+  'step.mood.eye':'Mood','step.mood.h':'Where are you <em>today?</em>','step.mood.sub':'Tap the number that feels closest. Size reflects intensity.',
+  'mood.name.3':'Mania / crisis','mood.name.2':'Mild hypomania','mood.name.1':'Slightly elevated','mood.name.0':'Baseline','mood.name.-1':'Slightly low','mood.name.-2':'Mild depression','mood.name.-3':'Severe depression',
+  'step.flags.eye':'Notes','step.flags.h':'Anything <em>else?</em>','step.flags.sub':'Select all that apply — helps reveal patterns over time.',
+  'flag.racing':'Racing thoughts','flag.irritable':'Irritable','flag.lowmot':'Low motivation','flag.spending':'Spending ↑','flag.withdrew':'Withdrew socially','flag.med':'Medication ✓','flag.appetite':'Appetite change','flag.focus':'Hard to focus','flag.risky':'Risky behavior',
+  'done.h':'Logged.','done.sub.default':'Your data is building something real.','done.days':'Days tracked','done.edit':'Edit this entry',
+  'cta.continue':'Continue','cta.save':'Save check-in',
+  'streak.ready':'Clinic report ready!','streak.unlock':'Clinic report unlocks in {n} days','streak.lockedHint':'Clinic report unlocks at 30 days',
+  'done.sub.count':'{n} day{s} tracked and counting.',
+  'prog.step':'Step {i} of {total}','prog.complete':'Complete',
+  'flow.editing':'Editing {date}','flow.logging':'Logging {date}',
+  'wake.red':'Early waking {n} days — matches your pre-hypomanic pattern. Consider reaching out to your care team.',
+  'wake.yellow':'Early waking {n} days this week. Sleep disruption often precedes mood shifts — keep an eye on this.',
+  'mood.body.3':'You are outside your window of tolerance. Please contact your psychiatrist or crisis line today.',
+  'mood.body.2':'You can still recognize this. Be cautious with decisions. Protect sleep tonight above all.',
+  'mood.body.1':'Functioning well. Enjoy the energy but keep your sleep schedule.',
+  'mood.body.0':'This is your stable state. A good day to reinforce healthy habits.',
+  'mood.body.-1':'Functioning well. Keep your routine and watch for further dips.',
+  'mood.body.-2':'You can still recognize this. Prioritize sleep, routine, and reaching out to someone you trust.',
+  'mood.body.-3':'Please reach out to your care team or a crisis line today. You do not have to handle this alone.',
+  'zone.red':'Red zone','zone.yellow':'Yellow zone','zone.green':'Green zone',
+  // History
+  'hist.title':'Your <em>journey</em>','hist.sub':'{n} day{s} tracked · Started {date}',
+  'hist.daysTracked':'Days tracked','hist.of30':'of last 30','hist.avgWake':'Avg wake time','hist.thisWeek':'this week','hist.avgSleep':'Avg sleep','hist.stableSince':'Stable since','hist.noRedYellow':'no red/yellow','hist.today':'Today','hist.daysAgo':'{n}d ago',
+  'uc.eye':'Clinic Report','uc.h':'Doctor-ready summary','uc.left':'{n} / 30 days','uc.unlocksIn':'Unlocks in {n} days','uc.readyExport':'Ready to export!','uc.subProgress':'{n} of 30 days tracked — keep going.','uc.subReady':'Your clinic report is ready. Share it with your psychiatrist.',
+  'chart.title':'Life chart','chart.sub':'Mood · Wake time','chart.noData':'No data yet','chart.elevated':'elevated','chart.depressed':'depressed',
+  'log.recent':'Recent entries','log.missed':'Log a missed day','log.editHint':'Tap to edit','log.today':'Today','log.yesterday':'Yesterday','log.wake':'wake',
+  // Insights
+  'ins.title':'What your <em>data says</em>','ins.sub':'Based on {n} day{s} of tracking','ins.subEmpty':'Start tracking to unlock insights',
+  'ins.notEnough':'Not enough data','ins.notEnoughBody':'Track at least 3 days to start seeing patterns.',
+  'ins.wake':'Wake time','ins.wakeRed':"You've woken before {h} AM <strong>{n} times this week.</strong> Early morning waking is a key warning sign of approaching hypomania. Consider contacting your care team.",
+  'ins.wakeYellow':'Early waking <strong>{n} times this week</strong> (before {h} AM). Sleep disruption often precedes mood shifts — monitor closely.',
+  'ins.wakeStable':'Sleep timing looks stable this week. Avg wake: <strong>{wake}</strong>. Keep protecting your sleep schedule.',
+  'ins.earlyWakesRow':'Early wakes this week (&lt;{h} AM)','ins.avgWakeRow':'Avg wake this week','ins.recentWakeRow':'Most recent wake','ins.based7':'Based on last 7 entries','ins.dayUnit':'{n} day{s}',
+  'ins.mood':'Mood trend','ins.5avg':'5-day avg: <strong>{avg}</strong> — {trend}. {note}','ins.trendUp':'↑ rising','ins.trendDown':'↓ falling','ins.trendStable':'→ stable','ins.moodYellow':"You're in a yellow zone. Monitor decisions, sleep, and spending carefully.",'ins.moodGreen':"You're in a green zone. Keep your routine.",'ins.daysAgo':'{n} days ago',
+  'ins.cycle':'Cycle','ins.cycleLast':'Last elevated episode was <strong>{n} day{s} ago</strong>.','ins.cycleNone':'No elevated episodes recorded yet.','ins.cycleMore':' With more data, your cycle length will become clearer.','ins.cycleUnit':'days','ins.cycleMeta':'Signature unlocks after 60 days · {n} more to go',
+  'ins.locked':'Locked','ins.lockedBody':'Your <strong style="color:var(--txt2)">personal pre-episode signature</strong> — the exact combination of signals that precede your specific episodes — unlocks after 60 days.','ins.lockedLeft':'{n} / 60 days','ins.lockedRight':'{n} more days',
+  // Profile
+  'prof.dx':'{dx} · Tracking since {date}','prof.edit':'Edit profile',
+  'pref.notifications':'Notifications','pref.eveningReminder':'Evening reminder','pref.reminderDaily':'{time} daily','pref.earlyWake':'Early wake alert','pref.earlyWakeVal':'Wake before {h} AM for {d}+ days','pref.redZone':'Red zone alert','pref.redZoneVal':'Immediate when you log ±{n}','pref.weekly':'Weekly summary','pref.weeklyVal':'Every {day} morning',
+  'pref.clinicReport':'Clinic report','pref.includeWake':'Include wake times','pref.includeWakeSub':'Bedtime + wake in report','pref.includeMeds':'Include medications','pref.includeMedsSub':'From daily flag entries',
+  'pref.dataPrivacy':'Data & privacy','pref.research':'Anonymized research opt-in','pref.researchSub':'Help improve bipolar care. No personal info shared.',
+  'pref.language':'Language',
+  'btn.install':'Install app on your phone','btn.previewReport':'Preview clinic report','btn.signout':'Sign out','btn.reset':'Reset all data','app.version':'PolarNote · v0.1 Beta · For validation only',
+  'install.title':'Install PolarNote','install.sub':'Add it to your home screen','install.cta':'Install','install.dismiss':'Dismiss',
+  'tab.today':'Today','tab.history':'History','tab.insights':'Insights','tab.profile':'Profile',
+  'default.name':'Friend','default.patient':'Patient',
+  // Modals
+  'modal.cancel':'Cancel','modal.done':'Done','modal.bedtime':'Bedtime','modal.waketime':'Wake time','modal.hour':'Hour','modal.min':'Min','modal.days':'Days','modal.day':'Day',
+  'modal.eveningReminder':'Evening reminder','modal.earlyWake':'Early wake alert','modal.weekly':'Weekly summary',
+  'editprof.title':'Edit profile','editprof.save':'Save','editprof.name':'Name','editprof.diagnosis':'Diagnosis',
+  'ios.close':'Close','ios.title':'Install app','ios.intro':"iPhone & iPad install from Safari's Share menu — there's no automatic prompt.",
+  'ios.step1pre':'Tap the ','ios.step1strong':'Share','ios.step1post':" button in Safari's toolbar.",'ios.step2pre':'Scroll down and tap ','ios.step2strong':'Add to Home Screen','ios.step2post':'.','ios.step3pre':'Tap ','ios.step3strong':'Add','ios.step3post':' — PolarNote appears on your Home Screen.',
+  'report.title':'Clinic Report','report.copy':'Copy report text','report.generated':'Generated {date} · {n} days of data',
+  'report.secPatient':'Patient','report.name':'Name','report.diagnosis':'Diagnosis','report.trackingPeriod':'Tracking period','report.totalDays':'Total days tracked',
+  'report.secSleep':'Sleep — last 7 days','report.avgSleep':'Avg sleep duration','report.avgWake':'Avg wake time','report.earlyWakes':'Early wakes (&lt;{h} AM)','report.ofDays':'{n} of 7 days',
+  'report.secMood':'Mood distribution — all time','report.green':'Green zone (−1 to +1)','report.yellow':'Yellow zone (±2)','report.red':'Red zone (±3)','report.7avg':'7-day mood avg','report.days':'{n} days',
+  'report.secMed':'Medication adherence','report.medAdh':'Days with medication logged','report.medVal':'{n} / {total} days ({pct}%)',
+  'report.secRecent':'Recent entries (last 5)','report.wakePrefix':'wake',
+  // Notifications & toasts
+  'notify.redTitle':'PolarNote — red zone','notify.redBody':'You logged {m}{lbl}. Please reach out to your care team or a crisis line.',
+  'notify.reminderTitle':'PolarNote','notify.reminderBody':'Time for your evening check-in. How was today?',
+  'notify.weeklyTitle':'PolarNote — weekly summary','notify.weeklyBody':'Last 7 days: {n} logged{avg}, {ec} early wake{s}. Tap to review your week.','notify.weeklyAvg':', avg mood {avg}',
+  'toast.enterName':'Please enter your name','toast.profileUpdated':'Profile updated','toast.synced':'Offline changes synced','toast.savedOffline':'Saved offline — will sync','toast.couldNotDelete':'Could not delete data','toast.reportCopied':'Report copied!','toast.copyManual':'Select and copy manually','toast.appInstalled':'App installed','toast.installHint':'Open your browser menu → "Add to Home screen"',
+  'confirm.reset':'Reset all tracked data? This deletes your entries and cannot be undone. (Your account stays.)',
+  'report.copyText':'POLARNOTE CLINIC REPORT\nGenerated: {date}\nPatient: {name} | Diagnosis: {dx}\nTracking: {start} – {today} ({n} days)\n\nSLEEP (last 7 days)\nAvg duration: {avgSleep}h\nEarly wakes (<{h} AM): {ew} of 7 days\n\nMOOD (all time)\nGreen (−1 to +1): {grn} days\nYellow (±2): {yel} days\nRed (±3): {red} days\n\nRECENT ENTRIES\n{entries}\n\nGenerated by PolarNote (validation prototype)'
+},vi:{
+  // Auth
+  'auth.welcome':'Chào mừng đến với <em>PolarNote</em>',
+  'auth.sub.signin':'Đăng nhập để đồng bộ dữ liệu theo dõi trên mọi thiết bị.',
+  'auth.sub.signup':'Tạo tài khoản để bắt đầu theo dõi an toàn.',
+  'auth.sub.recovery':'Chọn mật khẩu mới cho tài khoản của bạn.',
+  'auth.email.ph':'Email','auth.pass.ph':'Mật khẩu (tối thiểu 6 ký tự)','auth.pass.ph.new':'Mật khẩu mới (tối thiểu 6 ký tự)',
+  'auth.cta.signin':'Đăng nhập','auth.cta.signup':'Tạo tài khoản','auth.cta.update':'Cập nhật mật khẩu','auth.cta.wait':'Vui lòng đợi…',
+  'auth.toggle.toSignup':'Chưa có tài khoản? Đăng ký','auth.toggle.toSignin':'Đã có tài khoản? Đăng nhập','auth.forgot':'Quên mật khẩu?',
+  'err.notConfigured':'Supabase chưa được cấu hình. Xem supabase-config.js.',
+  'err.enterEmailFirst':'Nhập email phía trên, rồi nhấn "Quên mật khẩu?".',
+  'note.resetSent':'Đã gửi liên kết đặt lại mật khẩu. Kiểm tra email và mở trên thiết bị này.',
+  'err.resetFail':'Không gửi được email đặt lại mật khẩu.','err.passShort':'Mật khẩu phải có ít nhất 6 ký tự.',
+  'err.updatePassFail':'Không cập nhật được mật khẩu.','err.enterEmailPass':'Nhập email và mật khẩu của bạn.',
+  'note.accountCreated':'Đã tạo tài khoản. Kiểm tra email để xác nhận, rồi đăng nhập.','err.authFail':'Xác thực thất bại.',
+  'config.notSet':'⚠️ Chưa cấu hình backend. Thêm URL dự án và anon key vào <code>supabase-config.js</code>, rồi chạy <code>supabase-schema.sql</code> trong SQL editor.',
+  // Onboarding language step
+  'ob.lang.h':'Chọn <em>ngôn ngữ.</em>','ob.lang.body':'Bạn có thể đổi lại sau trong hồ sơ.',
+  'lang.en':'English','lang.vi':'Tiếng Việt',
+  // Onboarding intro
+  'ob0.h':'Theo dõi <em>các cực.</em><br>Hiểu chu kỳ của bạn.','ob0.body':'PolarNote được xây cho người rối loạn lưỡng cực — không phải để theo dõi tâm trạng nói chung. Mọi tính năng đều thiết kế theo cách tâm trí bạn thực sự hoạt động.',
+  'ob1.h':'Giấc ngủ là <em>tín hiệu đầu tiên.</em>','ob1.body':'Thức dậy lúc 5 giờ sáng ba ngày liên tiếp? Đó là hệ thống cảnh báo sớm của bạn. Chúng tôi theo dõi giờ ngủ và giờ thức để bạn thấy quy luật trước khi cơn xuất hiện.',
+  'ob2.h':'Không phải tốt hay xấu —<br><em>mà là cực nào.</em>','ob2.body':'Chúng tôi dùng thang −3 đến +3. Xanh nghĩa là ổn định. Vàng nghĩa là cần theo dõi sát. Đỏ nghĩa là hãy tìm trợ giúp ngay. Đơn giản, có cơ sở lâm sàng, không mơ hồ.',
+  'ob3.h':'Hãy thiết lập <em>hồ sơ của bạn.</em>','ob3.body':'Hai điều để bắt đầu.','ob.name.ph':'Tên của bạn',
+  'dx.bp1':'Rối loạn lưỡng cực I','dx.bp2':'Rối loạn lưỡng cực II','dx.cyclo':'Khí sắc chu kỳ','dx.unspec':'Chưa xác định / đang tìm hiểu','dx.bipolar':'Rối loạn lưỡng cực',
+  'ob.cta.start':'Bắt đầu','ob.cta.continue':'Tiếp tục','ob.cta.startTracking':'Bắt đầu theo dõi','ob.skip':'Bỏ qua','ob.skip.setup':'Bỏ qua thiết lập',
+  // Today / flow
+  'flow.back':'Quay lại','flow.skip':'Bỏ qua','step.sleep.eye':'Giấc ngủ','step.sleep.h':'Bạn đã <em>ngủ</em> thế nào?','step.sleep.sub':'Giờ ngủ và giờ thức cho biết nhiều hơn chỉ riêng thời lượng.',
+  'tile.bed':'Đi ngủ','tile.wake':'Thức dậy','tile.tap':'Nhấn để chọn','sleep.total':'Tổng giấc ngủ',
+  'step.mood.eye':'Tâm trạng','step.mood.h':'Hôm nay bạn <em>thế nào?</em>','step.mood.sub':'Nhấn vào con số gần nhất với bạn. Kích thước phản ánh mức độ.',
+  'mood.name.3':'Hưng cảm / khủng hoảng','mood.name.2':'Hưng cảm nhẹ','mood.name.1':'Hơi phấn chấn','mood.name.0':'Ổn định','mood.name.-1':'Hơi xuống','mood.name.-2':'Trầm cảm nhẹ','mood.name.-3':'Trầm cảm nặng',
+  'step.flags.eye':'Ghi chú','step.flags.h':'Còn gì <em>khác không?</em>','step.flags.sub':'Chọn tất cả mục phù hợp — giúp hé lộ quy luật theo thời gian.',
+  'flag.racing':'Suy nghĩ dồn dập','flag.irritable':'Dễ cáu gắt','flag.lowmot':'Thiếu động lực','flag.spending':'Chi tiêu ↑','flag.withdrew':'Thu mình xã hội','flag.med':'Uống thuốc ✓','flag.appetite':'Thay đổi khẩu vị','flag.focus':'Khó tập trung','flag.risky':'Hành vi rủi ro',
+  'done.h':'Đã ghi.','done.sub.default':'Dữ liệu của bạn đang tạo nên điều thực sự ý nghĩa.','done.days':'Số ngày theo dõi','done.edit':'Sửa mục này',
+  'cta.continue':'Tiếp tục','cta.save':'Lưu nhật ký',
+  'streak.ready':'Báo cáo phòng khám đã sẵn sàng!','streak.unlock':'Báo cáo phòng khám mở khoá sau {n} ngày','streak.lockedHint':'Báo cáo phòng khám mở khoá ở 30 ngày',
+  'done.sub.count':'{n} ngày theo dõi và đang tiếp tục.',
+  'prog.step':'Bước {i}/{total}','prog.complete':'Hoàn tất',
+  'flow.editing':'Đang sửa {date}','flow.logging':'Đang ghi {date}',
+  'wake.red':'Thức sớm {n} ngày — khớp với quy luật tiền hưng cảm của bạn. Hãy cân nhắc liên hệ đội ngũ chăm sóc.',
+  'wake.yellow':'Thức sớm {n} ngày trong tuần này. Rối loạn giấc ngủ thường đi trước thay đổi tâm trạng — hãy để ý.',
+  'mood.body.3':'Bạn đang vượt ngoài ngưỡng chịu đựng. Hãy liên hệ bác sĩ tâm thần hoặc đường dây khủng hoảng ngay hôm nay.',
+  'mood.body.2':'Bạn vẫn nhận biết được điều này. Hãy thận trọng khi ra quyết định. Trên hết, hãy bảo vệ giấc ngủ tối nay.',
+  'mood.body.1':'Đang ổn. Tận hưởng năng lượng nhưng giữ lịch ngủ đều đặn.',
+  'mood.body.0':'Đây là trạng thái ổn định của bạn. Một ngày tốt để củng cố thói quen lành mạnh.',
+  'mood.body.-1':'Đang ổn. Giữ nếp sinh hoạt và để ý nếu tâm trạng xuống thêm.',
+  'mood.body.-2':'Bạn vẫn nhận biết được điều này. Ưu tiên giấc ngủ, nếp sinh hoạt, và tìm đến người bạn tin tưởng.',
+  'mood.body.-3':'Hãy liên hệ đội ngũ chăm sóc hoặc đường dây khủng hoảng ngay hôm nay. Bạn không phải đối mặt một mình.',
+  'zone.red':'Vùng đỏ','zone.yellow':'Vùng vàng','zone.green':'Vùng xanh',
+  // History
+  'hist.title':'Hành trình <em>của bạn</em>','hist.sub':'{n} ngày theo dõi · Bắt đầu {date}',
+  'hist.daysTracked':'Số ngày theo dõi','hist.of30':'trong 30 ngày qua','hist.avgWake':'Giờ thức TB','hist.thisWeek':'tuần này','hist.avgSleep':'Giấc ngủ TB','hist.stableSince':'Ổn định từ','hist.noRedYellow':'không đỏ/vàng','hist.today':'Hôm nay','hist.daysAgo':'{n} ngày trước',
+  'uc.eye':'Báo cáo phòng khám','uc.h':'Tóm tắt gửi bác sĩ','uc.left':'{n} / 30 ngày','uc.unlocksIn':'Mở khoá sau {n} ngày','uc.readyExport':'Sẵn sàng xuất!','uc.subProgress':'Đã theo dõi {n}/30 ngày — tiếp tục nhé.','uc.subReady':'Báo cáo phòng khám đã sẵn sàng. Hãy chia sẻ với bác sĩ tâm thần của bạn.',
+  'chart.title':'Biểu đồ cuộc sống','chart.sub':'Tâm trạng · Giờ thức','chart.noData':'Chưa có dữ liệu','chart.elevated':'tăng cao','chart.depressed':'trầm xuống',
+  'log.recent':'Mục gần đây','log.missed':'Ghi cho ngày đã bỏ lỡ','log.editHint':'Nhấn để sửa','log.today':'Hôm nay','log.yesterday':'Hôm qua','log.wake':'thức',
+  // Insights
+  'ins.title':'Dữ liệu <em>nói gì</em>','ins.sub':'Dựa trên {n} ngày theo dõi','ins.subEmpty':'Bắt đầu theo dõi để mở khoá phân tích',
+  'ins.notEnough':'Chưa đủ dữ liệu','ins.notEnoughBody':'Theo dõi ít nhất 3 ngày để bắt đầu thấy quy luật.',
+  'ins.wake':'Giờ thức','ins.wakeRed':'Bạn đã thức trước {h} giờ sáng <strong>{n} lần trong tuần này.</strong> Thức dậy sớm là dấu hiệu cảnh báo quan trọng của hưng cảm sắp đến. Hãy cân nhắc liên hệ đội ngũ chăm sóc.',
+  'ins.wakeYellow':'Thức sớm <strong>{n} lần trong tuần này</strong> (trước {h} giờ sáng). Rối loạn giấc ngủ thường đi trước thay đổi tâm trạng — theo dõi sát.',
+  'ins.wakeStable':'Nhịp ngủ tuần này có vẻ ổn định. Giờ thức TB: <strong>{wake}</strong>. Hãy tiếp tục bảo vệ lịch ngủ.',
+  'ins.earlyWakesRow':'Thức sớm tuần này (&lt;{h} giờ sáng)','ins.avgWakeRow':'Giờ thức TB tuần này','ins.recentWakeRow':'Lần thức gần nhất','ins.based7':'Dựa trên 7 mục gần nhất','ins.dayUnit':'{n} ngày',
+  'ins.mood':'Xu hướng tâm trạng','ins.5avg':'TB 5 ngày: <strong>{avg}</strong> — {trend}. {note}','ins.trendUp':'↑ đang tăng','ins.trendDown':'↓ đang giảm','ins.trendStable':'→ ổn định','ins.moodYellow':'Bạn đang ở vùng vàng. Hãy theo dõi kỹ quyết định, giấc ngủ và chi tiêu.','ins.moodGreen':'Bạn đang ở vùng xanh. Giữ nếp sinh hoạt.','ins.daysAgo':'{n} ngày trước',
+  'ins.cycle':'Chu kỳ','ins.cycleLast':'Đợt tăng khí sắc gần nhất là <strong>{n} ngày trước</strong>.','ins.cycleNone':'Chưa ghi nhận đợt tăng khí sắc nào.','ins.cycleMore':' Với nhiều dữ liệu hơn, độ dài chu kỳ của bạn sẽ rõ ràng hơn.','ins.cycleUnit':'ngày','ins.cycleMeta':'Dấu hiệu đặc trưng mở khoá sau 60 ngày · còn {n} ngày',
+  'ins.locked':'Đã khoá','ins.lockedBody':'<strong style="color:var(--txt2)">Dấu hiệu tiền-cơn của riêng bạn</strong> — tổ hợp tín hiệu chính xác báo trước các cơn của bạn — sẽ mở khoá sau 60 ngày.','ins.lockedLeft':'{n} / 60 ngày','ins.lockedRight':'còn {n} ngày',
+  // Profile
+  'prof.dx':'{dx} · Theo dõi từ {date}','prof.edit':'Sửa hồ sơ',
+  'pref.notifications':'Thông báo','pref.eveningReminder':'Nhắc buổi tối','pref.reminderDaily':'{time} mỗi ngày','pref.earlyWake':'Cảnh báo thức sớm','pref.earlyWakeVal':'Thức trước {h} giờ sáng trong {d}+ ngày','pref.redZone':'Cảnh báo vùng đỏ','pref.redZoneVal':'Ngay khi bạn ghi ±{n}','pref.weekly':'Tóm tắt hàng tuần','pref.weeklyVal':'Sáng {day} hàng tuần',
+  'pref.clinicReport':'Báo cáo phòng khám','pref.includeWake':'Kèm giờ thức','pref.includeWakeSub':'Giờ ngủ + giờ thức trong báo cáo','pref.includeMeds':'Kèm thuốc','pref.includeMedsSub':'Từ ghi chú hằng ngày',
+  'pref.dataPrivacy':'Dữ liệu & quyền riêng tư','pref.research':'Tham gia nghiên cứu ẩn danh','pref.researchSub':'Giúp cải thiện chăm sóc rối loạn lưỡng cực. Không chia sẻ thông tin cá nhân.',
+  'pref.language':'Ngôn ngữ',
+  'btn.install':'Cài app lên điện thoại','btn.previewReport':'Xem trước báo cáo phòng khám','btn.signout':'Đăng xuất','btn.reset':'Xoá toàn bộ dữ liệu','app.version':'PolarNote · v0.1 Beta · Chỉ dùng để kiểm thử',
+  'install.title':'Cài đặt PolarNote','install.sub':'Thêm vào màn hình chính','install.cta':'Cài đặt','install.dismiss':'Đóng',
+  'tab.today':'Hôm nay','tab.history':'Lịch sử','tab.insights':'Phân tích','tab.profile':'Hồ sơ',
+  'default.name':'Bạn','default.patient':'Bệnh nhân',
+  // Modals
+  'modal.cancel':'Huỷ','modal.done':'Xong','modal.bedtime':'Giờ đi ngủ','modal.waketime':'Giờ thức','modal.hour':'Giờ','modal.min':'Phút','modal.days':'Ngày','modal.day':'Thứ',
+  'modal.eveningReminder':'Nhắc buổi tối','modal.earlyWake':'Cảnh báo thức sớm','modal.weekly':'Tóm tắt hàng tuần',
+  'editprof.title':'Sửa hồ sơ','editprof.save':'Lưu','editprof.name':'Tên','editprof.diagnosis':'Chẩn đoán',
+  'ios.close':'Đóng','ios.title':'Cài đặt app','ios.intro':'iPhone & iPad cài từ menu Chia sẻ của Safari — không có lời nhắc tự động.',
+  'ios.step1pre':'Nhấn nút ','ios.step1strong':'Chia sẻ','ios.step1post':' trên thanh công cụ Safari.','ios.step2pre':'Kéo xuống và nhấn ','ios.step2strong':'Thêm vào MH chính','ios.step2post':'.','ios.step3pre':'Nhấn ','ios.step3strong':'Thêm','ios.step3post':' — PolarNote xuất hiện trên Màn hình chính.',
+  'report.title':'Báo cáo phòng khám','report.copy':'Sao chép nội dung báo cáo','report.generated':'Tạo {date} · {n} ngày dữ liệu',
+  'report.secPatient':'Bệnh nhân','report.name':'Tên','report.diagnosis':'Chẩn đoán','report.trackingPeriod':'Khoảng theo dõi','report.totalDays':'Tổng số ngày theo dõi',
+  'report.secSleep':'Giấc ngủ — 7 ngày qua','report.avgSleep':'Thời lượng ngủ TB','report.avgWake':'Giờ thức TB','report.earlyWakes':'Thức sớm (&lt;{h} giờ sáng)','report.ofDays':'{n}/7 ngày',
+  'report.secMood':'Phân bố tâm trạng — toàn thời gian','report.green':'Vùng xanh (−1 đến +1)','report.yellow':'Vùng vàng (±2)','report.red':'Vùng đỏ (±3)','report.7avg':'TB tâm trạng 7 ngày','report.days':'{n} ngày',
+  'report.secMed':'Tuân thủ dùng thuốc','report.medAdh':'Số ngày có ghi uống thuốc','report.medVal':'{n}/{total} ngày ({pct}%)',
+  'report.secRecent':'Mục gần đây (5 mục cuối)','report.wakePrefix':'thức',
+  // Notifications & toasts
+  'notify.redTitle':'PolarNote — vùng đỏ','notify.redBody':'Bạn vừa ghi {m}{lbl}. Hãy liên hệ đội ngũ chăm sóc hoặc đường dây khủng hoảng.',
+  'notify.reminderTitle':'PolarNote','notify.reminderBody':'Đến giờ ghi nhật ký buổi tối. Hôm nay của bạn thế nào?',
+  'notify.weeklyTitle':'PolarNote — tóm tắt tuần','notify.weeklyBody':'7 ngày qua: ghi {n} ngày{avg}, {ec} lần thức sớm. Nhấn để xem lại tuần của bạn.','notify.weeklyAvg':', tâm trạng TB {avg}',
+  'toast.enterName':'Vui lòng nhập tên của bạn','toast.profileUpdated':'Đã cập nhật hồ sơ','toast.synced':'Đã đồng bộ thay đổi ngoại tuyến','toast.savedOffline':'Đã lưu ngoại tuyến — sẽ đồng bộ','toast.couldNotDelete':'Không xoá được dữ liệu','toast.reportCopied':'Đã sao chép báo cáo!','toast.copyManual':'Hãy chọn và sao chép thủ công','toast.appInstalled':'Đã cài app','toast.installHint':'Mở menu trình duyệt → "Thêm vào màn hình chính"',
+  'confirm.reset':'Xoá toàn bộ dữ liệu đã theo dõi? Thao tác này xoá các mục của bạn và không thể hoàn tác. (Tài khoản vẫn được giữ.)',
+  'report.copyText':'BÁO CÁO PHÒNG KHÁM POLARNOTE\nTạo: {date}\nBệnh nhân: {name} | Chẩn đoán: {dx}\nTheo dõi: {start} – {today} ({n} ngày)\n\nGIẤC NGỦ (7 ngày qua)\nThời lượng TB: {avgSleep}h\nThức sớm (<{h} giờ sáng): {ew}/7 ngày\n\nTÂM TRẠNG (toàn thời gian)\nXanh (−1 đến +1): {grn} ngày\nVàng (±2): {yel} ngày\nĐỏ (±3): {red} ngày\n\nMỤC GẦN ĐÂY\n{entries}\n\nTạo bởi PolarNote (bản kiểm thử)'
+}};
 // Local date key (YYYY-MM-DD) in the user's own timezone — NOT UTC.
 // toISOString() returns UTC, so it rolls the date over at midnight UTC, filing
 // check-ins under the wrong day for anyone east/west of GMT.
@@ -762,7 +1043,7 @@ async function flushQueue(){
     }catch{remain.push(op);}
   }
   setPending(remain);
-  if(q.length&&!remain.length)showToast('Offline changes synced');
+  if(q.length&&!remain.length)showToast(t('toast.synced'));
 }
 
 async function dbUpsertProfile(){
@@ -779,18 +1060,18 @@ async function dbUpsertProfile(){
 
 async function dbUpsertEntry(e){
   if(!sb||!S.userId)return;
-  if(!navigator.onLine){queueOp({type:'entry',entry:e});showToast('Saved offline — will sync');return;}
+  if(!navigator.onLine){queueOp({type:'entry',entry:e});showToast(t('toast.savedOffline'));return;}
   const {error}=await sb.from('entries').upsert(entryPayload(e),{onConflict:'user_id,date'});
-  if(error){queueOp({type:'entry',entry:e});showToast('Saved offline — will sync');}
+  if(error){queueOp({type:'entry',entry:e});showToast(t('toast.savedOffline'));}
 }
 
 // ── Auth ─────────────────────────────────────────────────────
 let authMode='signin'; // 'signin' | 'signup' | 'recovery'
 function authToggleMode(){
   authMode = authMode==='signin' ? 'signup' : 'signin';
-  document.getElementById('auth-cta').textContent = authMode==='signin'?'Sign in':'Create account';
-  document.getElementById('auth-toggle').textContent = authMode==='signin'?"Don't have an account? Sign up":'Already have an account? Sign in';
-  document.getElementById('auth-sub').textContent = authMode==='signin'?'Sign in to sync your tracking across devices.':'Create an account to start tracking securely.';
+  document.getElementById('auth-cta').textContent = authMode==='signin'?t('auth.cta.signin'):t('auth.cta.signup');
+  document.getElementById('auth-toggle').textContent = authMode==='signin'?t('auth.toggle.toSignup'):t('auth.toggle.toSignin');
+  document.getElementById('auth-sub').textContent = authMode==='signin'?t('auth.sub.signin'):t('auth.sub.signup');
   document.getElementById('auth-err').textContent='';
 }
 
@@ -799,16 +1080,16 @@ function authToggleMode(){
 async function authForgot(){
   const err=document.getElementById('auth-err');
   err.className='auth-err';err.textContent='';
-  if(!sb){err.textContent='Supabase not configured. See supabase-config.js.';return;}
+  if(!sb){err.textContent=t('err.notConfigured');return;}
   const email=document.getElementById('auth-email').value.trim();
-  if(!email){err.textContent='Enter your email above, then tap "Forgot password?".';return;}
+  if(!email){err.textContent=t('err.enterEmailFirst');return;}
   try{
     const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
     if(error)throw error;
     err.className='auth-note';
-    err.textContent='Password reset link sent. Check your email and open it on this device.';
+    err.textContent=t('note.resetSent');
   }catch(ex){
-    err.className='auth-err';err.textContent=ex.message||'Could not send reset email.';
+    err.className='auth-err';err.textContent=ex.message||t('err.resetFail');
   }
 }
 
@@ -819,12 +1100,12 @@ function enterRecoveryMode(){
   document.getElementById('page-auth').classList.add('active');
   document.getElementById('page-onboard').classList.remove('active');
   document.getElementById('tabbar').style.display='none';
-  document.getElementById('auth-sub').textContent='Choose a new password for your account.';
+  document.getElementById('auth-sub').textContent=t('auth.sub.recovery');
   document.getElementById('auth-email').style.display='none';
   const pass=document.getElementById('auth-pass');
-  pass.placeholder='New password (min. 6 characters)';
+  pass.placeholder=t('auth.pass.ph.new');
   pass.setAttribute('autocomplete','new-password');pass.value='';
-  document.getElementById('auth-cta').textContent='Update password';
+  document.getElementById('auth-cta').textContent=t('auth.cta.update');
   document.getElementById('auth-toggle').style.display='none';
   document.getElementById('auth-forgot').style.display='none';
   const err=document.getElementById('auth-err');err.className='auth-err';err.textContent='';
@@ -833,35 +1114,35 @@ function enterRecoveryMode(){
 async function authSubmit(){
   const err=document.getElementById('auth-err'),btn=document.getElementById('auth-cta');
   err.className='auth-err';err.textContent='';
-  if(!sb){err.textContent='Supabase not configured. See supabase-config.js.';return;}
+  if(!sb){err.textContent=t('err.notConfigured');return;}
   const pass=document.getElementById('auth-pass').value;
-  if(pass.length<6){err.textContent='Password must be at least 6 characters.';return;}
+  if(pass.length<6){err.textContent=t('err.passShort');return;}
 
   if(authMode==='recovery'){
-    btn.disabled=true;btn.style.opacity='.6';btn.textContent='Please wait…';
+    btn.disabled=true;btn.style.opacity='.6';btn.textContent=t('auth.cta.wait');
     try{
       const {data,error}=await sb.auth.updateUser({password:pass});
       if(error)throw error;
       history.replaceState(null,'',location.pathname+location.search); // drop recovery hash
       await onAuthed(data.user);
     }catch(ex){
-      err.className='auth-err';err.textContent=ex.message||'Could not update password.';
-      btn.disabled=false;btn.style.opacity='1';btn.textContent='Update password';
+      err.className='auth-err';err.textContent=ex.message||t('err.updatePassFail');
+      btn.disabled=false;btn.style.opacity='1';btn.textContent=t('auth.cta.update');
     }
     return;
   }
 
   const email=document.getElementById('auth-email').value.trim();
-  if(!email){err.textContent='Enter your email and password.';return;}
-  btn.disabled=true;btn.style.opacity='.6';btn.textContent='Please wait…';
+  if(!email){err.textContent=t('err.enterEmailPass');return;}
+  btn.disabled=true;btn.style.opacity='.6';btn.textContent=t('auth.cta.wait');
   try{
     if(authMode==='signup'){
       const {data,error}=await sb.auth.signUp({email,password:pass});
       if(error)throw error;
       if(!data.session){ // email confirmation is ON
         err.className='auth-note';
-        err.textContent='Account created. Check your email to confirm, then sign in.';
-        authMode='signin';document.getElementById('auth-toggle').textContent="Don't have an account? Sign up";
+        err.textContent=t('note.accountCreated');
+        authMode='signin';document.getElementById('auth-toggle').textContent=t('auth.toggle.toSignup');
         return;
       }
       await onAuthed(data.session.user);
@@ -871,10 +1152,10 @@ async function authSubmit(){
       await onAuthed(data.user);
     }
   }catch(ex){
-    err.className='auth-err';err.textContent=ex.message||'Authentication failed.';
+    err.className='auth-err';err.textContent=ex.message||t('err.authFail');
   }finally{
     btn.disabled=false;btn.style.opacity='1';
-    btn.textContent=authMode==='signin'?'Sign in':'Create account';
+    btn.textContent=authMode==='signin'?t('auth.cta.signin'):t('auth.cta.signup');
   }
 }
 
@@ -887,6 +1168,11 @@ async function onAuthed(user){
   const hadPendingProfile = pending().some(op=>op.type==='profile');
   await flushQueue();
   if(!S.onboarded && hadPendingProfile) await loadFromDB(user);
+  // Adopt the language saved on the synced profile (cross-device), then re-localize.
+  if(S.settings&&S.settings.lang&&(S.settings.lang==='en'||S.settings.lang==='vi')&&S.settings.lang!==LANG){
+    LANG=S.settings.lang;localStorage.setItem(LANG_KEY,LANG);
+  }
+  applyI18n();
   startReminderLoop();       // begin checking scheduled notifications
   document.getElementById('page-auth').classList.remove('active');
   if(S.onboarded){
@@ -918,7 +1204,7 @@ function selDx(btn){document.querySelectorAll('.ob-sel-btn').forEach(b=>b.classL
 
 // Persist the profile and enter the app. Defaults cover the "Skip setup" path.
 function finishOnboarding(){
-  S.name=document.getElementById('ob-name').value.trim()||'Friend';
+  S.name=document.getElementById('ob-name').value.trim()||t('default.name');
   S.dx=selDxVal||'Bipolar';S.onboarded=true;save(S);dbUpsertProfile();launchApp();
 }
 
@@ -930,13 +1216,13 @@ function goToStep(n){
   obCur=n;
   setTimeout(()=>cur.classList.remove('exit'),300);
   setTimeout(()=>document.getElementById('obs-'+obCur).classList.add('active'),20);
-  document.getElementById('ob-cta').textContent=obCur===3?'Start tracking':'Continue';
-  if(obCur===3)document.getElementById('ob-skip').textContent='Skip setup';
+  document.getElementById('ob-cta').textContent=obCur===4?t('ob.cta.startTracking'):t('ob.cta.continue');
+  document.getElementById('ob-skip').textContent=obCur===4?t('ob.skip.setup'):t('ob.skip');
 }
 
 function obNext(){
   if(obBusy)return;                       // ignore rapid double-taps mid-transition
-  if(obCur===3){obBusy=true;finishOnboarding();return;}
+  if(obCur===4){obBusy=true;finishOnboarding();return;}
   obBusy=true;goToStep(obCur+1);
   setTimeout(()=>{obBusy=false;},320);    // matches the 300ms step transition
 }
@@ -944,8 +1230,8 @@ function obNext(){
 // Skip the intro tour straight to profile setup; on the setup step, finish with defaults.
 function obSkip(){
   if(obBusy)return;
-  if(obCur===3){obBusy=true;finishOnboarding();return;}
-  obBusy=true;goToStep(3);
+  if(obCur===4){obBusy=true;finishOnboarding();return;}
+  obBusy=true;goToStep(4);
   setTimeout(()=>{obBusy=false;},320);
 }
 
@@ -973,13 +1259,13 @@ function switchTab(name,btn){
 function showDoneState(){
   const n=S.entries.length;
   document.getElementById('streak-num').textContent=n;
-  document.getElementById('streak-sub').textContent=n>=30?'Clinic report ready!':'Clinic report unlocks in '+(30-n)+' days';
-  document.getElementById('done-sub').textContent=n+' day'+(n!==1?'s':'')+' tracked and counting.';
+  document.getElementById('streak-sub').textContent=n>=30?t('streak.ready'):t('streak.unlock',{n:30-n});
+  document.getElementById('done-sub').textContent=t('done.sub.count',{n,s:n!==1?'s':''});
   updateFlowDateBanner();
   STEPS.forEach(s=>{const el=document.getElementById('step-'+s);el.classList.remove('active','exit');});
   document.getElementById('step-done').classList.add('active');
   document.getElementById('prog-fill').style.width='100%';
-  document.getElementById('prog-meta').textContent='Complete';
+  document.getElementById('prog-meta').textContent=t('prog.complete');
   document.getElementById('cta-wrap').style.display='none';
   document.getElementById('flow-back').classList.remove('vis');
   flowCur=STEPS.length-1;                 // park at 'done' so a stray tap can't re-enter the flow
@@ -999,7 +1285,7 @@ function updateFlowDateBanner(){
   const b=document.getElementById('flow-date-banner');if(!b)return;
   if(flowDate===todayKey()){b.style.display='none';return;}
   const existing=S.entries.some(e=>e.date===flowDate);
-  b.textContent=(existing?'Editing ':'Logging ')+fmtDate(flowDate);
+  b.textContent=existing?t('flow.editing',{date:fmtDate(flowDate)}):t('flow.logging',{date:fmtDate(flowDate)});
   b.style.display='block';
 }
 
@@ -1016,8 +1302,8 @@ function resetFlow(){
   flowCur=0;todayBedMin=todayWakeMin=todaySleepH=todayMood=todayZone=null;
   document.getElementById('tile-bed').classList.remove('set');
   document.getElementById('tile-wake').classList.remove('set');
-  document.getElementById('bed-disp').innerHTML='Tap to set';
-  document.getElementById('wake-disp').innerHTML='Tap to set';
+  document.getElementById('bed-disp').innerHTML=t('tile.tap');
+  document.getElementById('wake-disp').innerHTML=t('tile.tap');
   document.getElementById('sleep-result').classList.remove('show');
   document.getElementById('wake-alert').className='wake-alert';
   document.querySelectorAll('.mood-chip').forEach(c=>c.classList.remove('sel'));
@@ -1053,7 +1339,7 @@ function showFlowStep(i){
   setTimeout(()=>document.getElementById('step-'+STEPS[i]).classList.add('active'),20);
   const pct=Math.round(((i+1)/STEPS.length)*100);
   document.getElementById('prog-fill').style.width=pct+'%';
-  document.getElementById('prog-meta').textContent=i<STEPS.length-1?'Step '+(i+1)+' of '+(STEPS.length-1):'Complete';
+  document.getElementById('prog-meta').textContent=i<STEPS.length-1?t('prog.step',{i:i+1,total:STEPS.length-1}):t('prog.complete');
   document.getElementById('flow-back').classList.toggle('vis',i>0&&i<STEPS.length-1);
   const skip=document.getElementById('flow-skip');
   skip.style.opacity=i>=STEPS.length-1?'0':'1';skip.style.pointerEvents=i>=STEPS.length-1?'none':'all';
@@ -1062,12 +1348,12 @@ function showFlowStep(i){
     wrap.style.display='none';
     const n=S.entries.length;
     document.getElementById('streak-num').textContent=n;
-    document.getElementById('streak-sub').textContent=n>=30?'Clinic report ready!':'Clinic report unlocks in '+(30-n)+' days';
-    document.getElementById('done-sub').textContent=n+' day'+(n!==1?'s':'')+' tracked and counting.';
+    document.getElementById('streak-sub').textContent=n>=30?t('streak.ready'):t('streak.unlock',{n:30-n});
+    document.getElementById('done-sub').textContent=t('done.sub.count',{n,s:n!==1?'s':''});
   } else {
     wrap.style.display='block';
-    if(STEPS[i]==='flags'){btn.textContent='Save check-in';btn.className='cta grn';}
-    else{btn.textContent='Continue';btn.className='cta blue';}
+    if(STEPS[i]==='flags'){btn.textContent=t('cta.save');btn.className='cta grn';}
+    else{btn.textContent=t('cta.continue');btn.className='cta blue';}
   }
 }
 
@@ -1089,8 +1375,8 @@ function saveEntry(){
   if(flowDate===todayKey()){const ns=notifState();ns.reminder=flowDate;setNotifState(ns);}  // don't nag after logging
   // Crisis alert only for TODAY's check-in — editing/backfilling a past red day must not fire a false alarm.
   if(flowDate===todayKey()&&entry.mood!==null&&Math.abs(entry.mood)>=rztVal()&&getSettings().redZoneOn){
-    const info=MOOD_INFO[String(entry.mood)],lbl=info?' ('+info.t.split(' — ')[0]+')':'';
-    notify('PolarNote — red zone','You logged '+(entry.mood>0?'+'+entry.mood:entry.mood)+lbl+'. Please reach out to your care team or a crisis line.');
+    const lbl=' ('+t('mood.name.'+entry.mood)+')';
+    notify(t('notify.redTitle'),t('notify.redBody',{m:(entry.mood>0?'+'+entry.mood:entry.mood),lbl}));
   }
 }
 
@@ -1121,7 +1407,7 @@ function setModalChrome(o){
   document.getElementById('wheel-colon').style.display=o.colon?'':'none';
   document.getElementById('ampm-col').style.display=o.ampm?'':'none';
   document.getElementById('wh-m-col').style.display=o.secondCol?'':'none';
-  document.getElementById('wh-h-label').textContent=o.firstLabel||'Hour';
+  document.getElementById('wh-h-label').textContent=o.firstLabel||t('modal.hour');
   if(o.secondLabel)document.getElementById('wh-m-label').textContent=o.secondLabel;
   // Single-wheel mode (e.g. weekday names) needs a wider column than the
   // 110px sized for 2-digit numbers, else long labels clip.
@@ -1129,9 +1415,9 @@ function setModalChrome(o){
 }
 
 function openModal(t){
-  pickerTarget=t;document.getElementById('modal-title').textContent=t==='bed'?'Bedtime':'Wake time';
+  pickerTarget=t;document.getElementById('modal-title').textContent=t==='bed'?window.t('modal.bedtime'):window.t('modal.waketime');
   if(t==='bed'){selH=10;selM=30;selAP='PM';}else{selH=7;selM=0;selAP='AM';}
-  setModalChrome({colon:true,ampm:true,secondCol:true,firstLabel:'Hour',secondLabel:'Min'});setAP(selAP);
+  setModalChrome({colon:true,ampm:true,secondCol:true,firstLabel:window.t('modal.hour'),secondLabel:window.t('modal.min')});setAP(selAP);
   buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);
   buildWheel('wh-m',[0,15,30,45],selM);
   document.getElementById('modal-bg').classList.add('open');
@@ -1181,16 +1467,18 @@ function evalWake(h24,m){
   const wm=h24*60+m;
   const week=S.entries.filter(e=>e.date!==flowDate).slice(-7);   // exclude the day being edited
   const earlyCount=week.filter(e=>e.wakeMin!==null&&e.wakeMin<c.h*60).length+(wm<c.h*60?1:0);
-  if(earlyCount>=c.d){al.className='wake-alert red show';tx.textContent='Early waking '+earlyCount+' days — matches your pre-hypomanic pattern. Consider reaching out to your care team.';}
-  else if(earlyCount>=2){al.className='wake-alert yellow show';tx.textContent='Early waking '+earlyCount+' days this week. Sleep disruption often precedes mood shifts — keep an eye on this.';}
+  if(earlyCount>=c.d){al.className='wake-alert red show';tx.textContent=t('wake.red',{n:earlyCount});}
+  else if(earlyCount>=2){al.className='wake-alert yellow show';tx.textContent=t('wake.yellow',{n:earlyCount});}
   else{al.className='wake-alert';}
 }
 
-const MOOD_INFO={'3':{z:'red',t:'Mania / crisis — Red zone',b:'You are outside your window of tolerance. Please contact your psychiatrist or crisis line today.'},'2':{z:'yellow',t:'Mild hypomania — Yellow zone',b:'You can still recognize this. Be cautious with decisions. Protect sleep tonight above all.'},'1':{z:'green',t:'Slightly elevated — Green zone',b:'Functioning well. Enjoy the energy but keep your sleep schedule.'},'0':{z:'green',t:'Baseline — Green zone',b:'This is your stable state. A good day to reinforce healthy habits.'},'-1':{z:'green',t:'Slightly low — Green zone',b:'Functioning well. Keep your routine and watch for further dips.'},'-2':{z:'yellow',t:'Mild depression — Yellow zone',b:'You can still recognize this. Prioritize sleep, routine, and reaching out to someone you trust.'},'-3':{z:'red',t:'Severe depression — Red zone',b:'Please reach out to your care team or a crisis line today. You do not have to handle this alone.'}};
+// Mood → zone colour (static). Title/body text is localized on demand via moodInfo().
+const MOOD_ZONE={'3':'red','2':'yellow','1':'green','0':'green','-1':'green','-2':'yellow','-3':'red'};
+function moodInfo(v){const z=MOOD_ZONE[String(v)]||'green';return{z,t:t('mood.name.'+v)+' — '+t('zone.'+z),b:t('mood.body.'+v)};}
 
 function pickMood(el){
   document.querySelectorAll('.mood-chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
-  todayMood=parseInt(el.dataset.v);const info=MOOD_INFO[el.dataset.v];todayZone=info.z;
+  todayMood=parseInt(el.dataset.v);const info=moodInfo(el.dataset.v);todayZone=info.z;
   const fb=document.getElementById('mood-fb');
   document.getElementById('mft').textContent=info.t;document.getElementById('mfb').textContent=info.b;
   fb.className='mood-fb show '+info.z;
@@ -1203,12 +1491,12 @@ function fmtTime(min){
 }
 function fmtDate(iso){
   if(!iso)return'—';
-  return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  return new Date(iso+'T12:00:00').toLocaleDateString(localeTag(),{month:'short',day:'numeric',year:'numeric'});
 }
 
 function renderHistory(){
   const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
-  document.getElementById('hist-sub').textContent=entries.length+' day'+(entries.length!==1?'s':'')+' tracked · Started '+fmtDate(S.startDate);
+  document.getElementById('hist-sub').textContent=t('hist.sub',{n:entries.length,s:entries.length!==1?'s':'',date:fmtDate(S.startDate)});
   const recent30=entries.slice(0,30),week=entries.slice(0,7);
   document.getElementById('h-days').textContent=recent30.length;
   const wakeArr=week.filter(e=>e.wakeMin!==null).map(e=>e.wakeMin);
@@ -1216,37 +1504,37 @@ function renderHistory(){
   const sleepArr=week.filter(e=>e.sleepH).map(e=>e.sleepH);
   if(sleepArr.length){const avg=Math.round(sleepArr.reduce((a,b)=>a+b,0)/sleepArr.length*10)/10;const el=document.getElementById('h-sleep');el.textContent=avg+'h';el.className='stv '+(avg>=7?'green':avg>=6?'yellow':'red');}
   const si=entries.findIndex(e=>e.zone==='red'||e.zone==='yellow');
-  document.getElementById('h-stable').textContent=si<=0?'Today':si+'d ago';
+  document.getElementById('h-stable').textContent=si<=0?t('hist.today'):t('hist.daysAgo',{n:si});
   const pct=Math.min(100,Math.round(recent30.length/30*100));
   document.getElementById('uc-fill').style.width=pct+'%';
-  document.getElementById('uc-left').textContent=recent30.length+' / 30 days';
+  document.getElementById('uc-left').textContent=t('uc.left',{n:recent30.length});
   const left=Math.max(0,30-recent30.length);
-  document.getElementById('uc-right').textContent=left>0?'Unlocks in '+left+' days':'Ready to export!';
-  document.getElementById('uc-sub').textContent=left>0?recent30.length+' of 30 days tracked — keep going.':'Your clinic report is ready. Share it with your psychiatrist.';
+  document.getElementById('uc-right').textContent=left>0?t('uc.unlocksIn',{n:left}):t('uc.readyExport');
+  document.getElementById('uc-sub').textContent=left>0?t('uc.subProgress',{n:recent30.length}):t('uc.subReady');
   renderChart(entries.slice(0,20).reverse());
   const list=document.getElementById('log-list');list.innerHTML='';
   entries.slice(0,10).forEach((e,i)=>{
     const d=new Date(e.date+'T12:00:00');
-    const label=i===0?'Today':i===1?'Yesterday':d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    const flagStr=e.flags&&e.flags.length?e.flags.slice(0,2).join(', '):'—';
+    const label=i===0?t('log.today'):i===1?t('log.yesterday'):d.toLocaleDateString(localeTag(),{weekday:'short',month:'short',day:'numeric'});
+    const flagStr=e.flags&&e.flags.length?e.flags.slice(0,2).map(flagLabel).join(', '):'—';
     const el=document.createElement('div');el.className='log-item';el.style.cursor='pointer';
-    el.title='Tap to edit';
+    el.title=t('log.editHint');
     el.onclick=()=>editEntry(e.date);
-    el.innerHTML='<span class="log-date">'+label+'</span><div class="log-dot '+(e.zone||'green')+'"></div><span class="log-num">'+(e.mood>0?'+'+e.mood:e.mood)+'</span><span class="log-sleep">'+fmtTime(e.wakeMin)+' wake · '+(e.sleepH||'—')+'h</span><span class="log-flags">'+flagStr+'</span>';
+    el.innerHTML='<span class="log-date">'+label+'</span><div class="log-dot '+(e.zone||'green')+'"></div><span class="log-num">'+(e.mood>0?'+'+e.mood:e.mood)+'</span><span class="log-sleep">'+fmtTime(e.wakeMin)+' '+t('log.wake')+' · '+(e.sleepH||'—')+'h</span><span class="log-flags">'+escapeHtml(flagStr)+'</span>';
     list.appendChild(el);
   });
 }
 
 function renderChart(entries){
   const svg=document.getElementById('life-chart');
-  if(!entries.length){svg.innerHTML='<text x="50%" y="60" text-anchor="middle" fill="rgba(255,255,255,.2)" font-family="DM Sans,sans-serif" font-size="13">No data yet</text>';return;}
+  if(!entries.length){svg.innerHTML='<text x="50%" y="60" text-anchor="middle" fill="rgba(255,255,255,.2)" font-family="DM Sans,sans-serif" font-size="13">'+t('chart.noData')+'</text>';return;}
   const W=340,padL=8,padR=8,baseline=56,unitH=7;
   const cols=entries.length,colW=(W-padL-padR)/Math.max(cols,1);
   let html='<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF453A" stop-opacity=".06"/><stop offset="100%" stop-color="#0A84FF" stop-opacity=".06"/></linearGradient></defs>';
   html+='<rect x="'+padL+'" y="4" width="'+(W-padL-padR)+'" height="116" rx="8" fill="url(#cg)"/>';
   html+='<line x1="'+padL+'" y1="'+baseline+'" x2="'+(W-padR)+'" y2="'+baseline+'" stroke="rgba(255,255,255,.1)" stroke-width=".5" stroke-dasharray="2 3"/>';
-  html+='<text x="'+(padL+4)+'" y="16" font-size="8" fill="rgba(255,69,58,.45)" font-family="DM Sans,sans-serif">elevated</text>';
-  html+='<text x="'+(padL+4)+'" y="90" font-size="8" fill="rgba(10,132,255,.45)" font-family="DM Sans,sans-serif">depressed</text>';
+  html+='<text x="'+(padL+4)+'" y="16" font-size="8" fill="rgba(255,69,58,.45)" font-family="DM Sans,sans-serif">'+t('chart.elevated')+'</text>';
+  html+='<text x="'+(padL+4)+'" y="90" font-size="8" fill="rgba(10,132,255,.45)" font-family="DM Sans,sans-serif">'+t('chart.depressed')+'</text>';
   entries.forEach((e,i)=>{
     const cx=padL+i*colW+colW/2,mood=e.mood||0,zone=e.zone||'green';
     const col=zone==='red'?'#FF453A':zone==='yellow'?'#FFD60A':'#30D158';
@@ -1265,42 +1553,42 @@ function renderChart(entries){
 
 function renderInsights(){
   const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
-  document.getElementById('ins-sub').textContent=entries.length?'Based on '+entries.length+' day'+(entries.length!==1?'s':'')+' of tracking':'Start tracking to unlock insights';
+  document.getElementById('ins-sub').textContent=entries.length?t('ins.sub',{n:entries.length,s:entries.length!==1?'s':''}):t('ins.subEmpty');
   const body=document.getElementById('insights-body');body.innerHTML='';
-  if(entries.length<3){body.innerHTML='<div class="insight-card locked anim" style="margin:0 24px 12px;"><div class="badge muted" style="margin-bottom:12px;"><i class="ti ti-lock" style="font-size:11px"></i> Not enough data</div><p class="ic-body" style="color:var(--txt3)">Track at least 3 days to start seeing patterns.</p></div>';return;}
+  if(entries.length<3){body.innerHTML='<div class="insight-card locked anim" style="margin:0 24px 12px;"><div class="badge muted" style="margin-bottom:12px;"><i class="ti ti-lock" style="font-size:11px"></i> '+t('ins.notEnough')+'</div><p class="ic-body" style="color:var(--txt3)">'+t('ins.notEnoughBody')+'</p></div>';return;}
   const week=entries.slice(0,7);
   const ew=ewCfg();                                   // user-configured wake-before hour + day threshold
   const earlyWakes=week.filter(e=>e.wakeMin!==null&&e.wakeMin<ew.h*60);
   const avgWakeArr=week.filter(e=>e.wakeMin!==null);
   const avgWake=avgWakeArr.length?avgWakeArr.reduce((a,e)=>a+e.wakeMin,0)/avgWakeArr.length:null;
   let wakeBody='',wakeSev='blue';
-  if(earlyWakes.length>=ew.d){wakeSev='red';wakeBody='You\'ve woken before '+ew.h+' AM <strong>'+earlyWakes.length+' times this week.</strong> Early morning waking is a key warning sign of approaching hypomania. Consider contacting your care team.';}
-  else if(earlyWakes.length>=2){wakeSev='yellow';wakeBody='Early waking <strong>'+earlyWakes.length+' times this week</strong> (before '+ew.h+' AM). Sleep disruption often precedes mood shifts — monitor closely.';}
-  else{wakeBody='Sleep timing looks stable this week. Avg wake: <strong>'+fmtTime(avgWake?Math.round(avgWake):null)+'</strong>. Keep protecting your sleep schedule.';}
-  body.innerHTML+='<div class="insight-card anim"><div class="badge '+wakeSev+'" style="margin-bottom:12px;"><i class="ti ti-moon" style="font-size:11px"></i> Wake time</div><p class="ic-body">'+wakeBody+'</p><div class="ic-table"><div class="ic-row"><span class="ic-rl">Early wakes this week (&lt;'+ew.h+' AM)</span><span class="ic-rv" style="color:'+(earlyWakes.length>=ew.d?'var(--red)':earlyWakes.length>=2?'var(--yellow)':'var(--green)')+'">'+earlyWakes.length+' day'+(earlyWakes.length!==1?'s':'')+'</span></div><div class="ic-row"><span class="ic-rl">Avg wake this week</span><span class="ic-rv">'+fmtTime(avgWake?Math.round(avgWake):null)+'</span></div><div class="ic-row"><span class="ic-rl">Most recent wake</span><span class="ic-rv">'+fmtTime(entries[0]&&entries[0].wakeMin)+'</span></div></div><div class="ic-meta" style="margin-top:10px">Based on last 7 entries</div></div>';
+  if(earlyWakes.length>=ew.d){wakeSev='red';wakeBody=t('ins.wakeRed',{h:ew.h,n:earlyWakes.length});}
+  else if(earlyWakes.length>=2){wakeSev='yellow';wakeBody=t('ins.wakeYellow',{h:ew.h,n:earlyWakes.length});}
+  else{wakeBody=t('ins.wakeStable',{wake:fmtTime(avgWake?Math.round(avgWake):null)});}
+  body.innerHTML+='<div class="insight-card anim"><div class="badge '+wakeSev+'" style="margin-bottom:12px;"><i class="ti ti-moon" style="font-size:11px"></i> '+t('ins.wake')+'</div><p class="ic-body">'+wakeBody+'</p><div class="ic-table"><div class="ic-row"><span class="ic-rl">'+t('ins.earlyWakesRow',{h:ew.h})+'</span><span class="ic-rv" style="color:'+(earlyWakes.length>=ew.d?'var(--red)':earlyWakes.length>=2?'var(--yellow)':'var(--green)')+'">'+t('ins.dayUnit',{n:earlyWakes.length,s:earlyWakes.length!==1?'s':''})+'</span></div><div class="ic-row"><span class="ic-rl">'+t('ins.avgWakeRow')+'</span><span class="ic-rv">'+fmtTime(avgWake?Math.round(avgWake):null)+'</span></div><div class="ic-row"><span class="ic-rl">'+t('ins.recentWakeRow')+'</span><span class="ic-rv">'+fmtTime(entries[0]&&entries[0].wakeMin)+'</span></div></div><div class="ic-meta" style="margin-top:10px">'+t('ins.based7')+'</div></div>';
   const mr=entries.slice(0,5).map(e=>e.mood).filter(m=>m!==null&&m!==undefined);
   if(mr.length>=2){
     const avg=Math.round(mr.reduce((a,b)=>a+b,0)/mr.length*10)/10;
     const trend=mr[0]-mr[mr.length-1];
-    const ts=trend>0.5?'↑ rising':trend<-0.5?'↓ falling':'→ stable';
+    const ts=trend>0.5?t('ins.trendUp'):trend<-0.5?t('ins.trendDown'):t('ins.trendStable');
     const tz=Math.abs(avg)>=2?'yellow':'green';
-    body.innerHTML+='<div class="insight-card anim"><div class="badge '+tz+'" style="margin-bottom:12px;"><i class="ti ti-activity" style="font-size:11px"></i> Mood trend</div><p class="ic-body">5-day avg: <strong>'+(avg>0?'+'+avg:avg)+'</strong> — '+ts+'. '+(Math.abs(avg)>=2?'You\'re in a yellow zone. Monitor decisions, sleep, and spending carefully.':'You\'re in a green zone. Keep your routine.')+'</p><div class="ic-table">'+mr.map((m,i)=>'<div class="ic-row"><span class="ic-rl">'+(i===0?'Today':i===1?'Yesterday':i+' days ago')+'</span><span class="ic-rv" style="color:'+(Math.abs(m)>=3?'var(--red)':Math.abs(m)>=2?'var(--yellow)':'var(--green)')+'">'+((m>0?'+'+m:m))+'</span></div>').join('')+'</div></div>';
+    body.innerHTML+='<div class="insight-card anim"><div class="badge '+tz+'" style="margin-bottom:12px;"><i class="ti ti-activity" style="font-size:11px"></i> '+t('ins.mood')+'</div><p class="ic-body">'+t('ins.5avg',{avg:(avg>0?'+'+avg:avg),trend:ts,note:(Math.abs(avg)>=2?t('ins.moodYellow'):t('ins.moodGreen'))})+'</p><div class="ic-table">'+mr.map((m,i)=>'<div class="ic-row"><span class="ic-rl">'+(i===0?t('log.today'):i===1?t('log.yesterday'):t('ins.daysAgo',{n:i}))+'</span><span class="ic-rv" style="color:'+(Math.abs(m)>=3?'var(--red)':Math.abs(m)>=2?'var(--yellow)':'var(--green)')+'">'+((m>0?'+'+m:m))+'</span></div>').join('')+'</div></div>';
   }
   if(entries.length>=14){
     const ry=entries.filter(e=>e.zone==='red'||e.zone==='yellow');
     const dsl=ry.length?Math.floor((Date.now()-new Date(ry[0].date+'T12:00:00'))/864e5):null;
-    const svg='<svg viewBox="0 0 120 120" width="120" height="120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--s3)" stroke-width="8"/><circle cx="60" cy="60" r="50" fill="none" stroke="var(--blue)" stroke-width="8" stroke-dasharray="314" stroke-dashoffset="'+Math.round(314*(1-Math.min(entries.length,60)/60))+'" stroke-linecap="round" transform="rotate(-90 60 60)"/><text x="60" y="55" text-anchor="middle" font-family="Fraunces,serif" font-size="26" fill="white" font-weight="300">'+entries.length+'</text><text x="60" y="72" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="rgba(255,255,255,.4)">days</text></svg>';
-    body.innerHTML+='<div class="insight-card anim"><div class="badge blue" style="margin-bottom:12px;"><i class="ti ti-repeat" style="font-size:11px"></i> Cycle</div><p class="ic-body">'+(dsl!==null?'Last elevated episode was <strong>'+dsl+' day'+(dsl!==1?'s':'')+' ago</strong>.':'No elevated episodes recorded yet.')+' With more data, your cycle length will become clearer.</p><div class="cycle-svg-wrap">'+svg+'</div><div class="ic-meta">Signature unlocks after 60 days · '+Math.max(0,60-entries.length)+' more to go</div></div>';
+    const svg='<svg viewBox="0 0 120 120" width="120" height="120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--s3)" stroke-width="8"/><circle cx="60" cy="60" r="50" fill="none" stroke="var(--blue)" stroke-width="8" stroke-dasharray="314" stroke-dashoffset="'+Math.round(314*(1-Math.min(entries.length,60)/60))+'" stroke-linecap="round" transform="rotate(-90 60 60)"/><text x="60" y="55" text-anchor="middle" font-family="Fraunces,serif" font-size="26" fill="white" font-weight="300">'+entries.length+'</text><text x="60" y="72" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="rgba(255,255,255,.4)">'+t('ins.cycleUnit')+'</text></svg>';
+    body.innerHTML+='<div class="insight-card anim"><div class="badge blue" style="margin-bottom:12px;"><i class="ti ti-repeat" style="font-size:11px"></i> '+t('ins.cycle')+'</div><p class="ic-body">'+(dsl!==null?t('ins.cycleLast',{n:dsl,s:dsl!==1?'s':''}):t('ins.cycleNone'))+t('ins.cycleMore')+'</p><div class="cycle-svg-wrap">'+svg+'</div><div class="ic-meta">'+t('ins.cycleMeta',{n:Math.max(0,60-entries.length)})+'</div></div>';
   }
   const sp=Math.min(entries.length,60);
-  body.innerHTML+='<div class="insight-card locked anim"><div class="badge muted" style="margin-bottom:12px;"><i class="ti ti-lock" style="font-size:11px"></i> Locked</div><p class="ic-body" style="color:var(--txt3)">Your <strong style="color:var(--txt2)">personal pre-episode signature</strong> — the exact combination of signals that precede your specific episodes — unlocks after 60 days.</p><div class="uc-bar" style="margin-top:14px"><div class="uc-fill" style="width:'+Math.round(sp/60*100)+'%"></div></div><div class="uc-meta" style="margin-top:6px"><span>'+sp+' / 60 days</span><span>'+Math.max(0,60-entries.length)+' more days</span></div></div>';
+  body.innerHTML+='<div class="insight-card locked anim"><div class="badge muted" style="margin-bottom:12px;"><i class="ti ti-lock" style="font-size:11px"></i> '+t('ins.locked')+'</div><p class="ic-body" style="color:var(--txt3)">'+t('ins.lockedBody')+'</p><div class="uc-bar" style="margin-top:14px"><div class="uc-fill" style="width:'+Math.round(sp/60*100)+'%"></div></div><div class="uc-meta" style="margin-top:6px"><span>'+t('ins.lockedLeft',{n:sp})+'</span><span>'+t('ins.lockedRight',{n:Math.max(0,60-entries.length)})+'</span></div></div>';
 }
 
 function updateProfileUI(){
   const n=S.name||'You';
   document.getElementById('prof-name').textContent=n;
   document.getElementById('prof-av').textContent=(n[0]||'?').toUpperCase();
-  document.getElementById('prof-dx').textContent=(S.dx||'Bipolar')+' · Tracking since '+fmtDate(S.startDate);
+  document.getElementById('prof-dx').textContent=t('prof.dx',{dx:dxLabel(S.dx),date:fmtDate(S.startDate)});
   renderSettings();
 }
 
@@ -1316,25 +1604,28 @@ function closeEditProfile(){document.getElementById('editprof-bg').classList.rem
 function closeEditProfileOutside(e){if(e.target===document.getElementById('editprof-bg'))closeEditProfile();}
 function saveEditProfile(){
   const name=document.getElementById('epf-name').value.trim();
-  if(!name){showToast('Please enter your name');return;}
+  if(!name){showToast(t('toast.enterName'));return;}
   const sel=document.querySelector('.epf-sel-btn.on');
   S.name=name;
   if(sel)S.dx=sel.dataset.dx;
-  save(S);dbUpsertProfile();updateProfileUI();closeEditProfile();showToast('Profile updated');
+  save(S);dbUpsertProfile();updateProfileUI();closeEditProfile();showToast(t('toast.profileUpdated'));
 }
 
 // ── Notification settings (A: persisted prefs + selectable time/day) ──
-const WEEKDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+// weeklyDay is stored as a 0–6 index (Sun–Sat); names are localized for display only.
+const WEEKDAYS_I18N={en:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],vi:['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy']};
+function weekdayNames(){return WEEKDAYS_I18N[LANG]||WEEKDAYS_I18N.en;}
+function weekdayName(i){return weekdayNames()[i];}
 function getSettings(){if(!S.settings)S.settings={...DEFAULT_SETTINGS};return S.settings;}
 function renderSettings(){
   const st={...DEFAULT_SETTINGS,...getSettings()};S.settings=st;
   ['reminderOn','earlyWakeOn','redZoneOn','weeklyOn'].forEach(k=>{
     const b=document.getElementById('tg-'+k);if(b){b.classList.toggle('on',!!st[k]);b.setAttribute('aria-checked',!!st[k]);}
   });
-  const rs=document.getElementById('set-reminder-sub');if(rs)rs.firstChild&&(rs.childNodes[0].nodeValue=fmtTime(st.reminderTime)+' daily');
+  const rs=document.getElementById('set-reminder-sub');if(rs)rs.firstChild&&(rs.childNodes[0].nodeValue=t('pref.reminderDaily',{time:fmtTime(st.reminderTime)}));
   const ew=document.getElementById('set-earlywake-sub');if(ew)ew.childNodes[0].nodeValue=ewLabel();
-  const rz=document.getElementById('set-redzone-sub');if(rz)rz.childNodes[0].nodeValue='Immediate when you log ±'+st.redZoneThreshold;
-  const ws=document.getElementById('set-weekly-sub');if(ws)ws.childNodes[0].nodeValue='Every '+WEEKDAYS[st.weeklyDay]+' morning';
+  const rz=document.getElementById('set-redzone-sub');if(rz)rz.childNodes[0].nodeValue=t('pref.redZoneVal',{n:st.redZoneThreshold});
+  const ws=document.getElementById('set-weekly-sub');if(ws)ws.childNodes[0].nodeValue=t('pref.weeklyVal',{day:weekdayName(st.weeklyDay)});
 }
 function persistSettings(){save(S);dbUpsertProfile();}
 // Flip a presentational switch button, keeping role="switch" aria-checked in sync
@@ -1351,17 +1642,17 @@ function openReminderTime(){
   pickerTarget='reminder';
   const t=getSettings().reminderTime;let h=Math.floor(t/60),m=t%60;
   selAP=h>=12?'PM':'AM';selH=h%12||12;selM=[0,15,30,45].reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a,0);
-  document.getElementById('modal-title').textContent='Evening reminder';
-  setModalChrome({colon:true,ampm:true,secondCol:true,firstLabel:'Hour',secondLabel:'Min'});setAP(selAP);buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);buildWheel('wh-m',[0,15,30,45],selM);
+  document.getElementById('modal-title').textContent=t('modal.eveningReminder');
+  setModalChrome({colon:true,ampm:true,secondCol:true,firstLabel:t('modal.hour'),secondLabel:t('modal.min')});setAP(selAP);buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);buildWheel('wh-m',[0,15,30,45],selM);
   document.getElementById('modal-bg').classList.add('open');
 }
 // Effective early-wake config with defaults for accounts created before these keys existed.
 function ewCfg(){const s={...DEFAULT_SETTINGS,...getSettings()};return{h:s.earlyWakeHour,d:s.earlyWakeDays};}
-function ewLabel(){const c=ewCfg();return'Wake before '+c.h+' AM for '+c.d+'+ days';}
+function ewLabel(){const c=ewCfg();return t('pref.earlyWakeVal',{h:c.h,d:c.d});}
 function openEarlyWake(){
   pickerTarget='earlyWake';const c=ewCfg();selH=c.h;selM=c.d;selAP='AM';
-  document.getElementById('modal-title').textContent='Early wake alert';
-  setModalChrome({colon:false,ampm:false,secondCol:true,firstLabel:'Hour',secondLabel:'Days'});
+  document.getElementById('modal-title').textContent=t('modal.earlyWake');
+  setModalChrome({colon:false,ampm:false,secondCol:true,firstLabel:t('modal.hour'),secondLabel:t('modal.days')});
   buildWheel('wh-h',[4,5,6,7,8,9],selH);   // wake-before hour (AM)
   buildWheel('wh-m',[2,3,4,5,6,7],selM);    // consecutive days threshold
   document.getElementById('modal-bg').classList.add('open');
@@ -1374,9 +1665,9 @@ function cycleRedZone(){const st=getSettings();st.redZoneThreshold=rztVal()===3?
 // Weekly summary day — single-wheel picker showing weekday names.
 function openWeeklyDay(){
   pickerTarget='weekly';selH={...DEFAULT_SETTINGS,...getSettings()}.weeklyDay;
-  document.getElementById('modal-title').textContent='Weekly summary';
-  setModalChrome({colon:false,ampm:false,secondCol:false,firstLabel:'Day'});
-  buildWheel('wh-h',[0,1,2,3,4,5,6],selH,WEEKDAYS);
+  document.getElementById('modal-title').textContent=t('modal.weekly');
+  setModalChrome({colon:false,ampm:false,secondCol:false,firstLabel:t('modal.day')});
+  buildWheel('wh-h',[0,1,2,3,4,5,6],selH,weekdayNames());
   document.getElementById('modal-bg').classList.add('open');
 }
 
@@ -1403,7 +1694,7 @@ function weeklySummaryText(){
   const moods=week.filter(e=>e.mood!=null);
   const avg=moods.length?Math.round(moods.reduce((a,e)=>a+e.mood,0)/moods.length*10)/10:null;
   const ec=week.filter(e=>e.wakeMin!=null&&e.wakeMin<ewCfg().h*60).length;
-  return 'Last 7 days: '+week.length+' logged'+(avg!=null?', avg mood '+(avg>0?'+'+avg:avg):'')+', '+ec+' early wake'+(ec!==1?'s':'')+'. Tap to review your week.';
+  return t('notify.weeklyBody',{n:week.length,avg:(avg!=null?t('notify.weeklyAvg',{avg:(avg>0?'+'+avg:avg)}):''),ec:ec,s:ec!==1?'s':''});
 }
 
 // Evaluate scheduled reminders against the clock and fire any that are due.
@@ -1416,12 +1707,12 @@ function checkReminders(){
     const loggedToday=S.entries.some(e=>e.date===tk);
     if(!loggedToday&&mins>=st.reminderTime&&ns.reminder!==tk){
       ns.reminder=tk;setNotifState(ns);
-      notify('PolarNote','Time for your evening check-in. How was today?');
+      notify(t('notify.reminderTitle'),t('notify.reminderBody'));
     }
   }
   if(st.weeklyOn&&now.getDay()===st.weeklyDay&&now.getHours()>=8&&ns.weekly!==tk){
     ns.weekly=tk;setNotifState(ns);
-    notify('PolarNote — weekly summary',weeklySummaryText());
+    notify(t('notify.weeklyTitle'),weeklySummaryText());
   }
 }
 
@@ -1434,10 +1725,10 @@ function startReminderLoop(){
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkReminders();});
 
 async function resetApp(){
-  if(!confirm('Reset all tracked data? This deletes your entries and cannot be undone. (Your account stays.)'))return;
+  if(!confirm(t('confirm.reset')))return;
   if(sb&&S.userId){
     const {error}=await sb.from('entries').delete().eq('user_id',S.userId);
-    if(error){showToast('Could not delete data');return;}
+    if(error){showToast(t('toast.couldNotDelete'));return;}
   }
   localStorage.removeItem(KEY);
   location.reload();
@@ -1448,8 +1739,8 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 
 function showReport(){
   const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
-  const name=S.name||'Patient',today=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-  document.getElementById('rp-sub').textContent='Generated '+today+' · '+entries.length+' days of data';
+  const name=S.name||t('default.patient'),today=new Date().toLocaleDateString(localeTag(),{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('rp-sub').textContent=t('report.generated',{date:today,n:entries.length});
   const week=entries.slice(0,7);
   const avgSleep=week.filter(e=>e.sleepH).reduce((a,e)=>a+e.sleepH,0)/Math.max(week.filter(e=>e.sleepH).length,1);
   const avgWakeArr=week.filter(e=>e.wakeMin!==null);
@@ -1461,35 +1752,36 @@ function showReport(){
   const redD=entries.filter(e=>e.zone==='red').length,yelD=entries.filter(e=>e.zone==='yellow').length,grnD=entries.filter(e=>e.zone==='green').length;
   const medD=entries.filter(e=>e.flags&&e.flags.includes('Medication ✓')).length;
   document.getElementById('rp-body').innerHTML=
-    '<div class="rp-section"><div class="rp-sec-title">Patient</div>'+
-    '<div class="rp-row"><span class="rp-key">Name</span><span class="rp-val">'+escapeHtml(name)+'</span></div>'+
-    '<div class="rp-row"><span class="rp-key">Diagnosis</span><span class="rp-val">'+escapeHtml(S.dx||'Bipolar')+'</span></div>'+
-    '<div class="rp-row"><span class="rp-key">Tracking period</span><span class="rp-val">'+fmtDate(S.startDate)+' – '+today+'</span></div>'+
-    '<div class="rp-row"><span class="rp-key">Total days tracked</span><span class="rp-val">'+entries.length+'</span></div></div>'+
-    '<div class="rp-section"><div class="rp-sec-title">Sleep — last 7 days</div>'+
-    '<div class="rp-row"><span class="rp-key">Avg sleep duration</span><span class="rp-val">'+Math.round(avgSleep*10)/10+'h</span></div>'+
-    '<div class="rp-row"><span class="rp-key">Avg wake time</span><span class="rp-val">'+fmtTime(avgWake?Math.round(avgWake):null)+'</span></div>'+
-    '<div class="rp-row"><span class="rp-key">Early wakes (&lt;'+ewc.h+' AM)</span><span class="rp-val" style="color:'+(ew>=ewc.d?'var(--red)':ew>=1?'var(--yellow)':'var(--green)')+'">'+ew+' of 7 days</span></div></div>'+
-    '<div class="rp-section"><div class="rp-sec-title">Mood distribution — all time</div>'+
-    '<div class="rp-row"><span class="rp-key">Green zone (−1 to +1)</span><span class="rp-val" style="color:var(--green)">'+grnD+' days</span></div>'+
-    '<div class="rp-row"><span class="rp-key">Yellow zone (±2)</span><span class="rp-val" style="color:var(--yellow)">'+yelD+' days</span></div>'+
-    '<div class="rp-row"><span class="rp-key">Red zone (±3)</span><span class="rp-val" style="color:var(--red)">'+redD+' days</span></div>'+
-    '<div class="rp-row"><span class="rp-key">7-day mood avg</span><span class="rp-val">'+(moodAvg!==null?(Math.round(moodAvg*10)/10>0?'+':'')+Math.round(moodAvg*10)/10:'—')+'</span></div></div>'+
-    '<div class="rp-section"><div class="rp-sec-title">Medication adherence</div>'+
-    '<div class="rp-row"><span class="rp-key">Days with medication logged</span><span class="rp-val">'+medD+' / '+entries.length+' days ('+(entries.length?Math.round(medD/entries.length*100):0)+'%)</span></div></div>'+
-    '<div class="rp-section"><div class="rp-sec-title">Recent entries (last 5)</div>'+
-    entries.slice(0,5).map(e=>'<div class="rp-row"><span class="rp-key">'+fmtDate(e.date)+'</span><span class="rp-val" style="color:'+(e.zone==='red'?'var(--red)':e.zone==='yellow'?'var(--yellow)':'var(--green)')+'">'+((e.mood>0?'+'+e.mood:e.mood))+' · wake '+fmtTime(e.wakeMin)+'</span></div>').join('')+'</div>';
+    '<div class="rp-section"><div class="rp-sec-title">'+t('report.secPatient')+'</div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.name')+'</span><span class="rp-val">'+escapeHtml(name)+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.diagnosis')+'</span><span class="rp-val">'+escapeHtml(dxLabel(S.dx))+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.trackingPeriod')+'</span><span class="rp-val">'+fmtDate(S.startDate)+' – '+today+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.totalDays')+'</span><span class="rp-val">'+entries.length+'</span></div></div>'+
+    '<div class="rp-section"><div class="rp-sec-title">'+t('report.secSleep')+'</div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.avgSleep')+'</span><span class="rp-val">'+Math.round(avgSleep*10)/10+'h</span></div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.avgWake')+'</span><span class="rp-val">'+fmtTime(avgWake?Math.round(avgWake):null)+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.earlyWakes',{h:ewc.h})+'</span><span class="rp-val" style="color:'+(ew>=ewc.d?'var(--red)':ew>=1?'var(--yellow)':'var(--green)')+'">'+t('report.ofDays',{n:ew})+'</span></div></div>'+
+    '<div class="rp-section"><div class="rp-sec-title">'+t('report.secMood')+'</div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.green')+'</span><span class="rp-val" style="color:var(--green)">'+t('report.days',{n:grnD})+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.yellow')+'</span><span class="rp-val" style="color:var(--yellow)">'+t('report.days',{n:yelD})+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.red')+'</span><span class="rp-val" style="color:var(--red)">'+t('report.days',{n:redD})+'</span></div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.7avg')+'</span><span class="rp-val">'+(moodAvg!==null?(Math.round(moodAvg*10)/10>0?'+':'')+Math.round(moodAvg*10)/10:'—')+'</span></div></div>'+
+    '<div class="rp-section"><div class="rp-sec-title">'+t('report.secMed')+'</div>'+
+    '<div class="rp-row"><span class="rp-key">'+t('report.medAdh')+'</span><span class="rp-val">'+t('report.medVal',{n:medD,total:entries.length,pct:(entries.length?Math.round(medD/entries.length*100):0)})+'</span></div></div>'+
+    '<div class="rp-section"><div class="rp-sec-title">'+t('report.secRecent')+'</div>'+
+    entries.slice(0,5).map(e=>'<div class="rp-row"><span class="rp-key">'+fmtDate(e.date)+'</span><span class="rp-val" style="color:'+(e.zone==='red'?'var(--red)':e.zone==='yellow'?'var(--yellow)':'var(--green)')+'">'+((e.mood>0?'+'+e.mood:e.mood))+' · '+t('report.wakePrefix')+' '+fmtTime(e.wakeMin)+'</span></div>').join('')+'</div>';
   document.getElementById('report-bg').classList.add('open');
 }
 
 function copyReport(){
   const entries=[...S.entries].sort((a,b)=>b.date.localeCompare(a.date));
-  const name=S.name||'Patient',today=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const name=S.name||t('default.patient'),today=new Date().toLocaleDateString(localeTag(),{month:'long',day:'numeric',year:'numeric'});
   const week=entries.slice(0,7);
   const avgSleep=week.filter(e=>e.sleepH).reduce((a,e)=>a+e.sleepH,0)/Math.max(week.filter(e=>e.sleepH).length,1);
   const ewh=ewCfg().h;
-  const text='POLARNOTE CLINIC REPORT\nGenerated: '+today+'\nPatient: '+name+' | Diagnosis: '+(S.dx||'Bipolar')+'\nTracking: '+fmtDate(S.startDate)+' – '+today+' ('+entries.length+' days)\n\nSLEEP (last 7 days)\nAvg duration: '+Math.round(avgSleep*10)/10+'h\nEarly wakes (<'+ewh+' AM): '+week.filter(e=>e.wakeMin!==null&&e.wakeMin<ewh*60).length+' of 7 days\n\nMOOD (all time)\nGreen (−1 to +1): '+entries.filter(e=>e.zone==='green').length+' days\nYellow (±2): '+entries.filter(e=>e.zone==='yellow').length+' days\nRed (±3): '+entries.filter(e=>e.zone==='red').length+' days\n\nRECENT ENTRIES\n'+entries.slice(0,7).map(e=>e.date+': mood '+(e.mood>0?'+'+e.mood:e.mood)+', wake '+fmtTime(e.wakeMin)+', sleep '+(e.sleepH||'—')+'h'+(e.flags&&e.flags.length?' | '+e.flags.join(', '):'')).join('\n')+'\n\nGenerated by PolarNote (validation prototype)';
-  navigator.clipboard&&navigator.clipboard.writeText(text).then(()=>showToast('Report copied!')).catch(()=>showToast('Select and copy manually'));
+  const entriesTxt=entries.slice(0,7).map(e=>e.date+': mood '+(e.mood>0?'+'+e.mood:e.mood)+', '+t('report.wakePrefix')+' '+fmtTime(e.wakeMin)+', sleep '+(e.sleepH||'—')+'h'+(e.flags&&e.flags.length?' | '+e.flags.map(flagLabel).join(', '):'')).join('\n');
+  const text=t('report.copyText',{date:today,name:name,dx:dxLabel(S.dx),start:fmtDate(S.startDate),today:today,n:entries.length,avgSleep:Math.round(avgSleep*10)/10,h:ewh,ew:week.filter(e=>e.wakeMin!==null&&e.wakeMin<ewh*60).length,grn:entries.filter(e=>e.zone==='green').length,yel:entries.filter(e=>e.zone==='yellow').length,red:entries.filter(e=>e.zone==='red').length,entries:entriesTxt});
+  navigator.clipboard&&navigator.clipboard.writeText(text).then(()=>showToast(t('toast.reportCopied'))).catch(()=>showToast(t('toast.copyManual')));
 }
 
 function closeReportOutside(e){if(e.target===document.getElementById('report-bg'))document.getElementById('report-bg').classList.remove('open');}
@@ -1508,10 +1800,11 @@ window.addEventListener('online',flushQueue);
 if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
 
 window.addEventListener('DOMContentLoaded',async()=>{
+  applyI18n();                              // localize all static text for the saved/detected language
   const cfg=document.getElementById('auth-config');
   if(!SB_CONFIGURED){
     cfg.style.display='block';
-    cfg.innerHTML='⚠️ Backend not configured. Add your project URL and anon key in <code>supabase-config.js</code>, then run <code>supabase-schema.sql</code> in the SQL editor.';
+    cfg.innerHTML=t('config.notSet');
     hideBoot();return;
   }
   // Returning from a password-reset email: show the "set new password" screen
@@ -1571,13 +1864,13 @@ window.addEventListener('DOMContentLoaded',async()=>{
 
   // Android/Chrome: capture the prompt so the button/banner can trigger it on demand.
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;refresh();});
-  window.addEventListener('appinstalled',()=>{deferred=null;hideAll();if(window.showToast)showToast('App installed');});
+  window.addEventListener('appinstalled',()=>{deferred=null;hideAll();if(window.showToast)showToast(window.t?window.t('toast.appInstalled'):'App installed');});
   document.addEventListener('DOMContentLoaded',refresh);
 
   window.installApp=async function(){
     if(deferred){deferred.prompt();const r=await deferred.userChoice;deferred=null;if(r&&r.outcome==='accepted')hideAll();return;}
     if(isIOS){document.getElementById('iosinstall-bg').classList.add('open');return;}
-    if(window.showToast)showToast('Open your browser menu → "Add to Home screen"');
+    if(window.showToast)showToast(window.t?window.t('toast.installHint'):'Open your browser menu → "Add to Home screen"');
   };
   window.dismissInstallBar=function(){const bn=bar();if(bn)bn.classList.remove('show');try{localStorage.setItem(DISMISS_KEY,'1');}catch(e){}};
   window.closeIOSInstall=function(){document.getElementById('iosinstall-bg').classList.remove('open');};
