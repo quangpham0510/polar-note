@@ -237,18 +237,46 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 /* Empty state: a tappable blue control (iOS), not a dead dash */
 .time-tile:not(.set) .tt-val{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--blue);letter-spacing:0;}
 .tt-ap{font-size:14px;font-weight:400;margin-left:3px;color:var(--txt2);}
-.sleep-result{background:var(--s1);border-radius:var(--r-md);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;opacity:0;transition:opacity .3s;margin-bottom:10px;}
-.sleep-result.show{opacity:1;}
-.sr-label{font-size:13px;color:var(--txt2);}
-.sr-val{font-size:22px;font-weight:600;letter-spacing:-.5px;}
-.sr-val.good{color:var(--green);}
-.sr-val.warn{color:var(--yellow);}
-.sr-val.bad{color:var(--red);}
 .wake-alert{border-radius:var(--r-sm);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;opacity:0;transition:opacity .3s;pointer-events:none;}
 .wake-alert.show{opacity:1;pointer-events:all;}
 .wake-alert.yellow{background:var(--yellow-dim);color:var(--yellow);}
 .wake-alert.red{background:var(--red-dim);color:var(--red);}
 .wake-alert i{font-size:16px;flex-shrink:0;margin-top:1px;}
+/* ── Interrupted sleep ── */
+.add-interrupt{width:100%;margin-bottom:12px;padding:12px;border:1.5px dashed var(--s3);border-radius:var(--r-md);background:none;font-family:var(--sans);font-size:14px;font-weight:500;color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:border-color .15s,color .15s;}
+.add-interrupt:hover{border-color:var(--blue);color:var(--blue);}
+.add-interrupt:active{transform:scale(.99);}
+.add-interrupt i{font-size:16px;}
+.seg-card{position:relative;border:1.5px solid var(--border);border-radius:var(--r-md);padding:14px;margin-bottom:12px;background:var(--s1);}
+.seg-head{display:flex;align-items:center;margin-bottom:12px;}
+.seg-title{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);}
+.seg-remove{margin-left:auto;width:26px;height:26px;border:none;background:none;color:var(--txt3);font-size:20px;line-height:1;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s;}
+.seg-remove:hover{color:var(--red);background:var(--red-dim);}
+.seg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.seg-tile{background:var(--s2);border-radius:var(--r-sm);padding:12px 14px;cursor:pointer;border:1.5px solid transparent;transition:border-color .2s,transform .12s;}
+.seg-tile:active{transform:scale(.98);}
+.seg-tile.set{border-color:var(--blue);}
+.seg-lbl{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);display:block;margin-bottom:7px;}
+.seg-v{font-family:var(--serif);font-size:24px;font-weight:300;letter-spacing:-.5px;color:var(--txt3);line-height:1;}
+.seg-tile.set .seg-v{color:var(--txt);}
+.seg-tile:not(.set) .seg-v{font-family:var(--sans);font-size:14px;font-weight:500;color:var(--blue);}
+.seg-dur{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:5px 11px;border-radius:100px;background:var(--green-dim);color:var(--green);font-size:12px;font-weight:600;}
+.seg-dur i{font-size:12px;}
+.night-tl{margin-bottom:12px;}
+.ntl-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;}
+.tl-track{position:relative;height:14px;border-radius:7px;background:var(--s2);overflow:hidden;}
+.tl-bar{position:absolute;top:0;bottom:0;border-radius:7px;transition:left .3s ease,width .3s ease;}
+.tl-bar.b{background:var(--blue);}
+.tl-bar.g{background:var(--green);}
+.sleep-stats{display:none;background:var(--s1);border-radius:var(--r-md);padding:2px 18px;margin-bottom:10px;}
+.sleep-stats.show{display:block;}
+.ss-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:.5px solid var(--border);}
+.ss-row:last-child{border-bottom:none;}
+.ss-key{font-size:13px;color:var(--txt2);}
+.ss-val{font-size:15px;font-weight:600;letter-spacing:-.3px;color:var(--txt);}
+.ss-val.good{color:var(--green);}.ss-val.warn{color:var(--yellow);}.ss-val.bad{color:var(--red);}
+.ss-extra{display:none;}
+.sleep-stats.has-int .ss-extra{display:flex;}
 .mood-col{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
 .mood-chip{width:100%;border-radius:100px;border:1.5px solid transparent;background:var(--s1);cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0 20px;transition:all .2s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;flex-shrink:0;}
 .mood-chip:active{transform:scale(.98);}
@@ -569,7 +597,18 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
           <div class="time-tile" id="tile-bed" onclick="openModal('bed')" role="button" tabindex="0" aria-label="Set bedtime"><div class="tt-head"><i class="ti ti-bed tt-ico"></i><span class="tt-label" data-i18n="tile.bed">Went to bed</span><i class="ti ti-chevron-right tt-chev"></i></div><div class="tt-val" id="bed-disp" data-i18n="tile.tap">Tap to set</div></div>
           <div class="time-tile" id="tile-wake" onclick="openModal('wake')" role="button" tabindex="0" aria-label="Set wake time"><div class="tt-head"><i class="ti ti-sun tt-ico"></i><span class="tt-label" data-i18n="tile.wake">Woke up</span><i class="ti ti-chevron-right tt-chev"></i></div><div class="tt-val" id="wake-disp" data-i18n="tile.tap">Tap to set</div></div>
         </div>
-        <div class="sleep-result" id="sleep-result"><span class="sr-label" data-i18n="sleep.total">Total sleep</span><span class="sr-val" id="sr-val">—</span></div>
+        <div id="interrupt-segs"></div>
+        <button class="add-interrupt" id="add-interrupt-btn" onclick="addSegment()"><i class="ti ti-plus"></i><span data-i18n="sleep.addInterrupt">Add interrupted sleep</span></button>
+        <div class="night-tl" id="night-tl" style="display:none;">
+          <div class="ntl-label" data-i18n="sleep.yourNight">Your night</div>
+          <div class="tl-track" id="tl-track"></div>
+        </div>
+        <div class="sleep-stats" id="sleep-stats">
+          <div class="ss-row"><span class="ss-key" data-i18n="sleep.total">Total sleep</span><span class="ss-val" id="ss-total">—</span></div>
+          <div class="ss-row ss-extra"><span class="ss-key" data-i18n="sleep.interruptions">Interruptions</span><span class="ss-val warn" id="ss-int">—</span></div>
+          <div class="ss-row ss-extra"><span class="ss-key" data-i18n="sleep.longest">Longest stretch</span><span class="ss-val" id="ss-long">—</span></div>
+        </div>
+        <div class="wake-alert" id="interrupt-alert"><i class="ti ti-alert-triangle"></i><span id="interrupt-alert-txt"></span></div>
         <div class="wake-alert" id="wake-alert"><i class="ti ti-alert-triangle"></i><span id="wake-alert-txt"></span></div>
       </div>
       <div class="step" id="step-mood">
@@ -897,6 +936,8 @@ const I18N={en:{
   // Today / flow
   'flow.back':'Back','flow.skip':'Skip','step.sleep.eye':'Sleep','step.sleep.h':'When did you <em>sleep?</em>','step.sleep.sub':'Bedtime and wake time reveal more than duration alone.',
   'tile.bed':'Went to bed','tile.wake':'Woke up','tile.tap':'Tap to set','sleep.total':'Total sleep',
+  'sleep.addInterrupt':'Add interrupted sleep','sleep.yourNight':'Your night','sleep.interruptions':'Interruptions','sleep.longest':'Longest stretch','sleep.backToSleep':'Back to sleep','sleep.segInterrupt':'Interrupted — segment {n}','sleep.removeSeg':'Remove segment',
+  'sleep.warnYellow':'Interrupted sleep detected. If this continues for 2–3 nights, it may signal an approaching mood shift.','sleep.warnRed':'Multiple interruptions tonight. Fragmented sleep can precede a mood shift — watch the next few days closely.','sleep.warnRedShort':'Fragmented sleep under 5 hours. This pattern can precede a mood shift — consider reaching out to your support.',
   'step.mood.eye':'Mood','step.mood.h':'Where are you <em>today?</em>','step.mood.sub':'Tap the number that feels closest. Size reflects intensity.',
   'mood.name.3':'Mania / crisis','mood.name.2':'Mild hypomania','mood.name.1':'Slightly elevated','mood.name.0':'Baseline','mood.name.-1':'Slightly low','mood.name.-2':'Mild depression','mood.name.-3':'Severe depression',
   'step.flags.eye':'Notes','step.flags.h':'Anything <em>else?</em>','step.flags.sub':'Select all that apply — helps reveal patterns over time.',
@@ -996,6 +1037,8 @@ const I18N={en:{
   // Today / flow
   'flow.back':'Quay lại','flow.skip':'Bỏ qua','step.sleep.eye':'Giấc ngủ','step.sleep.h':'Bạn đã <em>ngủ</em> thế nào?','step.sleep.sub':'Giờ ngủ và giờ thức cho biết nhiều hơn chỉ riêng thời lượng.',
   'tile.bed':'Đi ngủ','tile.wake':'Thức dậy','tile.tap':'Nhấn để chọn','sleep.total':'Tổng giấc ngủ',
+  'sleep.addInterrupt':'Thêm giấc ngủ bị gián đoạn','sleep.yourNight':'Đêm của bạn','sleep.interruptions':'Số lần gián đoạn','sleep.longest':'Giấc dài nhất','sleep.backToSleep':'Ngủ lại','sleep.segInterrupt':'Gián đoạn — đoạn {n}','sleep.removeSeg':'Xoá đoạn',
+  'sleep.warnYellow':'Phát hiện giấc ngủ bị gián đoạn. Nếu tình trạng này kéo dài 2–3 đêm, đó có thể là dấu hiệu sắp chuyển pha cảm xúc.','sleep.warnRed':'Nhiều lần gián đoạn trong đêm. Giấc ngủ chắp vá có thể báo trước một đợt chuyển pha — hãy theo dõi sát vài ngày tới.','sleep.warnRedShort':'Giấc ngủ chắp vá dưới 5 giờ. Mẫu hình này có thể báo trước một đợt chuyển pha — cân nhắc tìm đến người hỗ trợ của bạn.',
   'step.mood.eye':'Tâm trạng','step.mood.h':'Hôm nay bạn <em>thế nào?</em>','step.mood.sub':'Nhấn vào con số gần nhất với bạn. Kích thước phản ánh mức độ.',
   'mood.name.3':'Hưng cảm / khủng hoảng','mood.name.2':'Hưng cảm nhẹ','mood.name.1':'Hơi phấn chấn','mood.name.0':'Ổn định','mood.name.-1':'Hơi xuống','mood.name.-2':'Trầm cảm nhẹ','mood.name.-3':'Trầm cảm nặng',
   'step.flags.eye':'Ghi chú','step.flags.h':'Còn gì <em>khác không?</em>','step.flags.sub':'Chọn tất cả mục phù hợp — giúp hé lộ quy luật theo thời gian.',
@@ -1136,7 +1179,7 @@ const sb = SB_CONFIGURED ? window.supabase.createClient(window.SUPABASE_URL, win
 }) : null;
 
 // ── DB layer: map between app (camelCase) and DB (snake_case) ─
-function rowToEntry(r){return{date:r.date,bedMin:r.bed_min,wakeMin:r.wake_min,sleepH:r.sleep_h!=null?Number(r.sleep_h):null,mood:r.mood,zone:r.zone,flags:Array.isArray(r.flags)?r.flags:[],note:r.note||'',ts:r.ts};}
+function rowToEntry(r){return{date:r.date,bedMin:r.bed_min,wakeMin:r.wake_min,sleepH:r.sleep_h!=null?Number(r.sleep_h):null,sleepSegments:Array.isArray(r.sleep_segments)?r.sleep_segments:[],mood:r.mood,zone:r.zone,flags:Array.isArray(r.flags)?r.flags:[],note:r.note||'',ts:r.ts};}
 
 async function loadFromDB(user){
   const [{data:prof},{data:rows}] = await Promise.all([
@@ -1171,7 +1214,7 @@ function queueOp(op){
   if(i>=0)q[i]=op;else q.push(op);
   setPending(q);
 }
-function entryPayload(e){return{user_id:S.userId,date:e.date,bed_min:e.bedMin,wake_min:e.wakeMin,sleep_h:e.sleepH,mood:e.mood,zone:e.zone,flags:e.flags,note:e.note||null,ts:e.ts};}
+function entryPayload(e){return{user_id:S.userId,date:e.date,bed_min:e.bedMin,wake_min:e.wakeMin,sleep_h:e.sleepH,sleep_segments:Array.isArray(e.sleepSegments)?e.sleepSegments:[],mood:e.mood,zone:e.zone,flags:e.flags,note:e.note||null,ts:e.ts};}
 // Upsert an entry; if the `note` column hasn't been migrated yet, retry without it
 // so the rest of the check-in still syncs (the note stays in the local cache).
 async function upsertEntryRow(e){
@@ -1454,6 +1497,9 @@ const STEPS=['sleep','mood','flags','done'];
 // flowDate = which calendar day this check-in writes to. Defaults to today, but
 // editing a past entry or backfilling a missed day points it elsewhere.
 let flowCur=0,flowDate=todayKey(),todayBedMin=null,todayWakeMin=null,todaySleepH=null,todayMood=null,todayZone=null;
+// Interrupted-sleep segments added after the main sleep (each {bedMin,wakeMin}).
+// The main sleep (todayBedMin/todayWakeMin) is conceptually segment 1.
+let todaySegments=[];
 
 // Time label for the bed/wake tiles: "10:30<span> PM</span>".
 function apLabel(h){return h>=12?t('time.pm'):t('time.am');}                 // AM/PM localized (SA/CH in vi)
@@ -1470,20 +1516,32 @@ function updateFlowDateBanner(){
 
 // Prefill the flow controls from an existing entry (edit / backfill mode).
 function prefillFlow(e){
-  if(e.bedMin!=null){todayBedMin=e.bedMin;document.getElementById('bed-disp').innerHTML=tileLabel(e.bedMin);document.getElementById('tile-bed').classList.add('set');}
-  if(e.wakeMin!=null){todayWakeMin=e.wakeMin;document.getElementById('wake-disp').innerHTML=tileLabel(e.wakeMin);document.getElementById('tile-wake').classList.add('set');evalWake(Math.floor(e.wakeMin/60),e.wakeMin%60);}
-  if(todayBedMin!=null&&todayWakeMin!=null)calcSleep();
+  // Reconstruct the night: prefer stored segments; fall back to legacy single bed/wake.
+  const segs=(Array.isArray(e.sleepSegments)&&e.sleepSegments.length)
+    ? e.sleepSegments
+    : ((e.bedMin!=null||e.wakeMin!=null)?[{bedMin:e.bedMin,wakeMin:e.wakeMin}]:[]);
+  if(segs.length){
+    const main=segs[0];
+    if(main.bedMin!=null){todayBedMin=main.bedMin;document.getElementById('bed-disp').innerHTML=tileLabel(main.bedMin);document.getElementById('tile-bed').classList.add('set');}
+    if(main.wakeMin!=null){todayWakeMin=main.wakeMin;document.getElementById('wake-disp').innerHTML=tileLabel(main.wakeMin);document.getElementById('tile-wake').classList.add('set');}
+    todaySegments=segs.slice(1).map(s=>({bedMin:s.bedMin,wakeMin:s.wakeMin}));
+  }
+  renderSegments();
+  recalcNight();
   if(e.mood!=null&&e.mood!==undefined){const chip=document.querySelector('.mood-chip[data-v="'+e.mood+'"]');if(chip)pickMood(chip);}
   (e.flags||[]).forEach(f=>document.querySelectorAll('.flag-chip').forEach(c=>{if(c.dataset.flag===f)c.classList.add('on');}));
 }
 
 function resetFlow(){
-  flowCur=0;todayBedMin=todayWakeMin=todaySleepH=todayMood=todayZone=null;
+  flowCur=0;todayBedMin=todayWakeMin=todaySleepH=todayMood=todayZone=null;todaySegments=[];
   document.getElementById('tile-bed').classList.remove('set');
   document.getElementById('tile-wake').classList.remove('set');
   document.getElementById('bed-disp').innerHTML=t('tile.tap');
   document.getElementById('wake-disp').innerHTML=t('tile.tap');
-  document.getElementById('sleep-result').classList.remove('show');
+  renderSegments();
+  document.getElementById('sleep-stats').classList.remove('show','has-int');
+  document.getElementById('night-tl').style.display='none';
+  document.getElementById('interrupt-alert').className='wake-alert';
   document.getElementById('wake-alert').className='wake-alert';
   document.querySelectorAll('.mood-chip').forEach(c=>c.classList.remove('sel'));
   document.getElementById('mood-fb').className='mood-fb';
@@ -1542,7 +1600,12 @@ function flowBack(){if(flowCur>0){flowCur--;showFlowStep(flowCur);}}
 function saveEntry(){
   const flags=Array.from(document.querySelectorAll('.flag-chip.on')).map(b=>b.dataset.flag);
   const prev=S.entries.find(e=>e.date===flowDate);                    // keep any evening note already written
-  const entry={date:flowDate,bedMin:todayBedMin,wakeMin:todayWakeMin,sleepH:todaySleepH,mood:todayMood,zone:todayZone||'green',flags,note:(prev&&prev.note)||'',ts:Date.now()};
+  // Denormalize the night: bedMin = first time to bed, wakeMin = final wake of the
+  // night (so charts/early-wake use the real wake), sleepH = total across segments.
+  const segs=allSegments();
+  const sleepSegments=segs.map(s=>({bedMin:s.bedMin,wakeMin:s.wakeMin}));
+  const finalWake=segs.length?segs[segs.length-1].wakeMin:todayWakeMin;
+  const entry={date:flowDate,bedMin:todayBedMin,wakeMin:finalWake,sleepH:todaySleepH,sleepSegments,mood:todayMood,zone:todayZone||'green',flags,note:(prev&&prev.note)||'',ts:Date.now()};
   // Upsert in place: editing a day or backfilling replaces, never duplicates.
   const idx=S.entries.findIndex(e=>e.date===flowDate);
   if(idx>=0)S.entries[idx]=entry;else S.entries.push(entry);
@@ -1557,7 +1620,7 @@ function saveEntry(){
   }
 }
 
-let pickerTarget='bed',selH=10,selM=0,selAP='PM';
+let pickerTarget='bed',selH=10,selM=0,selAP='PM',segIdx=0,segField='bed';
 
 // labels (optional): parallel display text per item, e.g. weekday names. When
 // omitted, items are shown zero-padded (time/number wheels).
@@ -1615,6 +1678,11 @@ function confirmTime(){
   if(pickerTarget==='reminder'){
     getSettings().reminderTime=mins;renderSettings();persistSettings();closeModal();return;
   }
+  if(pickerTarget==='seg'){
+    const seg=todaySegments[segIdx];
+    if(seg){if(segField==='bed')seg.bedMin=mins;else seg.wakeMin=mins;}
+    renderSegments();recalcNight();closeModal();return;
+  }
   const label=String(selH).padStart(2,'0')+':'+String(selM).padStart(2,'0')+'<span class="tt-ap"> '+(selAP==='PM'?t('time.pm'):t('time.am'))+'</span>';
   if(pickerTarget==='bed'){
     todayBedMin=mins;document.getElementById('bed-disp').innerHTML=label;document.getElementById('tile-bed').classList.add('set');
@@ -1622,18 +1690,106 @@ function confirmTime(){
     todayWakeMin=mins;document.getElementById('wake-disp').innerHTML=label;document.getElementById('tile-wake').classList.add('set');
     evalWake(h24,selM);
   }
-  if(todayBedMin!==null&&todayWakeMin!==null)calcSleep();
+  recalcNight();
   closeModal();
 }
 
-function calcSleep(){
-  let diff=todayWakeMin-todayBedMin;if(diff<0)diff+=24*60;
-  const h=Math.floor(diff/60),m=diff%60;
-  todaySleepH=Math.round(diff/6)/10;
-  const v=document.getElementById('sr-val');
-  v.textContent=m?h+'h '+m+'m':h+'h';
-  v.className='sr-val '+(h>=7?'good':h>=6?'warn':'bad');
-  document.getElementById('sleep-result').classList.add('show');
+// ── Sleep math (main + interrupted segments) ──────────────────────────
+// Duration of one segment in minutes, wrapping across midnight.
+function segDur(s){if(!s||s.bedMin==null||s.wakeMin==null)return 0;return ((s.wakeMin-s.bedMin)+1440)%1440;}
+function durLabel(min){const h=Math.floor(min/60),m=min%60;return m?h+'h '+m+'m':h+'h';}
+// Every fully-set segment, ordered: main sleep first, then interruptions.
+function allSegments(){
+  const segs=[];
+  if(todayBedMin!=null&&todayWakeMin!=null)segs.push({bedMin:todayBedMin,wakeMin:todayWakeMin});
+  todaySegments.forEach(s=>{if(s.bedMin!=null&&s.wakeMin!=null)segs.push({bedMin:s.bedMin,wakeMin:s.wakeMin});});
+  return segs;
+}
+
+function addSegment(){todaySegments.push({bedMin:null,wakeMin:null});renderSegments();}
+function removeSegment(i){todaySegments.splice(i,1);renderSegments();recalcNight();}
+
+// Render the interrupted-sleep cards (segment 2, 3, …).
+function renderSegments(){
+  const wrap=document.getElementById('interrupt-segs');if(!wrap)return;
+  wrap.innerHTML=todaySegments.map((s,i)=>{
+    const bedSet=s.bedMin!=null,wakeSet=s.wakeMin!=null;
+    return '<div class="seg-card">'
+      +'<div class="seg-head"><span class="seg-title">'+t('sleep.segInterrupt',{n:i+2})+'</span>'
+      +'<button class="seg-remove" aria-label="'+t('sleep.removeSeg')+'" onclick="removeSegment('+i+')">&times;</button></div>'
+      +'<div class="seg-grid">'
+        +'<div class="seg-tile'+(bedSet?' set':'')+'" role="button" tabindex="0" onclick="openSegModal('+i+',\'bed\')"><span class="seg-lbl">'+t('sleep.backToSleep')+'</span><span class="seg-v">'+(bedSet?tileLabel(s.bedMin):t('tile.tap'))+'</span></div>'
+        +'<div class="seg-tile'+(wakeSet?' set':'')+'" role="button" tabindex="0" onclick="openSegModal('+i+',\'wake\')"><span class="seg-lbl">'+t('tile.wake')+'</span><span class="seg-v">'+(wakeSet?tileLabel(s.wakeMin):t('tile.tap'))+'</span></div>'
+      +'</div>'
+      +((bedSet&&wakeSet)?'<div class="seg-dur"><i class="ti ti-moon"></i>'+durLabel(segDur(s))+'</div>':'')
+    +'</div>';
+  }).join('');
+}
+
+// Open the time wheel for an interrupted segment's back-to-sleep / woke-up field.
+function openSegModal(i,field){
+  pickerTarget='seg';segIdx=i;segField=field;
+  const cur=todaySegments[i]?(field==='bed'?todaySegments[i].bedMin:todaySegments[i].wakeMin):null;
+  document.getElementById('modal-title').textContent=field==='bed'?t('sleep.backToSleep'):t('modal.waketime');
+  if(cur!=null){const h=Math.floor(cur/60)%24;selH=h%12||12;selM=cur%60;selAP=h>=12?'PM':'AM';}
+  else if(field==='bed'){selH=2;selM=0;selAP='AM';}else{selH=6;selM=0;selAP='AM';}
+  setModalChrome({colon:true,ampm:true,secondCol:true,firstLabel:t('modal.hour'),secondLabel:t('modal.min')});setAP(selAP);
+  buildWheel('wh-h',[1,2,3,4,5,6,7,8,9,10,11,12],selH);
+  buildWheel('wh-m',[0,15,30,45],selM);
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+// Position a clock time onto the 8-hour night window (10 PM → 6 AM), clamped.
+function nightPos(min){let p=((min-22*60)+1440)%1440;if(p>1320)p=0;return Math.max(0,Math.min(480,p));}
+function renderTimeline(segs){
+  const track=document.getElementById('tl-track'),tl=document.getElementById('night-tl');
+  if(!track)return;
+  if(!segs.length){track.innerHTML='';tl.style.display='none';return;}
+  track.innerHTML=segs.map((s,i)=>{
+    const a=nightPos(s.bedMin),b=nightPos(s.wakeMin);
+    const left=a/480*100,w=Math.max(2,(b-a)/480*100);
+    return '<div class="tl-bar '+(i%2?'g':'b')+'" style="left:'+left+'%;width:'+w+'%"></div>';
+  }).join('');
+  tl.style.display='block';
+}
+
+// Interrupted-sleep warning: 1 interruption → yellow; 2+ → red;
+// any interruption with <5h total → red (double flag).
+function updateInterruptAlert(interruptions,totalH){
+  const al=document.getElementById('interrupt-alert'),tx=document.getElementById('interrupt-alert-txt');
+  if(!al)return;
+  if(interruptions<1){al.className='wake-alert';return;}
+  if(totalH!=null&&totalH<5){al.className='wake-alert red show';tx.textContent=t('sleep.warnRedShort');}
+  else if(interruptions>=2){al.className='wake-alert red show';tx.textContent=t('sleep.warnRed');}
+  else{al.className='wake-alert yellow show';tx.textContent=t('sleep.warnYellow');}
+}
+
+// Recompute totals/stats/timeline/alerts from the current segments. Sets todaySleepH.
+function recalcNight(){
+  const stats=document.getElementById('sleep-stats');
+  const segs=allSegments();
+  if(!segs.length){
+    todaySleepH=null;
+    if(stats)stats.classList.remove('show','has-int');
+    renderTimeline([]);updateInterruptAlert(0,null);
+    return;
+  }
+  const totalMin=segs.reduce((a,s)=>a+segDur(s),0);
+  const totalH=Math.round(totalMin/6)/10;
+  const interruptions=segs.length-1;
+  const longest=segs.reduce((m,s)=>Math.max(m,segDur(s)),0);
+  todaySleepH=totalH;
+  const tv=document.getElementById('ss-total');
+  tv.textContent=durLabel(totalMin);
+  tv.className='ss-val '+(totalH>=7?'good':totalH>=6?'warn':'bad');
+  document.getElementById('ss-int').textContent=interruptions+'×';
+  document.getElementById('ss-long').textContent=durLabel(longest);
+  stats.classList.toggle('has-int',interruptions>0);
+  stats.classList.add('show');
+  renderTimeline(segs);
+  const fw=segs[segs.length-1].wakeMin;              // final wake of the night
+  evalWake(Math.floor(fw/60)%24,fw%60);
+  updateInterruptAlert(interruptions,totalH);
 }
 
 function evalWake(h24,m){

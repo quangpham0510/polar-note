@@ -25,6 +25,7 @@ create table if not exists public.entries (
   bed_min     int,
   wake_min    int,
   sleep_h     numeric,
+  sleep_segments jsonb default '[]'::jsonb,  -- full night incl. interruptions: [{bedMin,wakeMin},...]
   mood        int,
   zone        text,
   flags       jsonb default '[]'::jsonb,
@@ -36,6 +37,9 @@ create table if not exists public.entries (
 
 -- (for existing projects created before the note column was added)
 alter table public.entries add column if not exists note text;
+
+-- (for existing projects created before interrupted-sleep tracking was added)
+alter table public.entries add column if not exists sleep_segments jsonb default '[]'::jsonb;
 
 create index if not exists entries_user_date_idx
   on public.entries (user_id, date);
