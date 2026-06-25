@@ -29,6 +29,16 @@
     const label=(t.getAttribute('data-track')||t.getAttribute('aria-label')||(t.textContent||'').trim().replace(/\s+/g,' ')||t.id||t.className||'unknown').slice(0,80);
     track('ui_click',{page:page,label:label});
   },true);
+
+  // ── Time-of-day theme — set BEFORE first paint so the boot screen never flashes.
+  // Default "auto": warm day theme from 6 AM until 5 PM, dark after. User can pin
+  // Light/Dark from Profile (stored in pn_theme). Mirrored by applyTheme() at runtime.
+  try{
+    const mode=localStorage.getItem('pn_theme')||'auto';
+    const h=new Date().getHours();
+    const day = mode==='light' || (mode==='auto' && h>=6 && h<17);
+    if(day) document.documentElement.setAttribute('data-theme','day');
+  }catch(e){}
 </script>
 
 <!-- Apple PWA -->
@@ -65,7 +75,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+/* ── Night (default) — the original after-dark palette ── */
 :root{
+  color-scheme:dark;
   --bg:#000;--s1:#1C1C1E;--s2:#2C2C2E;--s3:#3A3A3C;
   --txt:#FFF;--txt2:rgba(255,255,255,.6);--txt3:rgba(255,255,255,.3);
   --border:rgba(255,255,255,.08);
@@ -73,10 +85,43 @@
   --green:#30D158;--green-dim:rgba(48,209,88,.15);
   --yellow:#FFD60A;--yellow-dim:rgba(255,214,10,.15);
   --red:#FF453A;--red-dim:rgba(255,69,58,.15);
+  /* surfaces that used to be hardcoded — now theme-aware */
+  --bar:rgba(0,0,0,.88);          /* translucent tab bar */
+  --scrim:rgba(0,0,0,.6);         /* modal backdrop */
+  --scrim2:rgba(0,0,0,.7);        /* report backdrop */
+  --knob:#fff;                    /* toggle thumb */
+  --chip:rgba(28,28,30,.94);      /* floating install chip */
+  --chip-bd:rgba(255,255,255,.14);
+  --shadow:rgba(0,0,0,.45);
   --r-lg:20px;--r-md:14px;--r-sm:10px;
   --serif:'Fraunces',Georgia,serif;--sans:'DM Sans',sans-serif;
 }
-html,body{height:100%;overflow:hidden;background:#000;}
+/* ── Day — warm paper light theme (Claude-like cream, Apple system accents) ── */
+[data-theme="day"]{
+  color-scheme:light;
+  --bg:#F3F0E8;--s1:#FBF9F4;--s2:#EFEBE0;--s3:#E3DDCF;
+  --txt:#262320;--txt2:rgba(38,35,29,.62);--txt3:rgba(38,35,29,.42);
+  --border:rgba(38,35,29,.10);
+  --blue:#0A6CFF;--blue-dim:rgba(10,108,255,.12);
+  --green:#2E9E4F;--green-dim:rgba(46,158,79,.14);
+  --yellow:#B7791F;--yellow-dim:rgba(183,121,31,.14);
+  --red:#D7322A;--red-dim:rgba(215,50,42,.12);
+  --bar:rgba(243,240,232,.82);
+  --scrim:rgba(38,35,29,.32);
+  --scrim2:rgba(38,35,29,.42);
+  --knob:#fff;
+  --chip:rgba(251,249,244,.95);
+  --chip-bd:rgba(38,35,29,.12);
+  --shadow:rgba(38,35,29,.18);
+}
+/* Day-only surface tweaks for spots that read white-on-dark */
+[data-theme="day"] .wheel-hl{background:rgba(38,35,29,.06);}
+[data-theme="day"] .auth-config code{background:rgba(38,35,29,.06);}
+/* Brief cross-fade only while switching themes — no idle cost */
+html.theming,html.theming *,html.theming *::before,html.theming *::after{
+  transition:background-color .45s ease,color .45s ease,border-color .45s ease,fill .45s ease,box-shadow .45s ease !important;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);}
 body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased;}
 .app{position:fixed;inset:0;max-width:430px;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
 .sb{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;font-size:15px;font-weight:600;flex-shrink:0;}
@@ -90,7 +135,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 /* Accessibility: respect users who reduce motion (Apple HIG) */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
 /* Tab bar clears the home indicator via safe-area inset, keeps comfortable gap on non-notch */
-.tabbar{display:flex;background:rgba(0,0,0,.88);backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--border);padding:8px 0;padding-bottom:max(28px,calc(10px + env(safe-area-inset-bottom)));flex-shrink:0;}
+.tabbar{display:flex;background:var(--bar);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--border);padding:8px 0;padding-bottom:max(28px,calc(10px + env(safe-area-inset-bottom)));flex-shrink:0;}
 .tbtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:5px 0;font-family:var(--sans);font-size:10px;font-weight:500;color:var(--txt3);transition:color .2s;letter-spacing:.02em;}
 .tbtn i{font-size:22px;line-height:1;}
 .tbtn.on{color:var(--blue);}
@@ -104,7 +149,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .badge.muted{background:var(--s2);color:var(--txt3);}
 .toggle{width:51px;height:31px;border-radius:100px;background:var(--s3);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
 .toggle.on{background:var(--green);}
-.toggle::after{content:'';position:absolute;width:27px;height:27px;border-radius:50%;background:#fff;top:2px;left:2px;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:transform .2s cubic-bezier(.4,0,.2,1);}
+.toggle::after{content:'';position:absolute;width:27px;height:27px;border-radius:50%;background:var(--knob);top:2px;left:2px;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .2s cubic-bezier(.4,0,.2,1);}
 .toggle.on::after{transform:translateX(20px);}
 
 /* ONBOARDING */
@@ -350,7 +395,7 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .export-btn:hover{background:var(--blue-dim);}
 #install-btn{border-color:var(--green);color:var(--green);}
 #install-btn:hover{background:var(--green-dim);}
-.install-bar{position:fixed;right:12px;left:auto;max-width:min(340px,calc(100% - 24px));bottom:calc(76px + env(safe-area-inset-bottom));z-index:250;display:none;align-items:center;gap:12px;padding:11px 12px 11px 14px;background:rgba(28,28,30,.94);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:.5px solid rgba(255,255,255,.14);border-radius:16px;box-shadow:0 10px 34px rgba(0,0,0,.45);}
+.install-bar{position:fixed;right:12px;left:auto;max-width:min(340px,calc(100% - 24px));bottom:calc(76px + env(safe-area-inset-bottom));z-index:250;display:none;align-items:center;gap:12px;padding:11px 12px 11px 14px;background:var(--chip);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:.5px solid var(--chip-bd);border-radius:16px;box-shadow:0 10px 34px var(--shadow);}
 .install-bar.show{display:flex;}
 .ib-icon{flex:0 0 38px;width:38px;height:38px;border-radius:10px;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:20px;}
 .ib-text{flex:1;min-width:0;}
@@ -362,9 +407,9 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .version{text-align:center;font-size:12px;color:var(--txt3);padding:20px;font-weight:300;}
 
 /* TIME PICKER MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-bg{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;}
 .modal-bg.open{opacity:1;pointer-events:all;}
-.modal-sheet{background:#1C1C1E;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:0 0 44px;transform:translateY(40px);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.modal-sheet{background:var(--s1);border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:0 0 44px;transform:translateY(40px);transition:transform .3s cubic-bezier(.4,0,.2,1);}
 .modal-bg.open .modal-sheet{transform:translateY(0);}
 .modal-handle{width:36px;height:4px;background:var(--s3);border-radius:2px;margin:12px auto 0;}
 .modal-hdr{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:.5px solid var(--border);}
@@ -386,9 +431,9 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .ampm-pill.on{background:var(--blue);border-color:var(--blue);color:#fff;}
 
 /* REPORT MODAL */
-.report-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;}
+.report-bg{position:fixed;inset:0;background:var(--scrim2);display:flex;align-items:flex-end;justify-content:center;z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;}
 .report-bg.open{opacity:1;pointer-events:all;}
-.report-sheet{background:#1C1C1E;border-radius:20px 20px 0 0;width:100%;max-width:430px;max-height:82vh;overflow-y:auto;padding:24px 24px 44px;transform:translateY(40px);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.report-sheet{background:var(--s1);border-radius:20px 20px 0 0;width:100%;max-width:430px;max-height:82vh;overflow-y:auto;padding:24px 24px 44px;transform:translateY(40px);transition:transform .3s cubic-bezier(.4,0,.2,1);}
 .report-bg.open .report-sheet{transform:translateY(0);}
 .rp-handle{width:36px;height:4px;background:var(--s3);border-radius:2px;margin:0 auto 20px;}
 .rp-title{font-family:var(--serif);font-size:22px;margin-bottom:4px;}
@@ -402,11 +447,11 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 .rp-copy-btn{width:100%;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:var(--r-md);font-family:var(--sans);font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;}
 
 /* BOOT LOADER */
-#boot{position:fixed;inset:0;background:#000;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .3s;}
+#boot{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .3s;}
 #boot.hide{opacity:0;pointer-events:none;}
-.boot-mark{font-family:var(--serif);font-size:30px;color:#fff;opacity:.9;letter-spacing:-.5px;}
-.boot-mark em{font-style:italic;color:rgba(255,255,255,.5);}
-.boot-spin{width:22px;height:22px;border:2px solid rgba(255,255,255,.15);border-top-color:rgba(255,255,255,.6);border-radius:50%;animation:bootspin .8s linear infinite;}
+.boot-mark{font-family:var(--serif);font-size:30px;color:var(--txt);opacity:.92;letter-spacing:-.5px;}
+.boot-mark em{font-style:italic;color:var(--txt2);}
+.boot-spin{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--txt2);border-radius:50%;animation:bootspin .8s linear infinite;}
 @keyframes bootspin{to{transform:rotate(360deg)}}
 
 /* FLOW DATE BANNER + MISSED-DAY BUTTON */
@@ -616,6 +661,17 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
           <button class="lang-seg-btn" data-lang-opt="en" onclick="pickLang('en',true)"><span class="lang-flag"><svg viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#fff" stroke-width="8"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="4"/><rect x="25" width="10" height="40" fill="#fff"/><rect y="15" width="60" height="10" fill="#fff"/><rect x="27" width="6" height="40" fill="#C8102E"/><rect y="17" width="60" height="6" fill="#C8102E"/></svg></span><span data-i18n="lang.en">English</span></button>
           <button class="lang-seg-btn" data-lang-opt="vi" onclick="pickLang('vi',true)"><span class="lang-flag"><svg viewBox="0 0 60 40"><rect width="60" height="40" fill="#DA251D"/><polygon points="30,8 32.7,16.3 41.4,16.3 34.4,21.4 37.1,29.7 30,24.6 22.9,29.7 25.6,21.4 18.6,16.3 27.3,16.3" fill="#FFFF00"/></svg></span><span data-i18n="lang.vi">Tiếng Việt</span></button>
         </div>
+      </div>
+    </div>
+    <div class="pref-sec anim">
+      <div class="pref-label" data-i18n="pref.appearance">Appearance</div>
+      <div class="pref-card">
+        <div class="lang-seg" id="theme-seg" role="radiogroup" aria-label="Appearance">
+          <button class="lang-seg-btn" data-theme-opt="auto" role="radio" aria-checked="false" onclick="pickTheme('auto')"><i class="ti ti-clock-hour-8"></i><span data-i18n="theme.auto">Auto</span></button>
+          <button class="lang-seg-btn" data-theme-opt="light" role="radio" aria-checked="false" onclick="pickTheme('light')"><i class="ti ti-sun"></i><span data-i18n="theme.light">Light</span></button>
+          <button class="lang-seg-btn" data-theme-opt="dark" role="radio" aria-checked="false" onclick="pickTheme('dark')"><i class="ti ti-moon"></i><span data-i18n="theme.dark">Dark</span></button>
+        </div>
+        <div class="pr-sub" id="theme-hint" data-i18n="theme.autoHint" style="margin-top:11px;padding:0 2px;line-height:1.45;">Warm light through the day, dark after 5 PM</div>
       </div>
     </div>
     <div class="pref-sec anim">
@@ -885,6 +941,8 @@ const I18N={en:{
   'pref.clinicReport':'Clinic report','pref.includeWake':'Include wake times','pref.includeWakeSub':'Bedtime + wake in report','pref.includeMeds':'Include medications','pref.includeMedsSub':'From daily flag entries',
   'pref.dataPrivacy':'Data & privacy','pref.research':'Anonymized research opt-in','pref.researchSub':'Help improve bipolar care. No personal info shared.',
   'pref.language':'Language',
+  'pref.appearance':'Appearance','theme.auto':'Auto','theme.light':'Light','theme.dark':'Dark',
+  'theme.autoHint':'Warm light through the day, dark after 5 PM','theme.lightHint':'Always the warm light theme','theme.darkHint':'Always the dark theme',
   'btn.install':'Install app on your phone','btn.previewReport':'Preview clinic report','btn.signout':'Sign out','btn.reset':'Reset all data','app.version':'PolarNote · v0.1 Beta · For validation only',
   'install.title':'Install PolarNote','install.sub':'Add it to your home screen','install.cta':'Install','install.dismiss':'Dismiss',
   'tab.today':'Today','tab.history':'History','tab.insights':'Insights','tab.profile':'Profile',
@@ -982,6 +1040,8 @@ const I18N={en:{
   'pref.clinicReport':'Báo cáo phòng khám','pref.includeWake':'Kèm giờ thức','pref.includeWakeSub':'Giờ ngủ + giờ thức trong báo cáo','pref.includeMeds':'Kèm thuốc','pref.includeMedsSub':'Từ ghi chú hằng ngày',
   'pref.dataPrivacy':'Dữ liệu & quyền riêng tư','pref.research':'Tham gia nghiên cứu ẩn danh','pref.researchSub':'Giúp cải thiện chăm sóc rối loạn lưỡng cực. Không chia sẻ thông tin cá nhân.',
   'pref.language':'Ngôn ngữ',
+  'pref.appearance':'Giao diện','theme.auto':'Tự động','theme.light':'Sáng','theme.dark':'Tối',
+  'theme.autoHint':'Nền sáng ấm ban ngày, chuyển tối sau 5 giờ chiều','theme.lightHint':'Luôn dùng nền sáng ấm','theme.darkHint':'Luôn dùng nền tối',
   'btn.install':'Cài app lên điện thoại','btn.previewReport':'Xem trước báo cáo phòng khám','btn.signout':'Đăng xuất','btn.reset':'Xoá toàn bộ dữ liệu','app.version':'PolarNote · v0.1 Beta · Chỉ dùng để kiểm thử',
   'install.title':'Cài đặt PolarNote','install.sub':'Thêm vào màn hình chính','install.cta':'Cài đặt','install.dismiss':'Đóng',
   'tab.today':'Hôm nay','tab.history':'Lịch sử','tab.insights':'Phân tích','tab.profile':'Hồ sơ',
@@ -1644,27 +1704,29 @@ function renderHistory(){
 
 function renderChart(entries){
   const svg=document.getElementById('life-chart');
-  if(!entries.length){svg.innerHTML='<text x="50%" y="60" text-anchor="middle" fill="rgba(255,255,255,.2)" font-family="DM Sans,sans-serif" font-size="13">'+t('chart.noData')+'</text>';return;}
+  const cs=getComputedStyle(document.documentElement),v=n=>cs.getPropertyValue(n).trim();
+  const cR=v('--red'),cY=v('--yellow'),cG=v('--green'),cB=v('--blue'),cGrid=v('--border'),cFaint=v('--txt3');
+  if(!entries.length){svg.innerHTML='<text x="50%" y="60" text-anchor="middle" fill="'+cFaint+'" font-family="DM Sans,sans-serif" font-size="13">'+t('chart.noData')+'</text>';return;}
   const W=340,padL=8,padR=8,baseline=56,unitH=7;
   const cols=entries.length,colW=(W-padL-padR)/Math.max(cols,1);
-  let html='<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF453A" stop-opacity=".06"/><stop offset="100%" stop-color="#0A84FF" stop-opacity=".06"/></linearGradient></defs>';
+  let html='<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+cR+'" stop-opacity=".07"/><stop offset="100%" stop-color="'+cB+'" stop-opacity=".07"/></linearGradient></defs>';
   html+='<rect x="'+padL+'" y="4" width="'+(W-padL-padR)+'" height="116" rx="8" fill="url(#cg)"/>';
-  html+='<line x1="'+padL+'" y1="'+baseline+'" x2="'+(W-padR)+'" y2="'+baseline+'" stroke="rgba(255,255,255,.1)" stroke-width=".5" stroke-dasharray="2 3"/>';
-  html+='<text x="'+(padL+4)+'" y="16" font-size="8" fill="rgba(255,69,58,.45)" font-family="DM Sans,sans-serif">'+t('chart.elevated')+'</text>';
-  html+='<text x="'+(padL+4)+'" y="90" font-size="8" fill="rgba(10,132,255,.45)" font-family="DM Sans,sans-serif">'+t('chart.depressed')+'</text>';
+  html+='<line x1="'+padL+'" y1="'+baseline+'" x2="'+(W-padR)+'" y2="'+baseline+'" stroke="'+cGrid+'" stroke-width=".5" stroke-dasharray="2 3"/>';
+  html+='<text x="'+(padL+4)+'" y="16" font-size="8" fill="'+cR+'" opacity=".55" font-family="DM Sans,sans-serif">'+t('chart.elevated')+'</text>';
+  html+='<text x="'+(padL+4)+'" y="90" font-size="8" fill="'+cB+'" opacity=".55" font-family="DM Sans,sans-serif">'+t('chart.depressed')+'</text>';
   entries.forEach((e,i)=>{
     const cx=padL+i*colW+colW/2,mood=e.mood||0,zone=e.zone||'green';
-    const col=zone==='red'?'#FF453A':zone==='yellow'?'#FFD60A':'#30D158';
+    const col=zone==='red'?cR:zone==='yellow'?cY:cG;
     const barH=Math.abs(mood)*unitH||3,barY=mood>=0?baseline-barH:baseline;
-    html+='<rect x="'+(cx-5)+'" y="'+barY+'" width="10" height="'+barH+'" rx="2" fill="'+col+'" opacity=".85"/>';
+    html+='<rect x="'+(cx-5)+'" y="'+barY+'" width="10" height="'+barH+'" rx="2" fill="'+col+'" opacity=".88"/>';
     if(e.wakeMin!==null&&e.wakeMin!==undefined){
-      const dc=e.wakeMin<5.5*60?'#FF453A':e.wakeMin<6*60?'#FFD60A':'#30D158';
+      const dc=e.wakeMin<5.5*60?cR:e.wakeMin<6*60?cY:cG;
       html+='<circle cx="'+cx+'" cy="112" r="'+(i===entries.length-1?4:3)+'" fill="'+dc+'"/>';
     }
   });
-  html+='<circle cx="228" cy="8" r="3" fill="#30D158"/><text x="234" y="11" font-size="7" fill="rgba(255,255,255,.3)" font-family="DM Sans,sans-serif">7h+</text>';
-  html+='<circle cx="260" cy="8" r="3" fill="#FFD60A"/><text x="266" y="11" font-size="7" fill="rgba(255,255,255,.3)" font-family="DM Sans,sans-serif">&lt;6.5h</text>';
-  html+='<circle cx="298" cy="8" r="3" fill="#FF453A"/><text x="304" y="11" font-size="7" fill="rgba(255,255,255,.3)" font-family="DM Sans,sans-serif">&lt;6h</text>';
+  html+='<circle cx="228" cy="8" r="3" fill="'+cG+'"/><text x="234" y="11" font-size="7" fill="'+cFaint+'" font-family="DM Sans,sans-serif">7h+</text>';
+  html+='<circle cx="260" cy="8" r="3" fill="'+cY+'"/><text x="266" y="11" font-size="7" fill="'+cFaint+'" font-family="DM Sans,sans-serif">&lt;6.5h</text>';
+  html+='<circle cx="298" cy="8" r="3" fill="'+cR+'"/><text x="304" y="11" font-size="7" fill="'+cFaint+'" font-family="DM Sans,sans-serif">&lt;6h</text>';
   svg.innerHTML=html;
 }
 
@@ -1694,7 +1756,7 @@ function renderInsights(){
   if(entries.length>=14){
     const ry=entries.filter(e=>e.zone==='red'||e.zone==='yellow');
     const dsl=ry.length?Math.floor((Date.now()-new Date(ry[0].date+'T12:00:00'))/864e5):null;
-    const svg='<svg viewBox="0 0 120 120" width="120" height="120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--s3)" stroke-width="8"/><circle cx="60" cy="60" r="50" fill="none" stroke="var(--blue)" stroke-width="8" stroke-dasharray="314" stroke-dashoffset="'+Math.round(314*(1-Math.min(entries.length,60)/60))+'" stroke-linecap="round" transform="rotate(-90 60 60)"/><text x="60" y="55" text-anchor="middle" font-family="Fraunces,serif" font-size="26" fill="white" font-weight="300">'+entries.length+'</text><text x="60" y="72" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="rgba(255,255,255,.4)">'+t('ins.cycleUnit')+'</text></svg>';
+    const svg='<svg viewBox="0 0 120 120" width="120" height="120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--s3)" stroke-width="8"/><circle cx="60" cy="60" r="50" fill="none" stroke="var(--blue)" stroke-width="8" stroke-dasharray="314" stroke-dashoffset="'+Math.round(314*(1-Math.min(entries.length,60)/60))+'" stroke-linecap="round" transform="rotate(-90 60 60)"/><text x="60" y="55" text-anchor="middle" font-family="Fraunces,serif" font-size="26" style="fill:var(--txt)" font-weight="300">'+entries.length+'</text><text x="60" y="72" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" style="fill:var(--txt3)">'+t('ins.cycleUnit')+'</text></svg>';
     body.innerHTML+='<div class="insight-card anim"><div class="badge blue" style="margin-bottom:12px;"><i class="ti ti-repeat" style="font-size:11px"></i> '+t('ins.cycle')+'</div><p class="ic-body">'+(dsl!==null?t('ins.cycleLast',{n:dsl,s:dsl!==1?'s':''}):t('ins.cycleNone'))+t('ins.cycleMore')+'</p><div class="cycle-svg-wrap">'+svg+'</div><div class="ic-meta">'+t('ins.cycleMeta',{n:Math.max(0,60-entries.length)})+'</div></div>';
   }
   const sp=Math.min(entries.length,60);
@@ -1839,7 +1901,7 @@ function startReminderLoop(){
   if(reminderTimer)clearInterval(reminderTimer);
   reminderTimer=setInterval(checkReminders,60000);                       // re-check each minute while open
 }
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkReminders();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkReminders();applyTheme();}});
 
 async function resetApp(){
   if(!confirm(t('confirm.reset')))return;
@@ -1905,6 +1967,38 @@ function closeReportOutside(e){if(e.target===document.getElementById('report-bg'
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
+// ── THEME (time-of-day) ──────────────────────────────────────────────
+// "auto" follows the clock (day 6 AM–5 PM, dark otherwise); user can pin
+// light/dark from Profile. Kept in sync at runtime so the look shifts on its
+// own when the user crosses 5 PM with the app open.
+const THEME_DAY_START=6, THEME_NIGHT_START=17;   // hours
+function themeMode(){return localStorage.getItem('pn_theme')||'auto';}
+function isDayNow(){const h=new Date().getHours();return h>=THEME_DAY_START&&h<THEME_NIGHT_START;}
+function effectiveDay(){const m=themeMode();return m==='light'||(m==='auto'&&isDayNow());}
+function applyTheme(){
+  const el=document.documentElement, day=effectiveDay();
+  const already=(el.getAttribute('data-theme')==='day');
+  if(already!==day){
+    el.classList.add('theming');
+    if(day)el.setAttribute('data-theme','day');else el.removeAttribute('data-theme');
+    clearTimeout(applyTheme._t);applyTheme._t=setTimeout(()=>el.classList.remove('theming'),520);
+  }
+  const tc=day?'#F3F0E8':'#000000';
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.setAttribute('content',tc));
+  const tile=document.querySelector('meta[name="msapplication-TileColor"]');if(tile)tile.setAttribute('content',tc);
+  syncThemeSeg();
+}
+function pickTheme(mode){localStorage.setItem('pn_theme',mode);applyTheme();}
+function syncThemeSeg(){
+  const seg=document.getElementById('theme-seg');if(!seg)return;
+  const m=themeMode();
+  seg.querySelectorAll('[data-theme-opt]').forEach(b=>{
+    const on=b.getAttribute('data-theme-opt')===m;
+    b.classList.toggle('on',on);b.setAttribute('aria-checked',on?'true':'false');
+  });
+  const hint=document.getElementById('theme-hint');
+  if(hint){const key=m==='light'?'theme.lightHint':m==='dark'?'theme.darkHint':'theme.autoHint';hint.setAttribute('data-i18n',key);hint.textContent=t(key);}
+}
 function hideBoot(){const b=document.getElementById('boot');if(b){b.classList.add('hide');setTimeout(()=>{b.style.display='none';},300);}}
 
 // Register the service worker (offline shell) and replay queued writes on reconnect.
@@ -1917,6 +2011,8 @@ window.addEventListener('online',flushQueue);
 if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
 
 window.addEventListener('DOMContentLoaded',async()=>{
+  applyTheme();                             // sync runtime theme + segmented control + status-bar color
+  setInterval(applyTheme,60000);            // re-evaluate each minute so "auto" flips itself at 5 PM
   applyI18n();                              // localize all static text for the saved/detected language
   const cfg=document.getElementById('auth-config');
   if(!SB_CONFIGURED){
