@@ -851,8 +851,13 @@ body{font-family:var(--sans);color:var(--txt);-webkit-font-smoothing:antialiased
 
 <div class="toast" id="toast"></div>
 
-<!-- Supabase SDK + credentials -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase SDK + credentials.
+     Self-hosted first (same-origin → loads whenever the page does, and the
+     service worker caches it for offline). Falls back to the CDN only if the
+     local copy is somehow missing. This avoids the app bricking with a
+     "backend not configured" screen when a CDN is blocked on mobile networks. -->
+<script src="vendor/supabase-js.min.js"></script>
+<script>window.supabase||document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');</script>
 <script src="supabase-config.js"></script>
 
 <script>
@@ -923,6 +928,7 @@ const I18N={en:{
   'err.updatePassFail':'Could not update password.','err.enterEmailPass':'Enter your email and password.',
   'note.accountCreated':'Account created. Check your email to confirm, then sign in.','err.authFail':'Authentication failed.',
   'config.notSet':'⚠️ Backend not configured. Add your project URL and anon key in <code>supabase-config.js</code>, then run <code>supabase-schema.sql</code> in the SQL editor.',
+  'config.libFailed':'⚠️ Couldn\'t load the app. Check your internet connection and reload the page.',
   // Onboarding language step
   'ob.lang.h':'Choose your <em>language.</em>','ob.lang.body':'You can change this later in your profile.',
   'lang.en':'English','lang.vi':'Tiếng Việt',
@@ -1024,6 +1030,7 @@ const I18N={en:{
   'err.updatePassFail':'Không cập nhật được mật khẩu.','err.enterEmailPass':'Nhập email và mật khẩu của bạn.',
   'note.accountCreated':'Đã tạo tài khoản. Kiểm tra email để xác nhận, rồi đăng nhập.','err.authFail':'Xác thực thất bại.',
   'config.notSet':'⚠️ Chưa cấu hình backend. Thêm URL dự án và anon key vào <code>supabase-config.js</code>, rồi chạy <code>supabase-schema.sql</code> trong SQL editor.',
+  'config.libFailed':'⚠️ Không tải được ứng dụng. Kiểm tra kết nối mạng và tải lại trang.',
   // Onboarding language step
   'ob.lang.h':'Chọn <em>ngôn ngữ.</em>','ob.lang.body':'Bạn có thể đổi lại sau trong hồ sơ.',
   'lang.en':'English','lang.vi':'Tiếng Việt',
@@ -2172,8 +2179,11 @@ window.addEventListener('DOMContentLoaded',async()=>{
   applyI18n();                              // localize all static text for the saved/detected language
   const cfg=document.getElementById('auth-config');
   if(!SB_CONFIGURED){
+    // Credentials present but the library never loaded → it's a network/CDN
+    // problem, not a setup problem. Show a "reload" hint, not "add your config".
+    const credsSet = !!(window.SUPABASE_URL && !window.SUPABASE_URL.includes('YOUR_PROJECT'));
     cfg.style.display='block';
-    cfg.innerHTML=t('config.notSet');
+    cfg.innerHTML = (credsSet && !window.supabase) ? t('config.libFailed') : t('config.notSet');
     hideBoot();return;
   }
   // Returning from a password-reset email: show the "set new password" screen

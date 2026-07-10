@@ -4,8 +4,8 @@
 // Supabase API/auth calls (cross-origin) are NEVER cached — they pass
 // straight to the network; offline writes are queued in the page instead.
 // ============================================================
-const CACHE = 'polarnote-v1';
-const SHELL = ['./', './index.html', './supabase-config.js'];
+const CACHE = 'polarnote-v2';
+const SHELL = ['./', './index.html', './supabase-config.js', './vendor/supabase-js.min.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
