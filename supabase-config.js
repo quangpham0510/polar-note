@@ -4,5 +4,5 @@
 //   - Project URL  → SUPABASE_URL
 //   - anon public  → SUPABASE_ANON_KEY  (safe to expose; protected by RLS)
 // ============================================================
-window.SUPABASE_URL = 'https://touukojaysimaprwgtsl.supabase.co';
-window.SUPABASE_ANON_KEY = 'sb_publishable_TAwuCVs4pQCzN7eo5q_8Pg_pE4G8ouB';
+window.SUPABASE_URL = 'https://adolwsuxxjlchsfoeniw.supabase.co';
+window.SUPABASE_ANON_KEY = 'sb_publishable_FR7eV98hX9Hcbpg5f5wGvg_45QCxw3I';
